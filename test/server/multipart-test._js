@@ -37,24 +37,6 @@ function testStream() {
 	return buffer.reader(new Buffer(parts.map(formatPart).join(''), "binary"));
 }
 
-asyncTest('basic multipart/form-data', 7, function(_) {
-	var source = testStream("form-data");
-	var stream = source.transform(multipart.parser(headers("form-data")));
-	var part = stream.read(_);
-	ok(part != null, "part != null");
-	strictEqual(part.headers.a, "VA1", "header A");
-	strictEqual(part.headers.b, "VB1", "header B");
-	strictEqual(part.headers["content-type"], "text/plain", "content-type");
-	var r = part.read(_);
-	strictEqual(r.toString('binary'), 'C1', 'body C1');
-	r = part.read(_);
-	strictEqual(r, undefined, "end of part 1");
-
-	part = stream.read(_);
-	equal(part, undefined, "read next part returns undefined");
-	start();
-});
-
 asyncTest('basic multipart/mixed', 13, function(_) {
 	var source = testStream("mixed");
 	var stream = source.transform(multipart.parser(headers("mixed")));
