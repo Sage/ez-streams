@@ -64,6 +64,20 @@ var writer = function(collection) {
 ```
 
 
+## Basic read and write
+
+You can read from a reader by calling it `read` method and you can write to a writer by calling its `write` method:
+
+``` javascript
+var val = reader.read(_);
+writer.write(_, val);
+```
+
+The `read` and `write` methods are both asynchronous. 
+
+`read` returns `undefined` at the end of a stream. Symmetrically, passing `undefined` to the `write` method of a writer ends the writer.
+
+
 ## Array-like API
 
 You can treat an EZ reader very much like a JavaScript array: you can filter it, map it, reduce it, etc. For example you can write:
