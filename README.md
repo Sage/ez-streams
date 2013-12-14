@@ -1,4 +1,4 @@
-Easy Streams for node.js
+# Easy Streams for node.js
 
 EZ streams come in two flavors: _readers_ and _writers_. You pull data from _readers_ and you push data into _writers_.
 
@@ -29,9 +29,9 @@ var writer = node.writer(fs.createWriteStream(path)); // same as ezs.file.binary
 The `devices.http` and `devices.net` modules give you wrappers for servers and clients in which the request
 and response objects are EZ readers and writers.
 
-The `devices.generic` module lets you create your own EZ streams. For example here is how you would implement a reader that reads numbers from 0 to n
+The `devices.generic` module lets you create your own EZ streams. For example here is how you would implement a reader that returns numbers from 0 to n
 
-```
+``` javascript
 var numberReader = function(n) {
 	var i = 0;
 	return ezs.devices.generic.reader(function read(_) {
@@ -41,14 +41,14 @@ var numberReader = function(n) {
 };
 ```
 
-To define your own reader you just need to provide an asynchronous `read(_) {...}` function.
-To define your own writer you just need to provide an asynchronous `write(_, val) {...}` function.
+To define your own reader you just need to provide an asynchronous `read(_) {...}` function to `ezs.devices.generic.reader`.
+To define your own writer you just need to provide an asynchronous `write(_, val) {...}` function to `ezs.devices.generic.writer`.
 
 ## Array-like API
 
 You can treat an EZ reader very much like a JavaScript array: you can filter it, map it, reduce it, etc. For example you can write:
 
-```
+``` javascript
 console.log("pi~=" + 4 * numberReader(10000).filter(function(_, n) {
 	return n % 2; // keep only odd numbers
 }).map(function(_, n) {
@@ -62,7 +62,7 @@ This will compute 4 * (1 - 1/3 + 1/5 - 1/7 ...).
 
 For those not used to streamline this chain could be rewritten with callbacks as:
 
-```
+``` javascript
 numberReader(10000).filter(function(cb, n) {
 	cb(null, n % 2);
 }).map(function(cb, n) {
@@ -78,9 +78,9 @@ Every step of the chain, except the last one, returns a new reader stream. The f
 
 Also note that the `reduce` function takes a continuation callback as first parameter while the other functions don't. This is because the other functions (`filter`, `map`) return another stream immediately, while `reduce` pulls all the values from the stream it is applied to and combines them to produce a result. So `reduce` can only produce its result once all the operations have completed, and it does so by returning its result through a continuation callback. 
 
-The callbacks that you pass to `filter`, `map`, `reduce` are slightly different from the callbacks that you pass to normal array functions. They receive a continuation callback (`_`) as first argument. This allows you to call asynchronous functions from these callbacks. We did not do it in the example above but this would be easy to do. For example we could slow down the computation by injecting a `setTimeout` call in the filter operation:
+The callbacks that you pass to `filter`, `map`, `reduce` are slightly different from the callbacks that you pass to normal array functions. They receive a continuation callback (`_`) as first parameter. This allows you to call asynchronous functions from these callbacks. We did not do it in the example above but this would be easy to do. For example we could slow down the computation by injecting a `setTimeout` call in the filter operation:
 
-```
+``` javascript
 console.log("pi~=" + 4 * numberReader(10000).filter(function(_, n) {
 	setTimeout(_, 10);
 	return n % 2; // keep only odd numbers
@@ -95,15 +95,15 @@ The `forEach` function is also a reducer and takes a continuation callback, like
 
 ## Pipe
 
-Readers also have a `pipe` method that lets you pipe them into a writer:
+Readers have a `pipe` method that lets you pipe them into a writer:
 
-```
+``` javascript
 reader.pipe(_, writer)
 ```
 
 For example we can output the 100 first odd numbers to the console by piping the stream to the console device:
 
-```
+``` javascript
 numberReader(100).filter(function(_, n) {
 	return n % 2; // keep only odd numbers
 }).pipe(_, ezs.devices.console.log);
@@ -113,7 +113,7 @@ Note that `pipe` is also a reducer. It takes a continuation callback. So you can
 
 A major difference with standard node streams is that `pipe` operations only appear at the end of a chain, instead of being inserted between processing steps. The EZ `pipe` does not return a reader. Instead it returns (asynchronously) its writer argument, so that you can chain other operations on the writer itself. Here is a typical use:
 
-```
+``` javascript
 var result = numberReader(100).map(function(_, n) {
 	return n + ' ';
 }).pipe(_, ezs.devices.string.writer()).toString();
@@ -125,7 +125,7 @@ In this example, the integers are mapped to strings which are written to an in-m
 
 You can easily create an infinite stream. For example, here is a reader stream that will return all numbers (*) in sequence:
 
-```
+``` javascript
 var infiniteReader = function() {
 	var i = 0;
 	return ezs.devices.generic.reader(function read(_) {
@@ -225,7 +225,7 @@ Note that the library is still very embryonic and not fully tested.
 
 You can parallelize operations on a stream with the `parallel` call:
 
-```
+``` javascript
 reader.parallel(4, function(source) {
 	return source.map(fn1).transfrom(trans1);
 }).map(fn2).pipe(_, writer);
@@ -239,7 +239,7 @@ You can control the `parallel` call by passing an options object instead of an i
 
 You can also fork a stream into a set of identical streams that you pass through different chains:
 
-```
+``` javascript
 var streams = reader.fork([
 	function(source) { return source.map(fn1).transform(trans1); },
 	function(source) { return source.map(fn2); },
@@ -251,7 +251,7 @@ This returns 3 streams which operate on the same input but perform different cha
 
 You can also `join` the group of streams created by a fork, with a joiner function that defines how entries are dequeued from the group.
 
-```
+``` javascript
 var streams = reader.fork([
 	function(source) { return source.map(fn1).transform(trans1); },
 	function(source) { return source.map(fn2); },
@@ -265,7 +265,7 @@ This part of the API is still fairly experimental but it passes basic unit tests
 
 Exceptions are propagated through the chains and you can trap them in the reducer which pulls the items from the chain. If you write your code with streamline, you will naturally use try/catch:
 
-```javascript
+``` javascript
 try {
 	ezs.devices.file.text.reader('users.csv').transform(ezs.transforms.csv.parser()).filter(function(_, item) {
 		return item.gender === 'F';
@@ -277,7 +277,7 @@ try {
 
 It you write your code with callbacks, you will receive the exception as first parameter in your continuation callback:
 
-```javascript
+``` javascript
 ezs.devices.file.text.reader('users.csv').transform(ezs.transforms.csv.parser()).filter(function(cb, item) {
 	cb(null, item.gender === 'F');
 }).transform(ezs.transforms.json.formatter({ space: '\t' })).pipe(function(err) {
@@ -291,6 +291,6 @@ Backpressure is a non-issue. The ez-streams plumbing takes care of the low level
 
 Instead of worrying about backpressure, you should worry about buffering. You can control buffering on the source side by passing special options to `ezs.devices.node.reader(nodeStream, options)`. See the [`streamline-streams`](https://github.com/Sage/streamline-streams/blob/master/lib/streams.md) documentation (`ReadableStream`) for details. You can also control it with a `bufSize` option in `fork` calls.
 
-## License
+# License
 
 This work is licensed under the terms of the [MIT license](http://en.wikipedia.org/wiki/MIT_License).
