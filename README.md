@@ -2,7 +2,7 @@
 
 EZ streams come in two flavors: _readers_ and _writers_. You pull data from _readers_ and you push data into _writers_.
 
-The data that you push or pull may be anything: buffers and string chunks of course, but also simple values like numbers or Booleans, JavaScript objects, nulls, ... There is only one value which has a special meaning: `undefined`. Reading `undefined` means that you have reached the end of a reader stream. Writing `undefined` signals that you want to end a writer stream.
+The data that you push or pull may be anything: buffers and strings of course, but also simple values like numbers or Booleans, JavaScript objects, nulls, ... There is only one value which has a special meaning: `undefined`. Reading `undefined` means that you have reached the end of a reader stream. Writing `undefined` signals that you want to end a writer stream.
 
 EZ streams are implemented with streamline.js. The examples and API descriptions below use the streamline.js syntax because this is more concise but the `ez-streams` package can also be used directly with callback code. Just mentally replace every `_` by a callback.
 
@@ -22,8 +22,8 @@ var stringRd = ezs.devices.string.reader(text); // in memory text reader
 You can also wrap any node.js stream into an EZ stream, with the `node` device. For example:
 
 ``` javascript
-var reader = node.reader(fs.createReadStream(path)); // same as ezs.file.binary.reader
-var writer = node.writer(fs.createWriteStream(path)); // same as ezs.file.binary.writer
+var reader = ezs.devices.node.reader(fs.createReadStream(path)); // same as ezs.file.binary.reader
+var writer = ezs.devices.node.writer(fs.createWriteStream(path)); // same as ezs.file.binary.writer
 ```
 
 The `devices.http` and `devices.net` modules give you wrappers for servers and clients in which the request
@@ -41,9 +41,9 @@ var numberReader = function(n) {
 };
 ```
 
-To define your own reader you just need to provide an asynchronous `read(_) {...}` function to `ezs.devices.generic.reader`.
+To define your own reader you just need to pass an asynchronous `read(_) {...}` function to `ezs.devices.generic.reader`.
 
-To define your own writer you just need to provide an asynchronous `write(_, val) {...}` function to `ezs.devices.generic.writer`.
+To define your own writer you just need to pass an asynchronous `write(_, val) {...}` function to `ezs.devices.generic.writer`.
 
 So, for example, here is how you can wrap mongodb APIs with EZ streams:
 
