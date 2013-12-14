@@ -110,7 +110,7 @@ numberReader(10000).filter(function(cb, n) {
 
 Every step of the chain, except the last one, returns a new reader stream. The first stream produces all integers up to 9999. The second one, which is returned by the `filter` call produces only odd integers. The third one, returned by the `map` call returns the alternating fractions. The `reduce` step at the end combines alternating fractions to produce the final result.
 
-Also note that the `reduce` function takes a continuation callback as first parameter while the other functions don't. This is because the other functions (`filter`, `map`) return another stream immediately, while `reduce` pulls all the values from the stream it is applied to and combines them to produce a result. So `reduce` can only produce its result once all the operations have completed, and it does so by returning its result through a continuation callback. 
+Also note that the `reduce` function takes a continuation callback as first parameter while the other functions don't. This is because the other functions (`filter`, `map`) return another stream immediately, while `reduce` pulls all the values from the stream and combines them to produce a result. So `reduce` can only produce its result once all the operations have completed, and it does so by returning its result through a continuation callback. 
 
 The callbacks that you pass to `filter`, `map`, `reduce` are slightly different from the callbacks that you pass to normal array functions. They receive a continuation callback (`_`) as first parameter. This allows you to call asynchronous functions from these callbacks. We did not do it in the example above but this would be easy to do. For example we could slow down the computation by injecting a `setTimeout` call in the filter operation:
 
@@ -121,11 +121,11 @@ console.log("pi~=" + 4 * numberReader(10000).filter(function(_, n) {
 })...
 ```
 
-Rather academic here but in real stream filtering and mapping you often need to query databases or external services to process individual entries.
+Rather academic here but in real life you often need to query databases or external services when filtering or mapping stream entries.
 
-The Array-like API also includes `every`, `some` and `forEach`. On the other hand it does not include `reduceRight` nor `sort`, as these functions cannot work in streaming mode (they would need to buffer the entire stream).
+The Array-like API also includes `every`, `some` and `forEach`. On the other hand it does not include `reduceRight` nor `sort`, as these functions are incompatible with streaming (they would need to buffer the entire stream).
 
-The `forEach` function is also a reducer and takes a continuation callback, like `reduce`.
+The `forEach` function is also a reducer and takes a continuation callback, like `reduce` (see example later).
 
 ## Pipe
 
@@ -183,7 +183,7 @@ infiniteReader().until(function(_, n) {
 
 ## Transformations
 
-The array functions are nice but they have limited power. They work well to process stream entries independently from each other but they don't allow us to do more complex operation like combining several entries into a bigger one, or splitting one entry into several smaller ones, or a mix of both. This is something we typically do when we parse text streams: we receive chunks of texts; we look for special boundaries and we emit the items that we have isolated between boundaries. Usally, there is no one to one correspondance between the chunks that we receive and the items that we emit.
+The array functions are nice but they have limited power. They work well to process stream entries independently from each other but they don't allow us to do more complex operation like combining several entries into a bigger one, or splitting one entry into several smaller ones, or a mix of both. This is something we typically do when we parse text streams: we receive chunks of texts; we look for special boundaries and we emit the items that we have isolated between boundaries. Usally, there is not a one to one correspondance between the chunks that we receive and the items that we emit.
 
 The `transform` function is designed to handle these more complex operations. Typical code looks like:
 
@@ -204,7 +204,7 @@ Also, you are not limited to reading with the `read(_)` call, you can use any AP
 var csvParser = function(_, reader, writer) {
 	// get a lines parser from our transforms library
 	var linesParser = ezs.transforms.lines.parser();
-	// transform the reader into a line reader
+	// transform the raw text reader into a lines reader
 	reader = reader.transform(linesParser);
 	// read the first line and split it to get the keys
 	var keys = reader.read(_).split(',');
@@ -225,7 +225,7 @@ var csvParser = function(_, reader, writer) {
 };
 ```
 
-You can use this transform as:
+You can then use this transform as:
 
 ``` javascript
 ezs.devices.file.text.reader('mydata.csv').transform(csvParser)
@@ -253,7 +253,7 @@ ezs.devices.file.text.reader('users.csv').transform(ezs.transforms.csv.parser())
 	.pipe(_, ezs.devices.file.text.writer('females.json'));
 ```
 
-The library is rather embryonic at this stage but you can expect it to grow.
+The transforms library is rather embryonic at this stage but you can expect it to grow.
 
 ## Parallelizing
 
@@ -261,7 +261,7 @@ You can parallelize operations on a stream with the `parallel` call:
 
 ``` javascript
 reader.parallel(4, function(source) {
-	return source.map(fn1).transfrom(trans1);
+	return source.map(fn1).transform(trans1);
 }).map(fn2).pipe(_, writer);
 ```
 
@@ -283,6 +283,8 @@ var streams = reader.fork([
 
 This returns 3 streams which operate on the same input but perform different chains of operations. You can then pipe these 3 streams to different outputs. 
 
+Note that you have to use futures (or callbacks) when piping these streams so that they are piped in parallel. See the examples in the `api-test._js` test file.
+
 You can also `join` the group of streams created by a fork, with a joiner function that defines how entries are dequeued from the group.
 
 ``` javascript
@@ -293,7 +295,7 @@ var streams = reader.fork([
 ]).join(joinerFn).map(fn4).pipe(_, writer);
 ```
 
-This part of the API is still fairly experimental but it passes basic unit tests.
+This part of the API is still fairly experimental but it passes at least basic unit tests.
 
 ## Exception handling
 
@@ -324,7 +326,7 @@ ezs.devices.file.text.reader('users.csv').transform(ezs.transforms.csv.parser())
 
 ## Backpressure
 
-Backpressure is a non-issue. The ez-streams plumbing takes care of the low level pause/resume dance on the reader side, and of the write/drain dance on the write side. The event loop takes care of the rest.
+Backpressure is a non-issue. The ez-streams plumbing takes care of the low level pause/resume dance on the reader side, and of the write/drain dance on the write side. The event loop takes care of the rest. So you don't need to worry about backpressure when writing map or transform functions.
 
 Instead of worrying about backpressure, you should worry about buffering. You can control buffering on the source side by passing special options to `ezs.devices.node.reader(nodeStream, options)`. See the [`streamline-streams`](https://github.com/Sage/streamline-streams/blob/master/lib/streams.md) documentation (`ReadableStream`) for details. You can also control buffering with a `bufSize` option in `fork` calls.
 
