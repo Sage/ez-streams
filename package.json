@@ -1,0 +1,13 @@
+{
+  "name": "streamline-streams",
+  "description": "simple streams for streamline.js",
+  "version": "0.1.2",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/Sage/streamline-streams.git"
+  },
+  "engines": { "node": ">=0.10.8" },
+  "dependencies": {},
+  "author": "Bruno Jouhier",
+  "main": "index.js"
+}
