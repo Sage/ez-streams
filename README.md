@@ -45,6 +45,25 @@ To define your own reader you just need to provide an asynchronous `read(_) {...
 
 To define your own writer you just need to provide an asynchronous `write(_, val) {...}` function to `ezs.devices.generic.writer`.
 
+So, for example, here is how you can wrap mongodb APIs with EZ streams:
+
+``` javascript
+var reader = function(cursor) {
+	return ezs.devices.generic.reader(function(_) {
+		var obj = cursor.nextObject(_);
+		return obj == null ? undefined : obj;
+	});
+}
+var writer = function(collection) {
+	var done;
+	return ezs.devices.generic.writer(function(_, val) {
+		if (val === undefined) done = true;
+		if (!done) collection.insert(val, _);
+	});
+}
+```
+
+
 ## Array-like API
 
 You can treat an EZ reader very much like a JavaScript array: you can filter it, map it, reduce it, etc. For example you can write:
