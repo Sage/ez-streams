@@ -45,7 +45,7 @@ To define your own reader you just need to pass an asynchronous `read(_) {...}` 
 
 To define your own writer you just need to pass an asynchronous `write(_, val) {...}` function to `ezs.devices.generic.writer`.
 
-So, for example, here is how you can wrap mongodb APIs with EZ streams:
+So, for example, here is how you can wrap mongodb APIs into EZ streams:
 
 ``` javascript
 var reader = function(cursor) {
@@ -87,14 +87,14 @@ numberReader(10000).filter(function(cb, n) {
 	cb(null, n % 2);
 }).map(function(cb, n) {
 	cb(null, n % 4 === 1 ? 1 / n : -1 / n);
-}).reduce(function(err, result)) {
+}).reduce(function(err, result) {
 	console.log("pi~=" + 4 * result);
 }, function(cb, res, val) {
 	cb(null, res + val);
-}, 0));
+}, 0);
 ```
 
-Every step of the chain, except the last one, returns a new reader stream. The first stream produces all integers up to 9999. The second one, which is returned by the `filter` call produces only odd integers. The third one, returned by the `map` call returns the alternating fractions. The last step combines alternating fractions to produce the final result.
+Every step of the chain, except the last one, returns a new reader stream. The first stream produces all integers up to 9999. The second one, which is returned by the `filter` call produces only odd integers. The third one, returned by the `map` call returns the alternating fractions. The `reduce` step at the end combines alternating fractions to produce the final result.
 
 Also note that the `reduce` function takes a continuation callback as first parameter while the other functions don't. This is because the other functions (`filter`, `map`) return another stream immediately, while `reduce` pulls all the values from the stream it is applied to and combines them to produce a result. So `reduce` can only produce its result once all the operations have completed, and it does so by returning its result through a continuation callback. 
 
@@ -121,7 +121,7 @@ Readers have a `pipe` method that lets you pipe them into a writer:
 reader.pipe(_, writer)
 ```
 
-For example we can output the 100 first odd numbers to the console by piping the stream to the console device:
+For example we can output the odd numbers up to 100 to the console by piping the stream to the console device:
 
 ``` javascript
 numberReader(100).filter(function(_, n) {
@@ -129,7 +129,7 @@ numberReader(100).filter(function(_, n) {
 }).pipe(_, ezs.devices.console.log);
 ```
 
-Note that `pipe` is also a reducer. It takes a continuation callback. So you can schedule operations after the pipe has been fully processed.
+Note that `pipe` is also a reducer. It takes a continuation callback. So you can schedule operations which will be executed after the pipe has been fully processed.
 
 A major difference with standard node streams is that `pipe` operations only appear once in a chain, at the end, instead of being inserted between processing steps. The EZ `pipe` does not return a reader. Instead it returns (asynchronously) its writer argument, so that you can chain other operations on the writer itself. Here is a typical use:
 
@@ -155,13 +155,13 @@ var infiniteReader = function() {
 ```
 (\*): not quite as `i++` will stop moving when we reach 2**53
 
-EZ streams have methods that let you control how many entries you will read, even if the stream is potentially infinite. Here are two examples:
+EZ streams have methods like `skip`, `limit`, `until` and `while` that let you control how many entries you will read, even if the stream is potentially infinite. Here are two examples:
 
 ``` javascript
 // output 100 numbers after skipping the first 20
 infiniteReader().skip(20).limit(100).pipe(_, ezs.devices.console.log);
 
-// output numbers until square exceeds 1000 
+// output numbers until their square exceeds 1000 
 infiniteReader().until(function(_, n) {
 	return n * n > 1000;
 }).pipe(_, ezs.devices.console.log);
@@ -169,7 +169,7 @@ infiniteReader().until(function(_, n) {
 
 ## Transformations
 
-The array functions are nice but they have limited power. They work well to process stream entries independently from each other but they don't allow us to do more complex operation like combining several entries into bigger one, or splitting one entry into several smaller ones, or a mix of both. This is something we typically do when we parse text streams: we receive chunks of texts; we look for special boundaries and we emit the items that we have isolated between boundaries. 
+The array functions are nice but they have limited power. They work well to process stream entries independently from each other but they don't allow us to do more complex operation like combining several entries into a bigger one, or splitting one entry into several smaller ones, or a mix of both. This is something we typically do when we parse text streams: we receive chunks of texts; we look for special boundaries and we emit the items that we have isolated between boundaries. Usally, there is no one to one correspondance between the chunks that we receive and the items that we emit.
 
 The `transform` function is designed to handle these more complex operations. Typical code looks like:
 
@@ -232,9 +232,6 @@ The `lib/transforms` directory contains standard transforms:
 For example, you can read from a CSV file, filter its entries and write the output to a JSON file with:
 
 ``` javascript
-var src = new streams.ReadableStream(fs.createReadStream(srcName), { encoding: 'utf8' });
-var dst = new streams.WritableStream(fs.createWriteStream(dstName), { encoding: 'utf8' });
-
 ezs.devices.file.text.reader('users.csv').transform(ezs.transforms.csv.parser())
 	.filter(function(_, item) {
 	return item.gender === 'F';
@@ -242,7 +239,7 @@ ezs.devices.file.text.reader('users.csv').transform(ezs.transforms.csv.parser())
 	.pipe(_, ezs.devices.file.text.writer('females.json'));
 ```
 
-Note that the library is still very embryonic and not fully tested.
+The library is rather embryonic at this stage but you can expect it to grow.
 
 ## Parallelizing
 
@@ -270,7 +267,7 @@ var streams = reader.fork([
 ]).streams;
 ```
 
-This returns 3 streams which operate on the same input but perform different chains of operations. You can pipe these 3 streams to different outputs. 
+This returns 3 streams which operate on the same input but perform different chains of operations. You can then pipe these 3 streams to different outputs. 
 
 You can also `join` the group of streams created by a fork, with a joiner function that defines how entries are dequeued from the group.
 
@@ -315,7 +312,7 @@ ezs.devices.file.text.reader('users.csv').transform(ezs.transforms.csv.parser())
 
 Backpressure is a non-issue. The ez-streams plumbing takes care of the low level pause/resume dance on the reader side, and of the write/drain dance on the write side. The event loop takes care of the rest.
 
-Instead of worrying about backpressure, you should worry about buffering. You can control buffering on the source side by passing special options to `ezs.devices.node.reader(nodeStream, options)`. See the [`streamline-streams`](https://github.com/Sage/streamline-streams/blob/master/lib/streams.md) documentation (`ReadableStream`) for details. You can also control it with a `bufSize` option in `fork` calls.
+Instead of worrying about backpressure, you should worry about buffering. You can control buffering on the source side by passing special options to `ezs.devices.node.reader(nodeStream, options)`. See the [`streamline-streams`](https://github.com/Sage/streamline-streams/blob/master/lib/streams.md) documentation (`ReadableStream`) for details. You can also control buffering with a `bufSize` option in `fork` calls.
 
 # License
 
