@@ -134,7 +134,7 @@ var infiniteReader = function() {
 	});
 };
 ```
-(\*): not quite as i++ will stop moving when we reach 2**53
+(\*): not quite as `i++` will stop moving when we reach 2**53
 
 EZ streams have methods that let you control how many entries you will read, even if the stream is potentially infinite. Here are two examples:
 
@@ -150,7 +150,7 @@ infiniteReader().until(function(_, n) {
 
 ## Transformations
 
-The array functions are nice but they have limited power. They work well to process stream entries independently from each other but they don't allow us to do more complex operation like combining several entries into bigger one, or splitting one entry into several smaller ones, or a mix of both. This is something we typically do when we parse a stream: we receive chunks of texts; we look for special boundaries and we emit the items that we have isolated between boundaries. 
+The array functions are nice but they have limited power. They work well to process stream entries independently from each other but they don't allow us to do more complex operation like combining several entries into bigger one, or splitting one entry into several smaller ones, or a mix of both. This is something we typically do when we parse text streams: we receive chunks of texts; we look for special boundaries and we emit the items that we have isolated between boundaries. 
 
 The `transform` function is designed to handle these more complex operations. Typical code looks like:
 
@@ -165,7 +165,7 @@ stream.transform(function(_, reader, writer) {
 
 You have complete freedom to organize your read and write calls: you can read several items, combine them and write only one result, you can read one item, split it and write several results, you can drop data that you don't want to transfer, or inject additional data with extra writes, etc.
 
-Also, you are not limited to reading with the `read(_)` call, you can use any API available on a reader, even another transform. For example, here is the code for a simple CSV parser:
+Also, you are not limited to reading with the `read(_)` call, you can use any API available on a reader, even another transform. For example, here is how you can implement a simple CSV parser:
 
 ``` javascript
 var csvParser = function(_, reader, writer) {
@@ -195,7 +195,8 @@ var csvParser = function(_, reader, writer) {
 You can use this transform as:
 
 ``` javascript
-ezs.devices.file.text.reader('mydata.csv').transform(csvParser).pipe(_, ezs.devices.console.log);
+ezs.devices.file.text.reader('mydata.csv').transform(csvParser)
+	.pipe(_, ezs.devices.console.log);
 ```
 
 Note that the transform is written with a `forEach` call which loops through all the items read from the input chain. This may seem incompatible with streaming but it is not. This loop advances by executing asynchronous `reader.read(_)` and `writer.write(_, obj)` calls. So it yields to the event loop and gives it chance to wake up other pending calls at other steps of the chain. So, even thought the code may look like a tight loop, it gets processed one piece at a time, interleaved with other steps in the chain.
@@ -215,9 +216,11 @@ For example, you can read from a CSV file, filter its entries and write the outp
 var src = new streams.ReadableStream(fs.createReadStream(srcName), { encoding: 'utf8' });
 var dst = new streams.WritableStream(fs.createWriteStream(dstName), { encoding: 'utf8' });
 
-ezs.devices.file.text.reader('users.csv').transform(ezs.transforms.csv.parser()).filter(function(_, item) {
+ezs.devices.file.text.reader('users.csv').transform(ezs.transforms.csv.parser())
+	.filter(function(_, item) {
 	return item.gender === 'F';
-}).transform(ezs.transforms.json.formatter({ space: '\t' })).pipe(_, ezs.devices.file.text.writer('females.json'));
+}).transform(ezs.transforms.json.formatter({ space: '\t' }))
+	.pipe(_, ezs.devices.file.text.writer('females.json'));
 ```
 
 Note that the library is still very embryonic and not fully tested.
@@ -268,9 +271,11 @@ Exceptions are propagated through the chains and you can trap them in the reduce
 
 ``` javascript
 try {
-	ezs.devices.file.text.reader('users.csv').transform(ezs.transforms.csv.parser()).filter(function(_, item) {
+	ezs.devices.file.text.reader('users.csv').transform(ezs.transforms.csv.parser())
+		.filter(function(_, item) {
 		return item.gender === 'F';
-	}).transform(ezs.transforms.json.formatter({ space: '\t' })).pipe(_, ezs.devices.file.text.writer('females.json'));
+	}).transform(ezs.transforms.json.formatter({ space: '\t' }))
+		.pipe(_, ezs.devices.file.text.writer('females.json'));
 } catch (ex) {
 	logger.write(_, ex);
 }
@@ -279,7 +284,8 @@ try {
 It you write your code with callbacks, you will receive the exception as first parameter in your continuation callback:
 
 ``` javascript
-ezs.devices.file.text.reader('users.csv').transform(ezs.transforms.csv.parser()).filter(function(cb, item) {
+ezs.devices.file.text.reader('users.csv').transform(ezs.transforms.csv.parser())
+	.filter(function(cb, item) {
 	cb(null, item.gender === 'F');
 }).transform(ezs.transforms.json.formatter({ space: '\t' })).pipe(function(err) {
 	if (err) logger.write(function(e) {}, err);
