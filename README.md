@@ -42,6 +42,7 @@ var numberReader = function(n) {
 ```
 
 To define your own reader you just need to provide an asynchronous `read(_) {...}` function to `ezs.devices.generic.reader`.
+
 To define your own writer you just need to provide an asynchronous `write(_, val) {...}` function to `ezs.devices.generic.writer`.
 
 ## Array-like API
@@ -111,7 +112,7 @@ numberReader(100).filter(function(_, n) {
 
 Note that `pipe` is also a reducer. It takes a continuation callback. So you can schedule operations after the pipe has been fully processed.
 
-A major difference with standard node streams is that `pipe` operations only appear at the end of a chain, instead of being inserted between processing steps. The EZ `pipe` does not return a reader. Instead it returns (asynchronously) its writer argument, so that you can chain other operations on the writer itself. Here is a typical use:
+A major difference with standard node streams is that `pipe` operations only appear once in a chain, at the end, instead of being inserted between processing steps. The EZ `pipe` does not return a reader. Instead it returns (asynchronously) its writer argument, so that you can chain other operations on the writer itself. Here is a typical use:
 
 ``` javascript
 var result = numberReader(100).map(function(_, n) {
@@ -133,7 +134,7 @@ var infiniteReader = function() {
 	});
 };
 ```
-(*): not quite as i++ will stop moving when we reach 2**53
+(\*): not quite as i++ will stop moving when we reach 2**53
 
 EZ streams have methods that let you control how many entries you will read, even if the stream is potentially infinite. Here are two examples:
 
