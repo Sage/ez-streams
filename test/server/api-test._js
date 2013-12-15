@@ -173,6 +173,22 @@ function rand(min, max) {
 	};
 }
 
+asyncTest("buffer in simple chain", 3, function(_) {
+	strictEqual(numbers().buffer(3).skip(2).limit(5).pipe(_, arraySink()).toArray().join(','), "2,3,4,5,6");
+	strictEqual(numbers().skip(2).buffer(3).limit(5).pipe(_, arraySink()).toArray().join(','), "2,3,4,5,6");
+	strictEqual(numbers().skip(2).limit(5).buffer(3).pipe(_, arraySink()).toArray().join(','), "2,3,4,5,6");
+	start();
+});
+asyncTest("buffer with slower input", 1, function(_) {
+	strictEqual(numbers().limit(10).map(wait(20)).buffer(5).map(wait(10)).pipe(_, arraySink()).toArray().join(','), "0,1,2,3,4,5,6,7,8,9");
+	start();
+});
+
+asyncTest("buffer with faster input", 1, function(_) {
+	strictEqual(numbers().limit(10).map(wait(10)).buffer(5).map(wait(20)).pipe(_, arraySink()).toArray().join(','), "0,1,2,3,4,5,6,7,8,9");
+	start();
+});
+
 asyncTest("parallel preserve order", 1, function(_) {
 	var t0 = Date.now();
 	strictEqual(numbers().limit(10).parallel(4, function(source) {

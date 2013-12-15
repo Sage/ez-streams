@@ -70,6 +70,13 @@
   `consumer` is a function with the following signature: `stream = consumer(source)`  
   Returns a `StreamGroup` on which other operations can be chained.  
   Note: transformed entries may be delivered out of order.
+* `stream = stream.peekable()`  
+  Returns a stream which has been extended with two methods to support lookahead.  
+  The lookahead methods are:
+  - `stream.peek(_)`: same as `read(_)` but does not consume the item. 
+  - `stream.unread(val)`: pushes `val` back so that it will be returned by the next `read(_)`
+* `stream = stream.buffer(size)`  
+  Returns a stream which is identical to the original one but in which up to `size` entries may have been buffered.  
 ## StreamGroup API
 * `stream = group.dequeue()`  
   Dequeues values in the order in which they are delivered by the streams.
