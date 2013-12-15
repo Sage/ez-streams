@@ -255,6 +255,18 @@ ezs.devices.file.text.reader('users.csv').transform(ezs.transforms.csv.parser())
 
 The transforms library is rather embryonic at this stage but you can expect it to grow.
 
+## Lookahead
+
+It is often handy to be able to look ahead in a stream when implementing parsers. The reader API does not directly support lookahead but it includes a `peekable()` method which extends the stream with `peek` and `unread` methods:
+
+```
+// stream does not support lookahead methods but peekableStream will.
+var peekableStream = stream.peekable();
+val = peekableStream.peek(_); // reads a value without consuming it.
+val = peekableStream.read(_); // normal read
+peekableStream.unread(val); // pushes back val so that it can be read again.
+```
+
 ## Parallelizing
 
 You can parallelize operations on a stream with the `parallel` call:
