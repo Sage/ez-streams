@@ -48,13 +48,13 @@ and the corresponding _unbounded_ stream:
 
 ## API
 
-`var jsonTrans = require("ez-streams").transforms.json`  
+`var ezs = require("ez-streams")`  
 
-* `transform = jsonTrans.parser(options)`  
+* `transform = ezs.transforms.json.parser(options)`  
   creates a parser transform. The following options can be set:  
   - `unbounded`: use _unbounded_ format  
   - `reviver`: reviver function which is passed to [JSON.parse](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/parse)
-* `transform = jsonTrans.formatter(options)`  
+* `transform = ezs.transforms.json.formatter(options)`  
   creates a formatter transform. The following options can be set:  
   - `unbounded`: use _unbounded_ format  
   - `replacer`: replacer function which is passed to [JSON.stringify](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/parse)
