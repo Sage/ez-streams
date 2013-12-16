@@ -1,4 +1,4 @@
-## HTTP EZ Streams
+## TCP and socket EZ Streams
 
 `var ezs = require('ez-streams');`
 

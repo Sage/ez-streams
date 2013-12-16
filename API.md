@@ -17,7 +17,7 @@ EZ streams for node.js
 * [ez-streams/lib/devices/http](lib/devices/http.md)  
    HTTP EZ Streams
 * [ez-streams/lib/devices/net](lib/devices/net.md)  
-   HTTP EZ Streams
+   TCP and socket EZ Streams
 * [ez-streams/lib/devices/node](lib/devices/node.md)  
    EZ Stream wrappers for native node streams
 * [ez-streams/lib/devices/std](lib/devices/std.md)  
