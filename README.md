@@ -8,6 +8,12 @@ The data that you push or pull may be anything: buffers and strings of course, b
 
 EZ streams are implemented with [streamline.js](https://github.com/Sage/streamlinejs). Most of the examples and API descriptions below use the streamline.js syntax because this is more concise but the `ez-streams` package can also be used directly with callback code. Some of examples also provided both in streamline.js and in pure callback form.
 
+## Installation
+
+``` sh
+npm install ez-streams
+```
+
 ## Creating a stream
 
 The `devices` modules let you get or create various kinds of EZ streams. For example:
