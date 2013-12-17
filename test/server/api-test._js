@@ -245,36 +245,36 @@ asyncTest("fork/join limit one branch", 1, function(_) {
 });
 
 asyncTest("fork slow and fast", 2, function(_) {
-	var streams = numbers().fork([
+	var readers = numbers().fork([
 		function(source) { return source.map(wait(rand(20, 20))).map(pow(2)); },
 		function(source) { return source.map(wait(rand(10, 10))).map(pow(3)); },
-		]).streams;
-	var f1 = streams[0].limit(10).pipe(!_, arraySink());
-	var f2 = streams[1].limit(10).pipe(!_, arraySink());
+		]).readers;
+	var f1 = readers[0].limit(10).pipe(!_, arraySink());
+	var f2 = readers[1].limit(10).pipe(!_, arraySink());
 	strictEqual(f1(_).toArray().join(','), "0,1,4,9,16,25,36,49,64,81");
 	strictEqual(f2(_).toArray().join(','), "0,1,8,27,64,125,216,343,512,729");
 	start();
 });
 
 asyncTest("fork slow and fast with different limits (fast ends first)", 2, function(_) {
-	var streams = numbers().fork([
+	var readers = numbers().fork([
 		function(source) { return source.map(wait(rand(20, 20))).map(pow(2)).limit(10); },
 		function(source) { return source.map(wait(rand(10, 10))).map(pow(3)).limit(4); },
-		]).streams;
-	var f1 = streams[0].pipe(!_, arraySink());
-	var f2 = streams[1].pipe(!_, arraySink());
+		]).readers;
+	var f1 = readers[0].pipe(!_, arraySink());
+	var f2 = readers[1].pipe(!_, arraySink());
 	strictEqual(f1(_).toArray().join(','), "0,1,4,9,16,25,36,49,64,81");
 	strictEqual(f2(_).toArray().join(','), "0,1,8,27");
 	start();
 });
 
 asyncTest("fork slow and fast with different limits (slow ends first)", 2, function(_) {
-	var streams = numbers().fork([
+	var readers = numbers().fork([
 		function(source) { return source.map(wait(rand(10, 10))).map(pow(2)).limit(10); },
 		function(source) { return source.map(wait(rand(20, 20))).map(pow(3)).limit(4); },
-		]).streams;
-	var f1 = streams[0].pipe(!_, arraySink());
-	var f2 = streams[1].pipe(!_, arraySink());
+		]).readers;
+	var f1 = readers[0].pipe(!_, arraySink());
+	var f2 = readers[1].pipe(!_, arraySink());
 	strictEqual(f1(_).toArray().join(','), "0,1,4,9,16,25,36,49,64,81");
 	strictEqual(f2(_).toArray().join(','), "0,1,8,27");
 	start();

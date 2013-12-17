@@ -6,7 +6,7 @@ EZ streams come in two flavors: _readers_ and _writers_. You pull data from _rea
 
 The data that you push or pull may be anything: buffers and strings of course, but also simple values like numbers or Booleans, JavaScript objects, nulls, ... There is only one value which has a special meaning: `undefined`. Reading `undefined` means that you have reached the end of a reader stream. Writing `undefined` signals that you want to _end_ a writer stream.
 
-EZ streams are implemented with streamline.js. The examples and API descriptions below use the streamline.js syntax because this is more concise but the `ez-streams` package can also be used directly with callback code. Just mentally replace every `_` by a callback.
+EZ streams are implemented with [streamline.js](https://github.com/Sage/streamlinejs). Most of the examples and API descriptions below use the streamline.js syntax because this is more concise but the `ez-streams` package can also be used directly with callback code. Some of examples also provided both in streamline.js and in pure callback form.
 
 ## Creating a stream
 
@@ -68,7 +68,7 @@ var writer = function(collection) {
 
 ## Basic read and write
 
-You can read from a reader by calling it `read` method and you can write to a writer by calling its `write` method:
+You can read from a reader by calling its `read` method and you can write to a writer by calling its `write` method:
 
 ``` javascript
 var val = reader.read(_);
@@ -96,7 +96,7 @@ console.log("pi~=" + 4 * numberReader(10000).filter(function(_, n) {
 
 This will compute 4 * (1 - 1/3 + 1/5 - 1/7 ...).
 
-For those not used to streamline this chain could be rewritten with callbacks as:
+For those not used to streamline this chain can be rewritten with callbacks as:
 
 ``` javascript
 numberReader(10000).filter(function(cb, n) {
@@ -110,9 +110,9 @@ numberReader(10000).filter(function(cb, n) {
 }, 0);
 ```
 
-Every step of the chain, except the last one, returns a new reader stream. The first stream produces all integers up to 9999. The second one, which is returned by the `filter` call produces only odd integers. The third one, returned by the `map` call returns the alternating fractions. The `reduce` step at the end combines alternating fractions to produce the final result.
+Every step of the chain, except the last one, returns a new reader. The first reader produces all integers up to 9999. The second one, which is returned by the `filter` call lets only the odd integers go through. The third one, returned by the `map` call transforms the odd integers into alternating fractions. The `reduce` step at the end combines the alternating fractions to produce the final result.
 
-Also note that the `reduce` function takes a continuation callback as first parameter while the other functions don't. This is because the other functions (`filter`, `map`) return another stream immediately, while `reduce` pulls all the values from the stream and combines them to produce a result. So `reduce` can only produce its result once all the operations have completed, and it does so by returning its result through a continuation callback. 
+Note that the `reduce` function takes a continuation callback as first parameter while the other functions don't. This is because the other functions (`filter`, `map`) return another reader immediately, while `reduce` pulls all the values from the stream and combines them to produce a result. So `reduce` can only produce its result once all the operations have completed, and it does so by returning its result through a continuation callback. 
 
 The callbacks that you pass to `filter`, `map`, `reduce` are slightly different from the callbacks that you pass to normal array functions. They receive a continuation callback (`_`) as first parameter. This allows you to call asynchronous functions from these callbacks. We did not do it in the example above but this would be easy to do. For example we could slow down the computation by injecting a `setTimeout` call in the filter operation:
 
@@ -123,11 +123,11 @@ console.log("pi~=" + 4 * numberReader(10000).filter(function(_, n) {
 })...
 ```
 
-Rather academic here but in real life you often need to query databases or external services when filtering or mapping stream entries.
+Rather academic here but in real life you often need to query databases or external services when filtering or mapping stream entries. So this is very useful.
 
 The Array-like API also includes `every`, `some` and `forEach`. On the other hand it does not include `reduceRight` nor `sort`, as these functions are incompatible with streaming (they would need to buffer the entire stream).
 
-The `forEach` function is also a reducer and takes a continuation callback, like `reduce` (see example later).
+The `forEach`, `every` and `some` functions are reducers and take a continuation callback, like `reduce` (see example further down).
 
 ## Pipe
 
@@ -137,7 +137,7 @@ Readers have a `pipe` method that lets you pipe them into a writer:
 reader.pipe(_, writer)
 ```
 
-For example we can output the odd numbers up to 100 to the console by piping the stream to the console device:
+For example we can output the odd numbers up to 100 to the console by piping the number reader to the console device:
 
 ``` javascript
 numberReader(100).filter(function(_, n) {
@@ -169,7 +169,7 @@ var infiniteReader = function() {
 	});
 };
 ```
-(\*): not quite as `i++` will stop moving when we reach 2**53
+(\*): not quite as `i++` will stop moving when `i` reaches 2**53
 
 EZ streams have methods like `skip`, `limit`, `until` and `while` that let you control how many entries you will read, even if the stream is potentially infinite. Here are two examples:
 
@@ -234,16 +234,16 @@ ez.devices.file.text.reader('mydata.csv').transform(csvParser)
 	.pipe(_, ez.devices.console.log);
 ```
 
-Note that the transform is written with a `forEach` call which loops through all the items read from the input chain. This may seem incompatible with streaming but it is not. This loop advances by executing asynchronous `reader.read(_)` and `writer.write(_, obj)` calls. So it yields to the event loop and gives it chance to wake up other pending calls at other steps of the chain. So, even thought the code may look like a tight loop, it gets processed one piece at a time, interleaved with other steps in the chain.
+Note that the transform is written with a `forEach` call which loops through all the items read from the input chain. This may seem incompatible with streaming but it is not. This loop advances by executing asynchronous `reader.read(_)` and `writer.write(_, obj)` calls. So it yields to the event loop and gives it chance to wake up other pending calls at other steps of the chain. So, even though the code may look like a tight loop, it is not. It gets processed one piece at a time, interleaved with other steps in the chain.
 
 ## Transforms library
 
 The `lib/transforms` directory contains standard transforms:
 
 * [`ez.transforms.lines`](lib/transforms/lines.md): simple lines parser and formatter.
-* [`ez.transforms.csv`](lib/transforms/json.md): CSV parser and formatter.
+* [`ez.transforms.csv`](lib/transforms/csv.md): CSV parser and formatter.
 * [`ez.transforms.json`](lib/transforms/json.md): JSON parser and formatter.
-* [`ez.transforms.multipart`](lib/transforms/json.md): MIME multipart parser and formatter.
+* [`ez.transforms.multipart`](lib/transforms/multipart.md): MIME multipart parser and formatter.
 
 For example, you can read from a CSV file, filter its entries and write the output to a JSON file with:
 
@@ -262,11 +262,11 @@ The transforms library is rather embryonic at this stage but you can expect it t
 It is often handy to be able to look ahead in a stream when implementing parsers. The reader API does not directly support lookahead but it includes a `peekable()` method which extends the stream with `peek` and `unread` methods:
 
 ```
-// stream does not support lookahead methods but peekableStream will.
-var peekableStream = stream.peekable();
-val = peekableStream.peek(_); // reads a value without consuming it.
-val = peekableStream.read(_); // normal read
-peekableStream.unread(val); // pushes back val so that it can be read again.
+// reader does not support lookahead methods but peekableReader will.
+var peekableReader = reader.peekable();
+val = peekableReader.peek(_); // reads a value without consuming it.
+val = peekableReader.read(_); // normal read
+peekableReader.unread(val); // pushes back val so that it can be read again.
 ```
 
 ## Parallelizing
@@ -279,25 +279,25 @@ reader.parallel(4, function(source) {
 }).map(fn2).pipe(_, writer);
 ```
 
-In this example the `parallel` call will dispatch the items to 4 identical chains that apply the `fn1` mapping and the `trans1` transform. The output of these chains will be merged and passed through the `fn2` mapping.
+In this example the `parallel` call will dispatch the items to 4 identical chains that apply the `fn1` mapping and the `trans1` transform. The output of these chains will be merged, passed through the `fn2` mapping and finally piped to `writer`.
 
 You can control the `parallel` call by passing an options object instead of an integer as first parameter. The `shuffle` option lets you control if the order of entries is preserved or not. By default it is false and the order is preserved but you can get better thoughput by setting `shuffle` to true if order does not matter.
 
 ## Fork and join
 
-You can also fork a stream into a set of identical streams that you pass through different chains:
+You can also fork a reader into a set of identical readers that you pass through different chains:
 
 ``` javascript
-var streams = reader.fork([
+var readers = reader.fork([
 	function(source) { return source.map(fn1).transform(trans1); },
 	function(source) { return source.map(fn2); },
 	function(source) { return source.transform(trans3); },
-]).streams;
+]).readers;
 ```
 
 This returns 3 streams which operate on the same input but perform different chains of operations. You can then pipe these 3 streams to different outputs. 
 
-Note that you have to use futures (or callbacks) when piping these streams so that they are piped in parallel. See the examples in the `api-test._js` test file.
+Note that you have to use futures (or callbacks) when piping these streams so that they are piped in parallel. See the examples in the [`api-test._js`](https://github.com/Sage/ez-streams/blob/master/test/server/api-test._js) test file for some examples.
 
 You can also `join` the group of streams created by a fork, with a joiner function that defines how entries are dequeued from the group.
 
@@ -309,11 +309,11 @@ var streams = reader.fork([
 ]).join(joinerFn).map(fn4).pipe(_, writer);
 ```
 
-This part of the API is still fairly experimental but it passes at least basic unit tests.
+This part of the API is still fairly experimental and may change a bit.
 
 ## Exception handling
 
-Exceptions are propagated through the chains and you can trap them in the reducer which pulls the items from the chain. If you write your code with streamline, you will naturally use try/catch:
+Exceptions are propagated through the chains and you can trap them in the reducer which pulls the items from the chain. If you write your code with streamline.js, you will naturally use try/catch:
 
 ``` javascript
 try {
@@ -340,9 +340,23 @@ ez.devices.file.text.reader('users.csv').transform(ez.transforms.csv.parser())
 
 ## Backpressure
 
-Backpressure is a non-issue. The ez-streams plumbing takes care of the low level pause/resume dance on the reader side, and of the write/drain dance on the write side. The event loop takes care of the rest. So you don't need to worry about backpressure when writing map or transform functions.
+Backpressure is a non-issue. The ez-streams plumbing takes care of the low level pause/resume dance on the reader side, and of the write/drain dance on the write side. The event loop takes care of the rest. So you don't have to worry about backpressure when writing EZ streams code.
 
-Instead of worrying about backpressure, you should worry about buffering. You can control buffering on the source side by passing special options to `ez.devices.node.reader(nodeStream, options)`. See the [`streamline-streams`](https://github.com/Sage/streamline-streams/blob/master/lib/streams.md) documentation (`ReadableStream`) for details. You can also control buffering with a `bufSize` option in `fork` calls.
+Instead of worrying about backpressure, you should worry about buffering. You can control buffering on the source side by passing special options to `ez.devices.node.reader(nodeStream, options)`. See the [`streamline-streams`](https://github.com/Sage/streamline-streams/blob/master/lib/streams.md) documentation (`ReadableStream`) for details. You can also control buffering by injecting `buffer(max)` calls into your chains. The typical pattern is:
+
+``` javascript
+reader.transform(T1).buffer(N).transform(T2).pipe(_, writer);
+```
+
+## API
+
+See the [API reference](lib/streams.md).
+
+## More information
+
+The following blog article gives background information on this API design:
+
+* [Easy node.js streams](http://bjouhier.wordpress.com/2013/12/17)
 
 # License
 

@@ -77,19 +77,19 @@
   The lookahead methods are:
   - `reader.peek(_)`: same as `read(_)` but does not consume the item. 
   - `reader.unread(val)`: pushes `val` back so that it will be returned by the next `read(_)`
-* `reader = reader.buffer(size)`  
-  Returns a stream which is identical to the original one but in which up to `size` entries may have been buffered.  
+* `reader = reader.buffer(max)`  
+  Returns a stream which is identical to the original one but in which up to `max` entries may have been buffered.  
 ## StreamGroup API
 * `reader = group.dequeue()`  
-  Dequeues values in the order in which they are delivered by the streams.
+  Dequeues values in the order in which they are delivered by the readers.
   Returns a stream on which other operations may be chained.
 * `reader = group.rr()`  
   Dequeues values in round robin fashion.
   Returns a stream on which other operations may be chained.
 * `reader = group.join(fn, thisObj)`  
-  Combines the values read from the streams to produce a single value.
+  Combines the values read from the readers to produce a single value.
   `fn` is called as `fn(_, values)` where `values` is the set of values produced by 
-  all the streams that are still active.  
+  all the readers that are still active.  
   `fn` returns the value which will be read from the joined stream. `fn` _must_ also reset to `undefined` the `values` entries
   that it has consumed. The next `read(_)` on the joined stream will fetch these values. 
   Note that the length of the `values` array will decrease every time an input stream is exhausted.
