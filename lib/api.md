@@ -1,12 +1,12 @@
 ## EZ Streams core API
 
-`var ezs = require("ez-streams")`  
+`var ez = require("ez-streams")`  
 
-* `ezs.decorate(proto)`  
+* `ez.decorate(proto)`  
   Adds the EZ streams reader API to an object. 
   Usually the object is a prototype but it may be any object with a `read(_)` method.  
   You do not need to call this function if you create your readers with
-  the `ezs.devices` modules.   
+  the `ez.devices` modules.   
   Returns `proto` for convenience.
 * `count = reader.forEach(_, fn, thisObj)`  
   Similar to `forEach` on arrays.  

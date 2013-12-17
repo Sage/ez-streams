@@ -3,9 +3,9 @@
 var fs = require('streamline-fs');
 var path = require('path');
 var streams = require('streamline-streams');
-var ezs = require('ez-streams');
-var lines = ezs.transforms.lines;
-var file = ezs.devices.file;
+var ez = require('ez-streams');
+var lines = ez.transforms.lines;
+var file = ez.devices.file;
 
 var root = process.argv[2] || '.';
 

@@ -1,9 +1,9 @@
 "use strict";
-var ezs = require("ez-streams");
+var ez = require("ez-streams");
 
 var numberReader = function(n) {
 	var i = 0;
-	return ezs.devices.generic.reader(function read(_) {
+	return ez.devices.generic.reader(function read(_) {
 		if (i < n) return i++;
 		else return undefined;
 	});
