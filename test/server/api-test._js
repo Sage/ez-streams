@@ -81,6 +81,11 @@ asyncTest("reduce", 1, function(_) {
 	start();
 });
 
+asyncTest("toArray", 1, function(_) {
+	deepEqual(numbers(5).toArray(_), [0, 1, 2, 3, 4]);
+	start();
+});
+
 asyncTest("pipe", 1, function(_) {
 	strictEqual(numbers(5).pipe(_, arraySink()).toArray().join(','), "0,1,2,3,4");
 	start();

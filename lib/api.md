@@ -34,6 +34,9 @@
 * `count = reader.pipe(_, writer)`  
   Pipes from `stream` to `writer`.
   Returns the writer for chaining.
+* `result = reader.toArray(_)`  
+  Reads all entries and returns them to an array.
+  Note that this call is an anti-pattern for streaming but it may be useful when working with small streams.
 * `reader = reader.transform(fn)`  
   Inserts an asynchronous transformation into chain.  
   This API is more powerful than `map` because the transformation function can combine results, split them, etc.  
