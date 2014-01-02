@@ -11,19 +11,6 @@ function numbers(limit) {
 	});
 }
 
-function waiter(ms) {
-	return function wait(_, val) {
-		setTimeout(~_, ms);
-		return val;
-	}
-}
-
-function pow(n) {
-	return function(_, val) {
-		return Math.pow(val, n);
-	}
-}
-
 function minJoiner(_, values) {
 	var min = Math.min.apply(null, values);
 	values.forEach(function(val, i) {
