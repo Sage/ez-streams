@@ -26,9 +26,13 @@ EZ streams for node.js
    In-memory string streams
 * [ez-streams/lib/transforms/csv](lib/transforms/csv.md)  
    Stream transform for CSV files
+* [ez-streams/lib/transforms/cut](lib/transforms/cut.md)  
+   Transform to cut string and binary streams
 * [ez-streams/lib/transforms/json](lib/transforms/json.md)  
    "Simple" JSON streams
 * [ez-streams/lib/transforms/lines](lib/transforms/lines.md)  
    Stream transform for line-oriented text streams
 * [ez-streams/lib/transforms/multipart](lib/transforms/multipart.md)  
    Stream transform for MIME multipart
+* [ez-streams/lib/transforms/xml](lib/transforms/xml.md)  
+  Simple XML parser and formatter
