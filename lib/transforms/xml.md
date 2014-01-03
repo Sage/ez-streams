@@ -24,11 +24,11 @@ Some examples:
 <a/>  --> { a: {} }
 ```
 
-See the `test/common/jsxmlTest.js` unit test for more examples.
+See the `test/server/xml-test._js` unit test for more examples.
 
 ## API
 
-`var jsxml = require('jsxml')`  
+`var ez = require('ez-streams')`  
 
 * `transform = ez.transforms.xml.parser(options)`  
   creates a parser transform. The following options can be set:  
