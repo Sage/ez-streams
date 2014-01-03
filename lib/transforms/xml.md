@@ -36,4 +36,4 @@ See the `test/common/jsxmlTest.js` unit test for more examples.
 * `transform = ez.transforms.xml.formatter(options)`  
   creates a formatter transform. The following options can be set:  
   - `tags`: the list of tags that enclose each item returned by the reader
-NOTE: NIY
+  - `indent`: optional indentation string, should only contain spaces.
