@@ -356,7 +356,7 @@ reader.transform(T1).buffer(N).transform(T2).pipe(_, writer);
 
 ## API
 
-See the [API reference](lib/streams.md).
+See the [API reference](API.md).
 
 ## More information
 
