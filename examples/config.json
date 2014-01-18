@@ -1,0 +1,17 @@
+{
+	"oracle": {
+		"hostname": "localhost",
+		"database": "ORCL",
+		"user": "oracle",	
+		"password": "oracle",	
+		"table": "test",
+		"writable": false
+	},
+	"mongodb": {
+		"host": "localhost",
+		"port": "27017",
+		"database": "example",
+		"collection": "test",	
+		"writable": true
+	}
+}
