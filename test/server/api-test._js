@@ -12,7 +12,7 @@ function numbers(limit) {
 }
 
 function minJoiner(_, values) {
-	var min = Math.min.apply(null, values);
+	var min = Math.min.apply(null, values.filter(function(val) { return val !== undefined; }));
 	values.forEach(function(val, i) {
 		if (val == min) values[i] = undefined;
 	});
@@ -209,30 +209,24 @@ asyncTest("parallel shuffle", 1, function(_) {
 asyncTest("fork/join limit before", 1, function(_) {
 	strictEqual(numbers().limit(10).fork([
 		function(source) { return source.map(wait(rand(20, 20))).map(pow(2)); },
-		function(source) { return source.map(wait(rand(10, 10))).map(pow(3)); },
-		], {
-			bufSize: Infinity,
-		}).join(minJoiner).pipe(_, arraySink()).toArray().join(','), "0,1,4,8,9,16,25,27,36,49,64,81,125,216,343,512,729");
+		function(source) { return source.buffer(Infinity).map(wait(rand(10, 10))).map(pow(3)); },
+		]).join(minJoiner).pipe(_, arraySink()).toArray().join(','), "0,1,4,8,9,16,25,27,36,49,64,81,125,216,343,512,729");
 	start();
 });
 
 asyncTest("fork/join limit after", 1, function(_) {
 	strictEqual(numbers().fork([
 		function(source) { return source.map(wait(rand(20, 20))).map(pow(2)); },
-		function(source) { return source.map(wait(rand(10, 10))).map(pow(3)); },
-		], {
-			bufSize: Infinity,
-		}).join(minJoiner).limit(12).pipe(_, arraySink()).toArray().join(','), "0,1,4,8,9,16,25,27,36,49,64,81");
+		function(source) { return source.buffer(Infinity).map(wait(rand(10, 10))).map(pow(3)); },
+		]).join(minJoiner).limit(12).pipe(_, arraySink()).toArray().join(','), "0,1,4,8,9,16,25,27,36,49,64,81");
 	start();
 });
 
 asyncTest("fork/join limit one branch", 1, function(_) {
 	strictEqual(numbers().fork([
 		function(source) { return source.map(wait(rand(20, 20))).map(pow(2)).limit(3); },
-		function(source) { return source.map(wait(rand(10, 10))).map(pow(3)); },
-		], {
-			bufSize: Infinity,
-		}).join(minJoiner).limit(10).pipe(_, arraySink()).toArray().join(','),  "0,1,4,8,27,64,125,216,343,512");
+		function(source) { return source.buffer(6).map(wait(rand(10, 10))).map(pow(3)); },
+		]).join(minJoiner).limit(10).pipe(_, arraySink()).toArray().join(','),  "0,1,4,8,27,64,125,216,343,512");
 	start();
 });
 
@@ -271,3 +265,4 @@ asyncTest("fork slow and fast with different limits (slow ends first)", 2, funct
 	strictEqual(f2(_).toArray().join(','), "0,1,8,27");
 	start();
 });
+

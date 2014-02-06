@@ -18,6 +18,8 @@ EZ streams for node.js
    HTTP EZ Streams
 * [ez-streams/lib/devices/mongodb](lib/devices/mongodb.md)  
    EZ wrappers for mongodb
+* [ez-streams/lib/devices/mysql](lib/devices/mysql.md)  
+   EZ wrappers for mysql
 * [ez-streams/lib/devices/net](lib/devices/net.md)  
    TCP and socket EZ Streams
 * [ez-streams/lib/devices/node](lib/devices/node.md)  

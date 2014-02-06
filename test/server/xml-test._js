@@ -133,7 +133,7 @@ asyncTest('comments in text', 1, function(_) {
 
 asyncTest('reformatting', 7, function(_) {
 	rtTest(_, 'spaces outside', ' \r\n\t <a/> \t', null, '<a/>');
-	rtTest(_, 'spaces inside tag', '<a  x="v1"\y="v2"\t/>', null, '<a x="v1" y="v2"/>');
+	rtTest(_, 'spaces inside tag', '<a  x="v1"\ny="v2"\t/>', null, '<a x="v1" y="v2"/>');
 	rtTest(_, 'spaces around children', '<a> <b />\n<c\n/>\t</a>', null, '<a><b/><c/></a>');
 	rtTest(_, 'spaces and cdata', '<a> \n<![CDATA[ <abc>\n\t]]>\t</a>', null, '<a><![CDATA[ <abc>\n\t]]></a>');
 	rtTest(_, 'spaces in value', '<a> </a>', null, '<a> </a>');
@@ -174,8 +174,8 @@ asyncTest("rss roundtrip", 1, function(_) {
 		indent: "  "
 	})) //
 	.toArray(_).join('');
-	expected = expected.replace(/\n */g, '').replace(/<\!--.*-->/g, '');
-	result = result.replace(/\n */g, '');
+	expected = expected.replace(/\r?\n */g, '').replace(/<\!--.*-->/g, '');
+	result = result.replace(/\r?\n */g, '');
 	strictEqual(result, expected);
 	start();
 });
