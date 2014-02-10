@@ -2,5 +2,5 @@
 
 `var ez = require('ez-streams');`
 
-* `reader = ez.devices.mysql.reader(cursor)`  
+* `reader = ez.devices.mysql.reader(connection, query)`   
 * `writer = ez.devices.mysql.writer(connection, tableName)`  
