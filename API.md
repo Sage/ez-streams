@@ -2,8 +2,6 @@
 
 EZ streams for node.js
 
-* [ez-streams/lib/api](lib/api.md)  
-   EZ Streams core API
 * [ez-streams/lib/devices/array](lib/devices/array.md)  
    Array readers and writers
 * [ez-streams/lib/devices/buffer](lib/devices/buffer.md)  
@@ -30,6 +28,8 @@ EZ streams for node.js
    EZ wrappers for standard I/O streams
 * [ez-streams/lib/devices/string](lib/devices/string.md)  
    In-memory string streams
+* [ez-streams/lib/reader](lib/reader.md)  
+   EZ Streams core reader API
 * [ez-streams/lib/transforms/csv](lib/transforms/csv.md)  
    Stream transform for CSV files
 * [ez-streams/lib/transforms/cut](lib/transforms/cut.md)  
@@ -42,3 +42,5 @@ EZ streams for node.js
    Stream transform for MIME multipart
 * [ez-streams/lib/transforms/xml](lib/transforms/xml.md)  
   Simple XML parser and formatter
+* [ez-streams/lib/writer](lib/writer.md)  
+   EZ Streams core writer API
