@@ -23,7 +23,7 @@ var ez = require('ez-streams');
 var log = ez.devices.console.log; // console writer
 var stdin = ez.devices.std.in('utf8'); // stdin in text mode
 var textRd = ez.devices.file.text.reader(path); // text file reader
-var binWr = ez.devices.file.text.writer(path); // binary file writer
+var binWr = ez.devices.file.binary.writer(path); // binary file writer
 var stringRd = ez.devices.string.reader(text); // in memory text reader
 ```
 
