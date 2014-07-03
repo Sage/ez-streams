@@ -361,7 +361,7 @@ reader.transform(T1).buffer(N).transform(T2).pipe(_, writer);
 
 EZ streams is the recommended streams package for [galaxy](https://github.com/Sage/galaxy). The API is overloaded to facilitate integration with generator functions. 
 
-If you develop with galaxy, we should use the API as follows:
+If you develop with galaxy, you should use the API as follows:
 
 * add a `Star` postfix to the _reducer_ methods (the methods that have `_` as first parameter: `forEach`, `every`, `some`, `reduce`, `pipe`, `toArray`). You should also `yield` on these `Star` calls.
 * pass generator functions (`function*(...) { ... }`) instead of regular asynchronous functions (`function(_, ...) { ...}`) to the methods that expect a callback (`forEach`, `map`, `filter`, `transform`, ...).
