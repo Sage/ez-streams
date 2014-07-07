@@ -1,4 +1,4 @@
-## File based ES streams
+## File based EZ streams
 
 `var ez = require('ez-streams');`
 
