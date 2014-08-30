@@ -10,12 +10,14 @@ EZ streams are implemented with [streamline.js](https://github.com/Sage/streamli
 
 EZ streams are also compatible with [galaxy](https://github.com/Sage/galaxy). See [Galaxy-support](#galaxy-support) below for details.
 
+<a name="installation"/>
 ## Installation
 
 ``` sh
 npm install ez-streams
 ```
 
+<a name="devices"/>
 ## Creating a stream
 
 The `devices` modules let you get or create various kinds of EZ streams. For example:
@@ -74,6 +76,7 @@ var writer = function(collection) {
 ```
 
 
+<a name="basic-api"/>
 ## Basic read and write
 
 You can read from a reader by calling its `read` method and you can write to a writer by calling its `write` method:
@@ -88,6 +91,7 @@ The `read` and `write` methods are both asynchronous.
 `read` returns `undefined` at the end of a stream. Symmetrically, passing `undefined` to the `write` method of a writer ends the writer.
 
 
+<a name="array-api"/>
 ## Array-like API
 
 You can treat an EZ reader very much like a JavaScript array: you can filter it, map it, reduce it, etc. For example you can write:
@@ -137,6 +141,7 @@ The Array-like API also includes `every`, `some` and `forEach`. On the other han
 
 The `forEach`, `every` and `some` functions are reducers and take a continuation callback, like `reduce` (see example further down).
 
+<a name="pipe"/>
 ## Pipe
 
 Readers have a `pipe` method that lets you pipe them into a writer:
@@ -165,6 +170,7 @@ var result = numberReader(100).map(function(_, n) {
 
 In this example, the integers are mapped to strings which are written to an in-memory string writer. The string writer is returned by the `pipe` call and we obtain its contents by applying `toString()`.
 
+<a name="infinite-streams"/>
 ## Infinite streams
 
 You can easily create an infinite stream. For example, here is a reader stream that will return all numbers (*) in sequence:
@@ -191,6 +197,7 @@ infiniteReader().until(function(_, n) {
 }).pipe(_, ez.devices.console.log);
 ```
 
+<a name="transforms"/>
 ## Transformations
 
 The array functions are nice but they have limited power. They work well to process stream entries independently from each other but they don't allow us to do more complex operation like combining several entries into a bigger one, or splitting one entry into several smaller ones, or a mix of both. This is something we typically do when we parse text streams: we receive chunks of texts; we look for special boundaries and we emit the items that we have isolated between boundaries. Usally, there is not a one to one correspondance between the chunks that we receive and the items that we emit.
@@ -244,6 +251,29 @@ ez.devices.file.text.reader('mydata.csv').transform(csvParser)
 
 Note that the transform is written with a `forEach` call which loops through all the items read from the input chain. This may seem incompatible with streaming but it is not. This loop advances by executing asynchronous `reader.read(_)` and `writer.write(_, obj)` calls. So it yields to the event loop and gives it chance to wake up other pending calls at other steps of the chain. So, even though the code may look like a tight loop, it is not. It gets processed one piece at a time, interleaved with other steps in the chain.
 
+<a name="transforms-library"/>
+## Transforms library
+
+The `lib/transforms` directory contains standard transforms:
+
+* [`ez.transforms.lines`](lib/transforms/lines.md): simple lines parser and formatter.
+* [`ez.transforms.csv`](lib/transforms/csv.md): CSV parser and formatter.
+* [`ez.transforms.json`](lib/transforms/json.md): JSON parser and formatter.
+* [`ez.transforms.multipart`](lib/transforms/multipart.md): MIME multipart parser and formatter.
+
+For example, you can read from a CSV file, filter its entries and write the output to a JSON file with:
+
+``` javascript
+ez.devices.file.text.reader('users.csv').transform(ez.transforms.csv.parser())
+	.filter(function(_, item) {
+	return item.gender === 'F';
+}).transform(ez.transforms.json.formatter({ space: '\t' }))
+	.pipe(_, ez.devices.file.text.writer('females.json'));
+```
+
+The transforms library is rather embryonic at this stage but you can expect it to grow.
+
+<a name="node-interop"/>
 ## Interoperabily with native node.js streams
 
 `ez-streams` are fully interoperable with native node.js streams.
@@ -273,27 +303,7 @@ And you can transform an _ez_ stream with a node duplex stream:
 reader = reader.nodeTransform(duplexStream)
 ```
 
-## Transforms library
-
-The `lib/transforms` directory contains standard transforms:
-
-* [`ez.transforms.lines`](lib/transforms/lines.md): simple lines parser and formatter.
-* [`ez.transforms.csv`](lib/transforms/csv.md): CSV parser and formatter.
-* [`ez.transforms.json`](lib/transforms/json.md): JSON parser and formatter.
-* [`ez.transforms.multipart`](lib/transforms/multipart.md): MIME multipart parser and formatter.
-
-For example, you can read from a CSV file, filter its entries and write the output to a JSON file with:
-
-``` javascript
-ez.devices.file.text.reader('users.csv').transform(ez.transforms.csv.parser())
-	.filter(function(_, item) {
-	return item.gender === 'F';
-}).transform(ez.transforms.json.formatter({ space: '\t' }))
-	.pipe(_, ez.devices.file.text.writer('females.json'));
-```
-
-The transforms library is rather embryonic at this stage but you can expect it to grow.
-
+<a name="lookahead"/>
 ## Lookahead
 
 It is often handy to be able to look ahead in a stream when implementing parsers. The reader API does not directly support lookahead but it includes a `peekable()` method which extends the stream with `peek` and `unread` methods:
@@ -306,6 +316,7 @@ val = peekableReader.read(_); // normal read
 peekableReader.unread(val); // pushes back val so that it can be read again.
 ```
 
+<a name="parallelizing"/>
 ## Parallelizing
 
 You can parallelize operations on a stream with the `parallel` call:
@@ -320,6 +331,7 @@ In this example the `parallel` call will dispatch the items to 4 identical chain
 
 You can control the `parallel` call by passing an options object instead of an integer as first parameter. The `shuffle` option lets you control if the order of entries is preserved or not. By default it is false and the order is preserved but you can get better thoughput by setting `shuffle` to true if order does not matter.
 
+<a name="fork-and-join"/>
 ## Fork and join
 
 You can also fork a reader into a set of identical readers that you pass through different chains:
@@ -348,6 +360,7 @@ var streams = reader.fork([
 
 This part of the API is still fairly experimental and may change a bit.
 
+<a name="exceptions"/>
 ## Exception handling
 
 Exceptions are propagated through the chains and you can trap them in the reducer which pulls the items from the chain. If you write your code with streamline.js, you will naturally use try/catch:
@@ -375,6 +388,7 @@ ez.devices.file.text.reader('users.csv').transform(ez.transforms.csv.parser())
 }, ez.devices.file.text.writer('females.json'));
 ```
 
+<a name="backpressure"/>
 ## Backpressure
 
 Backpressure is a non-issue. The ez-streams plumbing takes care of the low level pause/resume dance on the reader side, and of the write/drain dance on the write side. The event loop takes care of the rest. So you don't have to worry about backpressure when writing EZ streams code.
@@ -423,17 +437,19 @@ _Note:_ do not forget the `*` after `function` in the functions inside your chai
 
 See the [galaxy unit test](test/server/galaxy-test.js) for more examples.
 
-
+<a name="api"/>
 ## API
 
 See the [API reference](API.md).
 
+<a name="more-info"/>
 ## More information
 
 The following blog article gives background information on this API design:
 
 * [Easy node.js streams](http://bjouhier.wordpress.com/2013/12/17)
 
+<a name="license"/>
 # License
 
 This work is licensed under the terms of the [MIT license](http://en.wikipedia.org/wiki/MIT_License).
