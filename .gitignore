@@ -1,2 +1,3 @@
 *.testlog
 examples/config-custom.*
+.DS_Store

@@ -9,7 +9,9 @@ EZ streams for node.js
 * [ez-streams/lib/devices/console](lib/devices/console.md)  
    Console EZ streams
 * [ez-streams/lib/devices/file](lib/devices/file.md)  
-   File based ES streams
+   File based EZ streams
+* [ez-streams/lib/devices/galaxy](lib/devices/galaxy.md)  
+   Stream constructors for galaxy
 * [ez-streams/lib/devices/generic](lib/devices/generic.md)  
    Generic stream constructors
 * [ez-streams/lib/devices/http](lib/devices/http.md)  
@@ -24,12 +26,16 @@ EZ streams for node.js
    EZ Stream wrappers for native node streams
 * [ez-streams/lib/devices/oracle](lib/devices/oracle.md)  
    EZ wrappers for oracle
+* [ez-streams/lib/devices/sqlserver](lib/devices/sqlserver.md)  
+   EZ wrappers for oracle
 * [ez-streams/lib/devices/std](lib/devices/std.md)  
    EZ wrappers for standard I/O streams
 * [ez-streams/lib/devices/string](lib/devices/string.md)  
    In-memory string streams
 * [ez-streams/lib/reader](lib/reader.md)  
    EZ Streams core reader API
+* [ez-streams/lib/transforms/convert](lib/transforms/convert.md)  
+   Encoding mappers
 * [ez-streams/lib/transforms/csv](lib/transforms/csv.md)  
    Stream transform for CSV files
 * [ez-streams/lib/transforms/cut](lib/transforms/cut.md)  

@@ -12,3 +12,5 @@
   Similar to `map` on arrays.  
   The `fn` function is called as `fn(_, elt, i)`.  
   Returns another writer on which other operations may be chained.
+* `stream = writer.nodify()`  
+  converts the writer into a native node Writable stream.  

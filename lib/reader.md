@@ -82,6 +82,12 @@
   - `reader.unread(val)`: pushes `val` back so that it will be returned by the next `read(_)`
 * `reader = reader.buffer(max)`  
   Returns a stream which is identical to the original one but in which up to `max` entries may have been buffered.  
+* `stream = reader.nodify()`  
+  converts the reader into a native node Readable stream.  
+* `reader = reader.nodeTransform(duplex)`  
+  pipes the reader into a node duplex stream. Returns another reader. 
+* `cmp = reader1.compare(_, reader2)`  
+  compares reader1 and reader2 return 0 if equal,  
 ## StreamGroup API
 * `reader = group.dequeue()`  
   Dequeues values in the order in which they are delivered by the readers.

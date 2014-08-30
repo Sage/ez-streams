@@ -244,6 +244,35 @@ ez.devices.file.text.reader('mydata.csv').transform(csvParser)
 
 Note that the transform is written with a `forEach` call which loops through all the items read from the input chain. This may seem incompatible with streaming but it is not. This loop advances by executing asynchronous `reader.read(_)` and `writer.write(_, obj)` calls. So it yields to the event loop and gives it chance to wake up other pending calls at other steps of the chain. So, even though the code may look like a tight loop, it is not. It gets processed one piece at a time, interleaved with other steps in the chain.
 
+## Interoperabily with native node.js streams
+
+`ez-streams` are fully interoperable with native node.js streams.
+
+You can convert a node.js stream to an _ez_ stream:
+
+``` javascript
+// converting a node.js readable stream to an ez reader
+var reader = ez.devices.node.reader(stream);
+// converting a node.js writable stream to an ez writer
+var writer = ez.devices.node.writer(stream);
+```
+
+You can also convert in the reverse direction, from an _ez_ stream to a node.js stream:
+
+``` javascript
+// converting an ez reader to a node readable stream
+var stream = reader.nodfiy();
+// converting an ez writer to a node writable stream
+var stream = writer.nodify();
+```
+
+And you can transform an _ez_ stream with a node duplex stream:
+
+``` javascript
+// transforms an ez reader into another ez reader
+reader = reader.nodeTransform(duplexStream)
+```
+
 ## Transforms library
 
 The `lib/transforms` directory contains standard transforms:
