@@ -32,6 +32,8 @@ EZ streams for node.js
    EZ wrappers for standard I/O streams
 * [ez-streams/lib/devices/string](lib/devices/string.md)  
    In-memory string streams
+* [ez-streams/lib/devices/uturn](lib/devices/uturn.md)  
+   Special device that transforms a writer into a reader
 * [ez-streams/lib/reader](lib/reader.md)  
    EZ Streams core reader API
 * [ez-streams/lib/transforms/convert](lib/transforms/convert.md)  
