@@ -388,6 +388,24 @@ ez.devices.file.text.reader('users.csv').transform(ez.transforms.csv.parser())
 }, ez.devices.file.text.writer('females.json'));
 ```
 
+<a name="writer-chaining"/>
+## Writer chaining
+
+You can also chain operations on writers via a special `pre` property. For example:
+
+``` javascript
+// create a binary file writer
+var rawWriter = ez.devices.file.binary.writer("data.gzip");
+// create another writer that applies a gzip transform before the file writer
+var zipWriter = rawWriter.pre.nodeTransform(zlib.createGzip());
+```
+
+All the chainable operations available on readers (`map`, `filter`, `transform`, `nodeTransform`, ...) 
+can also be applied to writers through this `pre` property.
+
+Note: the `pre` property was introduced to stress the fact that the operation is applied _before_ 
+writing to the original writer, even though it appears _after_ in the chain.
+
 <a name="backpressure"/>
 ## Backpressure
 
