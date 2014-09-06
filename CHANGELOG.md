@@ -16,7 +16,7 @@ First brew
 
 ## v0.1.4
 2014-09-06
-* [#2 galaxy hooks](https://github.com/Sage/ez-streams/issues/2)
+* [#2](https://github.com/Sage/ez-streams/issues/2) [galaxy hooks](https://github.com/Sage/ez-streams/blob/master/README.md#galaxy-support)
 * [interoperability with native node.js streams  (reader.nodify, writer.nodify)](https://github.com/Sage/ez-streams#interoperabily-with-native-nodejs-streams)
 * [https://github.com/Sage/ez-streams#writer-chaining (writer.pre)](https://github.com/Sage/ez-streams#interoperabily-with-native-nodejs-streams)
 * [reader to enumerate files (devices.file.list)](https://github.com/Sage/ez-streams/blob/master/lib/devices/file.md)
