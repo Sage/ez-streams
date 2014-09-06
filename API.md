@@ -34,10 +34,10 @@ EZ streams for node.js
    In-memory string streams
 * [ez-streams/lib/devices/uturn](lib/devices/uturn.md)  
    Special device that transforms a writer into a reader
+* [ez-streams/lib/mappers/convert](lib/mappers/convert.md)  
+   Encoding mappers
 * [ez-streams/lib/reader](lib/reader.md)  
    EZ Streams core reader API
-* [ez-streams/lib/transforms/convert](lib/transforms/convert.md)  
-   Encoding mappers
 * [ez-streams/lib/transforms/csv](lib/transforms/csv.md)  
    Stream transform for CSV files
 * [ez-streams/lib/transforms/cut](lib/transforms/cut.md)  

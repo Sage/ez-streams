@@ -8,9 +8,5 @@
   You do not need to call this function if you create your readers with
   the `ez.devices` modules.   
   Returns `proto` for convenience.
-* `writer = writer.premap(fn, thisObj)`  
-  Similar to `map` on arrays.  
-  The `fn` function is called as `fn(_, elt, i)`.  
-  Returns another writer on which other operations may be chained.
 * `stream = writer.nodify()`  
   converts the writer into a native node Writable stream.  
