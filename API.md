@@ -6,6 +6,8 @@ EZ streams for node.js
    Array readers and writers
 * [ez-streams/lib/devices/buffer](lib/devices/buffer.md)  
    In-memory buffer streams
+* [ez-streams/lib/devices/child_process](lib/devices/child_process.md)  
+   EZ Stream wrappers for node child processes
 * [ez-streams/lib/devices/console](lib/devices/console.md)  
    Console EZ streams
 * [ez-streams/lib/devices/file](lib/devices/file.md)  
