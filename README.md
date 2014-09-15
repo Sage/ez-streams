@@ -425,6 +425,7 @@ EZ streams is the recommended streams package for [galaxy](https://github.com/Sa
 If you develop with galaxy, you should use the API as follows:
 
 * add a `Star` postfix to the _reducer_ methods (the methods that have `_` as first parameter: `forEach`, `every`, `some`, `reduce`, `pipe`, `toArray`). You should also `yield` on these `Star` calls.
+* add a `G` (for generator/galaxy postfix to the non _reducer_ methods.
 * pass generator functions (`function*(...) { ... }`) instead of regular asynchronous functions (`function(_, ...) { ...}`) to the methods that expect a callback (`forEach`, `map`, `filter`, `transform`, ...).
 
 For example, instead of:
@@ -442,9 +443,9 @@ console.log("pi~=" + 4 * numberReader(10000).filter(function(_, n) {
 you would write:
 
 ``` javascript
-console.log("pi~=" + 4 * (yield numberReader(10000).filter(function*(n) {
+console.log("pi~=" + 4 * (yield numberReader(10000).filterG(function*(n) {
 	return n % 2; // keep only odd numbers
-}).map(function*(n) {
+}).mapG(function*(n) {
 	return n % 4 === 1 ? 1 / n : -1 / n;
 }).reduceStar(function*(res, val) {
 	return res + val;
