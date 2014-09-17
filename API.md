@@ -36,6 +36,8 @@ EZ streams for node.js
    In-memory string streams
 * [ez-streams/lib/devices/uturn](lib/devices/uturn.md)  
    Special device that transforms a writer into a reader
+* [ez-streams/lib/helpers/binary](lib/helpers/binary.md)  
+   helpers for binary streams
 * [ez-streams/lib/mappers/convert](lib/mappers/convert.md)  
    Encoding mappers
 * [ez-streams/lib/reader](lib/reader.md)  
