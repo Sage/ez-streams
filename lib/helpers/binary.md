@@ -2,7 +2,7 @@
 
 `var ez = require("ez-streams")`  
 
-###
+----
 
 * `reader = ez.helpers.binary.reader(reader, options)`  
   Wraps a raw buffer reader and returns a reader with additional API to handle binary streams.  
@@ -20,7 +20,7 @@
   Same as `read` but does not advance the read pointer.  
   Another `read` would read the same data again.
 
-* reader.unread(len)`  
+* `reader.unread(len)`  
   Unread the last `len` bytes read.  
   `len` cannot exceed the size of the last read.
 
@@ -44,7 +44,7 @@
 * `val = reader.peekDouble(_)`  
   Specialized peekers for numbers.
 
-###
+----
 
 * `writer = ez.helpers.binary.writer(writer, options)`  
   Wraps a raw buffer writer and returns a writer with additional API to handle binary streams.
