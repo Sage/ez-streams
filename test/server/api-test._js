@@ -35,7 +35,7 @@ asyncTest("map", 1, function(_) {
 	start();
 });
 
-asyncTest("every", 3, function(_) {
+asyncTest("every", 6, function(_) {
 	strictEqual(numbers(5).every(_, function(_, num) {
 		return num < 5;
 	}), true);
@@ -45,10 +45,19 @@ asyncTest("every", 3, function(_) {
 	strictEqual(numbers(5).every(_, function(_, num) {
 		return num != 2;
 	}), false);
+	strictEqual(numbers(5).every(_, {
+		$lt: 5,
+	}), true);
+	strictEqual(numbers(5).every(_, {
+		$lt: 4,
+	}), false);
+	strictEqual(numbers(5).every(_, {
+		$ne: 2,
+	}), false);
 	start();
 });
 
-asyncTest("some", 3, function(_) {
+asyncTest("some", 6, function(_) {
 	strictEqual(numbers(5).some(_, function(_, num) {
 		return num >= 5;
 	}), false);
@@ -57,6 +66,15 @@ asyncTest("some", 3, function(_) {
 	}), true);
 	strictEqual(numbers(5).some(_, function(_, num) {
 		return num != 2;
+	}), true);
+	strictEqual(numbers(5).some(_, {
+		$gte: 5,
+	}), false);
+	strictEqual(numbers(5).some(_, {
+		$gte: 4,
+	}), true);
+	strictEqual(numbers(5).some(_, {
+		$ne: 2,
 	}), true);
 	start();
 });
@@ -114,23 +132,33 @@ asyncTest("transform - less reads than writes", 1, function(_) {
 	start();
 });
 
-asyncTest("filter", 1, function(_) {
+asyncTest("filter", 2, function(_) {
 	strictEqual(numbers(10).filter(function(_, val) {
 		return val % 2;
 	}).pipe(_, arraySink()).toArray().join(','), "1,3,5,7,9");
+	strictEqual(numbers(10).filter({
+		$gt: 2,
+		$lt: 6,
+	}).pipe(_, arraySink()).toArray().join(','), "3,4,5");
 	start();
 });
 
-asyncTest("while", 1, function(_) {
+asyncTest("while", 2, function(_) {
 	strictEqual(numbers().while(function(_, val) {
 		return val < 5;
+	}).pipe(_, arraySink()).toArray().join(','), "0,1,2,3,4");
+	strictEqual(numbers().while({
+		$lt: 5,
 	}).pipe(_, arraySink()).toArray().join(','), "0,1,2,3,4");
 	start();
 });
 
-asyncTest("until", 1, function(_) {
+asyncTest("until", 2, function(_) {
 	strictEqual(numbers().until(function(_, val) {
 		return val > 5;
+	}).pipe(_, arraySink()).toArray().join(','), "0,1,2,3,4,5");
+	strictEqual(numbers().until({
+		$gt: 5,
 	}).pipe(_, arraySink()).toArray().join(','), "0,1,2,3,4,5");
 	start();
 });

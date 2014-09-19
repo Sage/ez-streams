@@ -141,6 +141,21 @@ The Array-like API also includes `every`, `some` and `forEach`. On the other han
 
 The `forEach`, `every` and `some` functions are reducers and take a continuation callback, like `reduce` (see example further down).
 
+Note: the `filter`, `every` and `some` methods can also be controlled by a mongodb filter condition rather than a function. The following are equivalent:
+
+``` javascript
+// filter expressed as a function
+reader =  numberReader(1000).filter(function(_, n) {
+	return n >= 10 && n < 20;
+});
+
+// mongo-style filter
+reader =  numberReader(1000).filter({
+	$gte: 10,
+	$lt: 20,
+});
+```
+
 <a name="pipe"/>
 ## Pipe
 
@@ -196,6 +211,8 @@ infiniteReader().until(function(_, n) {
 	return n * n > 1000;
 }).pipe(_, ez.devices.console.log);
 ```
+
+Note: `while` and `until` conditions can also be expressed as mongodb conditions.
 
 <a name="transforms"/>
 ## Transformations
