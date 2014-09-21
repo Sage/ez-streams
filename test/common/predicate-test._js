@@ -136,6 +136,16 @@ asyncTest("and", 2, function(_) {
 	start();
 });
 
+asyncTest("empty and", 2, function(_) {
+	t(_, {}, {}, true);
+
+	t(_, {}, {
+		a: 5,
+	}, true);
+
+	start();
+});
+
 asyncTest("or", 2, function(_) {
 	t(_, {
 		$or: [2, 5],
@@ -144,6 +154,20 @@ asyncTest("or", 2, function(_) {
 	t(_, {
 		$or: [2, 6],
 	}, 5, false);
+
+	start();
+});
+
+asyncTest("empty or", 2, function(_) {
+	t(_, {
+		$or: []
+	}, {}, false);
+
+	t(_, {
+		$or: []
+	}, {
+		a: 5,
+	}, false);
 
 	start();
 });
@@ -208,26 +232,215 @@ asyncTest("not in", 3, function(_) {
 	start();
 });
 
-asyncTest("empty and", 2, function(_) {
-	t(_, {}, {}, true);
-
-	t(_, {}, {
+asyncTest("exists", 3, function(_) {
+	t(_, {
+		$exists: "a"
+	}, {
 		a: 5,
 	}, true);
+
+	t(_, {
+		$exists: "a"
+	}, {
+		a: undefined,
+	}, true);
+
+	t(_, {
+		$exists: "a"
+	}, {
+		b: 5,
+	}, false);
 
 	start();
 });
 
-asyncTest("empty or", 2, function(_) {
+asyncTest("type", 3, function(_) {
 	t(_, {
-		$or: []
-	}, {}, false);
+		$type: "number"
+	}, 5, true);
 
 	t(_, {
-		$or: []
+		$type: "object"
+	}, {}, true);
+
+	t(_, {
+		$type: "string"
+	}, 5, false);
+
+	start();
+});
+
+asyncTest("mod", 2, function(_) {
+	t(_, {
+		$mod: [3, 2]
+	}, 5, true);
+
+	t(_, {
+		$mod: [4, 2]
+	}, 5, false);
+
+	start();
+});
+
+asyncTest("regex", 4, function(_) {
+	t(_, {
+		$regex: "^hel",
+	}, "hello", true);
+
+	t(_, {
+		$regex: "^hel",
+	}, "world", false);
+
+	t(_, {
+		$regex: "^hel",
+	}, "HeLLo", false);
+
+	t(_, {
+		$regex: "^hel",
+		$options: "i",
+	}, "HeLLo", true);
+
+	start();
+});
+
+asyncTest("where", 4, function(_) {
+	t(_, {
+		$where: "this.a === this.b",
 	}, {
 		a: 5,
+		b: 5,
+	}, true);
+
+	t(_, {
+		$where: "this.a === this.b",
+	}, {
+		a: 5,
+		b: 6,
 	}, false);
+
+	t(_, {
+		$where: function() {
+			return this.a === this.b;
+		},
+	}, {
+		a: 5,
+		b: 5,
+	}, true);
+
+	t(_, {
+		$where: function() {
+			return this.a === this.b;
+		},
+	}, {
+		a: 5,
+		b: 6,
+	}, false);
+
+	start();
+});
+
+asyncTest("elemMatch", 2, function(_) {
+	t(_, {
+		$elemMatch: {
+			$gte: 2,
+			$lt: 5,
+		},
+	}, [1, 3, 5], true);
+
+	t(_, {
+		$elemMatch: {
+			$gte: 2,
+			$lt: 5,
+		},
+	}, [1, 5, 6], false);
+
+	start();
+});
+
+asyncTest("all", 6, function(_) {
+	t(_, {
+		$all: [2, 4],
+	}, [1, 2, 3, 4, 5], true);
+
+	t(_, {
+		$all: [2, 4],
+	}, [1, 2, 3, 5], false);
+
+	t(_, {
+		tags: {
+			$all: ["appliance", "school", "book"]
+		}
+	}, {
+		tags: ["school", "book", "bag", "headphone", "appliance"],
+	}, true);
+
+	t(_, {
+		tags: {
+			$all: ["appliance", "school", "book"]
+		}
+	}, {
+		tags: ["school", "bag", "headphone", "appliance"],
+	}, false);
+
+	var cond = {
+		items: {
+			$all: [{
+				$elemMatch: {
+					size: "M",
+					num: {
+						$gt: 50
+					}
+				}
+			}, {
+				$elemMatch: {
+					num: 100,
+					color: "green"
+				}
+			}]
+		}
+	};
+	t(_, cond, {
+		items: [{
+			size: "S",
+			num: 10,
+			color: "blue"
+		}, {
+			size: "M",
+			num: 100,
+			color: "blue"
+		}, {
+			size: "L",
+			num: 100,
+			color: "green"
+		}]
+	}, true);
+	t(_, cond, {
+		items: [{
+			size: "S",
+			num: 10,
+			color: "blue"
+		}, {
+			size: "M",
+			num: 100,
+			color: "blue"
+		}, {
+			size: "L",
+			num: 100,
+			color: "red"
+		}]
+	}, false);
+
+	start();
+});
+
+asyncTest("size", 2, function(_) {
+	t(_, {
+		$size: 2,
+	}, [1, 2], true);
+
+	t(_, {
+		$size: 2,
+	}, [1, 2, 3], false);
 
 	start();
 });
