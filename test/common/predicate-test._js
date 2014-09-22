@@ -1,10 +1,14 @@
 "use strict";
 QUnit.module(module.id);
 
-var predicate = require("ez-streams/lib/predicate").predicate;
+var safeConverter = require("ez-streams/lib/predicate").convert;
+var unsafeConverter = require("ez-streams/lib/predicate").converter({
+	allowEval: true
+});
 
-function t(_, pred, obj, result) {
-	equals(predicate(pred)(_, obj), result, JSON.stringify(pred) + " with " + JSON.stringify(obj) + " => " + result);
+function t(_, condition, obj, expected, unsafe) {
+	var got = (unsafe ? unsafeConverter : safeConverter)(condition)(_, obj);
+	equals(got, expected, JSON.stringify(condition) + " with " + JSON.stringify(obj) + " => " + expected);
 }
 
 asyncTest("direct values", 6, function(_) {
@@ -309,14 +313,14 @@ asyncTest("where", 4, function(_) {
 	}, {
 		a: 5,
 		b: 5,
-	}, true);
+	}, true, true);
 
 	t(_, {
 		$where: "this.a === this.b",
 	}, {
 		a: 5,
 		b: 6,
-	}, false);
+	}, false, true);
 
 	t(_, {
 		$where: function() {
