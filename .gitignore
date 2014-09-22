@@ -1,3 +1,4 @@
 *.testlog
 examples/config-custom.*
 .DS_Store
+test/fixtures/rss-sample.zip
