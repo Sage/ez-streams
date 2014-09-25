@@ -42,6 +42,8 @@ EZ streams for node.js
    helpers for binary streams
 * [ez-streams/lib/mappers/convert](lib/mappers/convert.md)  
    Encoding mappers
+* [ez-streams/lib/mappers/json](lib/mappers/json.md)  
+   JSON mappers
 * [ez-streams/lib/reader](lib/reader.md)  
    EZ Streams core reader API
 * [ez-streams/lib/transforms/csv](lib/transforms/csv.md)  
