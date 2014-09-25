@@ -28,6 +28,8 @@ EZ streams for node.js
    EZ Stream wrappers for native node streams
 * [ez-streams/lib/devices/oracle](lib/devices/oracle.md)  
    EZ wrappers for oracle
+* [ez-streams/lib/devices/queue](lib/devices/queue.md)  
+   Queue device
 * [ez-streams/lib/devices/sqlserver](lib/devices/sqlserver.md)  
    EZ wrappers for oracle
 * [ez-streams/lib/devices/std](lib/devices/std.md)  
