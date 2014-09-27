@@ -96,6 +96,13 @@ asyncTest("pipe", 1, function(_) {
 	start();
 });
 
+asyncTest("tee", 2, function(_) {
+	var secondary = arraySink();
+	strictEqual(numbers(5).tee(secondary).pipe(_, arraySink()).toArray().join(','), "0,1,2,3,4");
+	strictEqual(secondary.toArray().join(','), "0,1,2,3,4");
+	start();
+});
+
 asyncTest("transform - same number of reads and writes", 1, function(_) {
 	strictEqual(numbers(5).transform(function(_, reader, writer) {
 		var sum = 0, val;

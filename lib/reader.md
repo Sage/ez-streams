@@ -15,7 +15,7 @@
 * `reader = reader.map(fn, thisObj)`  
   Similar to `map` on arrays.  
   The `fn` function is called as `fn(_, elt, i)`.  
-  Returns another stream on which other operations may be chained.
+  Returns another reader on which other operations may be chained.
 * `result = reader.every(_, fn, thisObj)`  
   Similar to `every` on arrays.  
   The `fn` function is called as `fn(_, elt)`.  
@@ -34,6 +34,9 @@
 * `writer = reader.pipe(_, writer)`  
   Pipes from `stream` to `writer`.
   Returns the writer for chaining.
+* `reader = reader.tee(_, writer)`  
+  Branches another writer on the chain`.  
+  Returns another reader on which other operations may be chained.
 * `result = reader.toArray(_)`  
   Reads all entries and returns them to an array.
   Note that this call is an anti-pattern for streaming but it may be useful when working with small streams.
@@ -43,27 +46,27 @@
   The transformation function `fn` is called as `fn(_, reader, writer)`
   where `reader` is the `stream` to which `transform` is applied,
   and writer is a writer which is piped into the next element of the chain.  
-  Returns another stream on which other operations may be chained.
+  Returns another reader on which other operations may be chained.
 * `result = reader.filter(fn, thisObj)`  
   Similar to `filter` on arrays.  
   The `fn` function is called as `fn(_, elt, i)`.  
-  Returns another stream on which other operations may be chained.
+  Returns another reader on which other operations may be chained.
 * `result = reader.until(fn, testVal, thisObj)`  
   Cuts the stream by when the `fn` condition becomes true.  
   The `fn` function is called as `fn(_, elt, i)`.  
-  Returns another stream on which other operations may be chained.
+  Returns another reader on which other operations may be chained.
 * `result = reader.while(fn, testVal, thisObj)`  
   Cuts the stream by when the `fn` condition becomes false.  
   This is different from `filter` in that the result streams _ends_ when the condition
   becomes false, instead of just skipping the entries.
   The `fn` function is called as `fn(_, elt, i)`.  
-  Returns another stream on which other operations may be chained.
+  Returns another reader on which other operations may be chained.
 * `result = reader.limit(count)`  
   Limits the stream to produce `count` results.  
-  Returns another stream on which other operations may be chained.
+  Returns another reader on which other operations may be chained.
 * `result = reader.skip(count)`  
   Skips the first `count` entries of the reader.  
-  Returns another stream on which other operations may be chained.
+  Returns another reader on which other operations may be chained.
 * `group = reader.fork(consumers)`  
   Forks the steam and passes the values to a set of consumers, as if each consumer
   had its own copy of the stream as input.  
