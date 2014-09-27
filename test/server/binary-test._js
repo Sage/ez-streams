@@ -34,7 +34,7 @@ asyncTest("roundtrip", 13, function(_) {
 	equals(reader.readFloat(_), 0.5, 'float roundtrip');
 	equals(reader.peekDouble(_), 0.125, 'double roundtrip (peek)');
 	equals(reader.readDouble(_), 0.125, 'double roundtrip');
-	reader.unread(8);
+	reader.unreadDouble();
 	equals(reader.readDouble(_), 0.125, 'double roundtrip (after unread)');
 	equals(reader.readInt8(_), 5, 'int8 roundtrip again');
 	equals(reader.read(_), undefined, 'EOF roundtrip');

@@ -43,6 +43,15 @@
 * `val = reader.peekFloat(_)`  
 * `val = reader.peekDouble(_)`  
   Specialized peekers for numbers.
+* `val = reader.unreadInt8()`  
+* `val = reader.unreadUInt8()`  
+* `val = reader.unreadInt16()`  
+* `val = reader.unreadUInt16()`  
+* `val = reader.unreadInt32()`  
+* `val = reader.unreadUInt32()`  
+* `val = reader.unreadFloat()`  
+* `val = reader.unreadDouble()`  
+  Specialized unreaders for numbers.
 
 ----
 
