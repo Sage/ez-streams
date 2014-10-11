@@ -103,6 +103,15 @@ asyncTest("tee", 2, function(_) {
 	start();
 });
 
+asyncTest("dup", 2, function(_) {
+	var streams = numbers(5).dup();
+	var f1 = streams[0].toArray(!_);
+	var f2 = streams[1].toArray(!_);
+	strictEqual(f1(_).join(','), "0,1,2,3,4");
+	strictEqual(f2(_).join(','), "0,1,2,3,4");
+	start();
+});
+
 asyncTest("transform - same number of reads and writes", 1, function(_) {
 	strictEqual(numbers(5).transform(function(_, reader, writer) {
 		var sum = 0, val;

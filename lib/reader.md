@@ -34,9 +34,11 @@
 * `writer = reader.pipe(_, writer)`  
   Pipes from `stream` to `writer`.
   Returns the writer for chaining.
-* `reader = reader.tee(_, writer)`  
+* `reader = reader.tee(writer)`  
   Branches another writer on the chain`.  
   Returns another reader on which other operations may be chained.
+* `readers = reader.dup()`  
+  Duplicates a reader and returns a pair of readers which can be read from independently.
 * `result = reader.toArray(_)`  
   Reads all entries and returns them to an array.
   Note that this call is an anti-pattern for streaming but it may be useful when working with small streams.
