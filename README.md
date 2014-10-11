@@ -75,6 +75,7 @@ var writer = function(collection) {
 }
 ```
 
+But you don't have to do it. There are already ez-streams _devices_ for MongoDB and popular databases. See [below](#database-support).
 
 <a name="basic-api"/>
 ## Basic read and write
@@ -433,6 +434,16 @@ Instead of worrying about backpressure, you should worry about buffering. You ca
 ``` javascript
 reader.transform(T1).buffer(N).transform(T2).pipe(_, writer);
 ```
+
+<a name="database-support"/>
+## Database support
+
+It is easy to interface ez-streams with node.js database drivers. Database support was bundled with ez-streams until version 0.1.6 but it is now provided through separate node.js packages. The following packages are published to NPM:
+
+* [ez-mongodb](https://github.com/Sage/ez-mongodb): MongoDB native driver
+* [ez-mysql](https://github.com/Sage/ez-mysql): MySQL driver
+* [ez-oracle](https://github.com/Sage/ez-oracle): node-oracle driver
+* [ez-tedious](https://github.com/Sage/ez-mysql): Microsoft SQL Server _tedious_ driver
 
 <a name="galaxy-support"/>
 ## Galaxy support
