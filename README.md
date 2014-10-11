@@ -443,7 +443,7 @@ It is easy to interface ez-streams with node.js database drivers. Database suppo
 * [ez-mongodb](https://github.com/Sage/ez-mongodb): MongoDB native driver
 * [ez-mysql](https://github.com/Sage/ez-mysql): MySQL driver
 * [ez-oracle](https://github.com/Sage/ez-oracle): node-oracle driver
-* [ez-tedious](https://github.com/Sage/ez-mysql): Microsoft SQL Server _tedious_ driver
+* [ez-tedious](https://github.com/Sage/ez-tedious): Microsoft SQL Server _tedious_ driver
 
 <a name="galaxy-support"/>
 ## Galaxy support
