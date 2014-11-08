@@ -2,7 +2,6 @@
 
 var fs = require('streamline-fs');
 var path = require('path');
-var streams = require('streamline-streams');
 var ez = require('ez-streams');
 var lines = ez.transforms.lines;
 var file = ez.devices.file;

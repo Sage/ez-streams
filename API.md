@@ -36,6 +36,8 @@ EZ streams for node.js
    Encoding mappers
 * [ez-streams/lib/mappers/json](lib/mappers/json.md)  
    JSON mappers
+* [ez-streams/lib/node-wrappers](lib/node-wrappers.md)  
+  Wrappers for node.js streams
 * [ez-streams/lib/reader](lib/reader.md)  
    EZ Streams core reader API
 * [ez-streams/lib/transforms/csv](lib/transforms/csv.md)  

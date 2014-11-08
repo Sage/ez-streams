@@ -429,7 +429,7 @@ writing to the original writer, even though it appears _after_ in the chain.
 
 Backpressure is a non-issue. The ez-streams plumbing takes care of the low level pause/resume dance on the reader side, and of the write/drain dance on the write side. The event loop takes care of the rest. So you don't have to worry about backpressure when writing EZ streams code.
 
-Instead of worrying about backpressure, you should worry about buffering. You can control buffering on the source side by passing special options to `ez.devices.node.reader(nodeStream, options)`. See the [`streamline-streams`](https://github.com/Sage/streamline-streams/blob/master/lib/streams.md) documentation (`ReadableStream`) for details. You can also control buffering by injecting `buffer(max)` calls into your chains. The typical pattern is:
+Instead of worrying about backpressure, you should worry about buffering. You can control buffering on the source side by passing special options to `ez.devices.node.reader(nodeStream, options)`. See the [`node-wrappers`](https://github.com/Sage/ez-streams/blob/master/lib/node-wrappers.md) documentation (`ReadableStream`) for details. You can also control buffering by injecting `buffer(max)` calls into your chains. The typical pattern is:
 
 ``` javascript
 reader.transform(T1).buffer(N).transform(T2).pipe(_, writer);

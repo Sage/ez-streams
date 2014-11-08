@@ -1,11 +1,11 @@
 "use strict";
 
-var streams = require('streamline-streams');
-var output = require('ez-streams').devices.console.log;
+var ez = require('ez-streams');
+var output = ez.devices.console.log;
 
 function numbers() {
 	var i = 0;
-	return streams.reader(function read(_) {
+	return ez.devices.generic.reader(function read(_) {
 		return i++;
 	});
 }
@@ -29,12 +29,12 @@ function minJoiner(_, values) {
 	return min;
 }
 
-//numbers().map(pow(2)).join(numbers().map(pow(3)).limit(4)).rr().map(wait).limit(20).pipe(_, streams.console.log);
+//numbers().map(pow(2)).join(numbers().map(pow(3)).limit(4)).rr().map(wait).limit(20).pipe(_, output);
 
 /*numbers().fork([
 	function(source) { return source.map(pow(2)).limit(4); },
 	function(source) { return source.map(pow(3)); },
-]).rr().map(wait).limit(30).pipe(_, streams.console.log);*/
+]).rr().map(wait).limit(30).pipe(_, output);*/
 
 numbers().parallelize(5, function(source) {
 	return source.map(pow(2)).map(wait);

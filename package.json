@@ -10,8 +10,7 @@
     "node": ">=0.10.8"
   },
   "dependencies": {
-    "streamline": "^0.10.15",
-    "streamline-streams": "^0.1.5"
+    "streamline": "^0.10.15"
   },
   "author": "Bruno Jouhier",
   "main": "index.js"
