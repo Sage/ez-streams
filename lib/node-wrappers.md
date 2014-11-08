@@ -55,6 +55,8 @@ All readable stream wrappers derive from this wrapper.
   returns `this` for chaining.
 * `len = stream.available()`  
   returns the number of bytes/chars that have been received and not read yet.
+* `reader = stream.reader`  
+  returns a clean ez reader.
 
 ## WritableStream
 
@@ -69,6 +71,8 @@ All writable stream wrappers derive from this wrapper.
 * `stream.end()`  
   signals the end of the send operation.  
   Returns `this` for chaining.
+* `writer = stream.writer`  
+  returns a clean ez writer.
 
 ## HttpServerRequest
 
