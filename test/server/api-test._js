@@ -112,6 +112,14 @@ asyncTest("dup", 2, function(_) {
 	start();
 });
 
+asyncTest("concat", 2, function(_) {
+	var rd1 = numbers(5).concat(numbers(8).skip(6), numbers(10).skip(10), numbers(15).skip(12));
+	strictEqual(rd1.toArray(_).join(), "0,1,2,3,4,6,7,12,13,14");
+	var rd2 = numbers(5).concat([numbers(8).skip(6), numbers(10).skip(10), numbers(15).skip(12)]);
+	strictEqual(rd2.toArray(_).join(), "0,1,2,3,4,6,7,12,13,14");
+	start();
+});
+
 asyncTest("transform - same number of reads and writes", 1, function(_) {
 	strictEqual(numbers(5).transform(function(_, reader, writer) {
 		var sum = 0, val;

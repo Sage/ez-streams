@@ -39,6 +39,9 @@
   Returns another reader on which other operations may be chained.
 * `readers = reader.dup()`  
   Duplicates a reader and returns a pair of readers which can be read from independently.
+* `reader = reader.concat(reader1, reader2)`  
+  Concatenates reader with one or more readers.  
+  Works like array.concat: you can pass the readers as separate arguments, or pass an array of readers.  
 * `result = reader.toArray(_)`  
   Reads all entries and returns them to an array.
   Note that this call is an anti-pattern for streaming but it may be useful when working with small streams.
