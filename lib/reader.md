@@ -45,6 +45,9 @@
 * `result = reader.toArray(_)`  
   Reads all entries and returns them to an array.
   Note that this call is an anti-pattern for streaming but it may be useful when working with small streams.
+* `result = reader.readAll(_)`  
+  Reads all entries and returns them as a single string or buffer. Returns undefined if nothing has been read.
+  Note that this call is an anti-pattern for streaming but it may be useful when working with small streams.
 * `reader = reader.transform(fn)`  
   Inserts an asynchronous transformation into chain.  
   This API is more powerful than `map` because the transformation function can combine results, split them, etc.  

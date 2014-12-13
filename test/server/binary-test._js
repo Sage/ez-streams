@@ -10,7 +10,6 @@ function eqbuf(b1, b2, msg) {
 
 asyncTest("roundtrip", 52, function(_) {
 	[1, 4, 11, 1000].forEach_(_, function(_, size) {
-		console.log("testing with " + size);
 		var dst = ez.devices.buffer.writer();
 		var writer = ez.helpers.binary.writer(dst, {
 			bufSize: size
