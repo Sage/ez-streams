@@ -13,16 +13,21 @@ function nodeStream(_, text) {
 	return file.text.reader(inputFile);
 }
 
-asyncTest("empty", 2, function(_) {
+asyncTest("empty", 1, function(_) {
 	var stream = nodeStream(_, '').transform(lines.parser());
-	strictEqual(stream.read(_), '', "empty line");
 	strictEqual(stream.read(_), undefined, "undefined");
 	start();
 });
 
-asyncTest("only newline", 3, function(_) {
+asyncTest("non empty line", 2, function(_) {
+	var stream = nodeStream(_, 'a').transform(lines.parser());
+	strictEqual(stream.read(_), 'a', "a");
+	strictEqual(stream.read(_), undefined, "undefined");
+	start();
+});
+
+asyncTest("only newline", 2, function(_) {
 	var stream = nodeStream(_, '\n').transform(lines.parser());
-	strictEqual(stream.read(_), '', "empty line");
 	strictEqual(stream.read(_), '', "empty line");
 	strictEqual(stream.read(_), undefined, "undefined");
 	start();
