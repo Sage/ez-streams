@@ -309,7 +309,7 @@ You can also convert in the reverse direction, from an _ez_ stream to a node.js 
 
 ``` javascript
 // converting an ez reader to a node readable stream
-var stream = reader.nodfiy();
+var stream = reader.nodify();
 // converting an ez writer to a node writable stream
 var stream = writer.nodify();
 ```
