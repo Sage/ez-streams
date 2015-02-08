@@ -1,7 +1,12 @@
 "use strict";
 QUnit.module(module.id);
 
-var ez = require("../..")
+var ez = require("../..");
+// skip it in streamline fast mode
+if (!ez.devices.galaxy.reader) {
+	test("galaxy API disabled in streamline fast modes", 0, function() {});
+	return;
+}
 var galaxy = require('galaxy');
 var generic = ez.devices.generic;
 var arraySink = ez.devices.array.writer;
