@@ -37,7 +37,7 @@ starTest("forEach", 1, function*() {
 });
 
 starTest("map", 1, function*() {
-	strictEqual((yield numbers(5).map(function*(num) {
+	strictEqual((yield numbers(5).mapG(function*(num) {
 		return num * num;
 	}).toArrayStar()).join(','), "0,1,4,9,16");
 	start();
@@ -87,7 +87,7 @@ starTest("pipe", 1, function*() {
 });
 
 starTest("transform - same number of reads and writes", 1, function*() {
-	strictEqual((yield numbers(5).transform(function*(reader, writer) {
+	strictEqual((yield numbers(5).transformG(function*(reader, writer) {
 		var sum = 0,
 			val;
 		while ((val = yield reader.readStar()) !== undefined) {
@@ -99,7 +99,7 @@ starTest("transform - same number of reads and writes", 1, function*() {
 });
 
 starTest("transform - more reads than writes", 1, function*() {
-	strictEqual((yield numbers(12).transform(function*(reader, writer) {
+	strictEqual((yield numbers(12).transformG(function*(reader, writer) {
 		var str = "",
 			val;
 		while ((val = yield reader.readStar()) !== undefined) {
@@ -115,7 +115,7 @@ starTest("transform - more reads than writes", 1, function*() {
 });
 
 starTest("transform - less reads than writes", 1, function*() {
-	strictEqual((yield numbers(5).transform(function*(reader, writer) {
+	strictEqual((yield numbers(5).transformG(function*(reader, writer) {
 		var str = "",
 			val;
 		while ((val = yield reader.readStar()) !== undefined) {
@@ -126,22 +126,21 @@ starTest("transform - less reads than writes", 1, function*() {
 });
 
 starTest("filter", 1, function*() {
-	strictEqual((yield numbers(10).filter(function*(val) {
+	strictEqual((yield numbers(10).filterG(function*(val) {
 		return val % 2;
 	}).toArrayStar()).join(','), "1,3,5,7,9");
 	start();
 });
 
 starTest("while", 1, function*() {
-	strictEqual((yield numbers().
-	while (function*(val) {
+	strictEqual((yield numbers().whileG(function*(val) {
 		return val < 5;
 	}).toArrayStar()).join(','), "0,1,2,3,4");
 	start();
 });
 
 starTest("until", 1, function*() {
-	strictEqual((yield numbers().until(function*(val) {
+	strictEqual((yield numbers().untilG(function*(val) {
 		return val > 5;
 	}).toArrayStar()).join(','), "0,1,2,3,4,5");
 	start();
@@ -185,19 +184,19 @@ starTest("buffer in simple chain", 3, function*() {
 });
 
 starTest("buffer with slower input", 1, function*() {
-	strictEqual((yield numbers().limit(10).map(wait(20)).buffer(5).map(wait(10)).toArrayStar()).join(','), "0,1,2,3,4,5,6,7,8,9");
+	strictEqual((yield numbers().limit(10).mapG(wait(20)).buffer(5).mapG(wait(10)).toArrayStar()).join(','), "0,1,2,3,4,5,6,7,8,9");
 	start();
 });
 
 starTest("buffer with faster input", 1, function*() {
-	strictEqual((yield numbers().limit(10).map(wait(10)).buffer(5).map(wait(20)).toArrayStar()).join(','), "0,1,2,3,4,5,6,7,8,9");
+	strictEqual((yield numbers().limit(10).mapG(wait(10)).buffer(5).mapG(wait(20)).toArrayStar()).join(','), "0,1,2,3,4,5,6,7,8,9");
 	start();
 });
 
 starTest("parallel preserve order", 1, function*() {
 	var t0 = Date.now();
 	strictEqual((yield numbers().limit(10).parallel(4, function(source) {
-		return source.map(wait(rand(10, 10))).map(pow(2));
+		return source.mapG(wait(rand(10, 10))).mapG(pow(2));
 	}).toArrayStar()).join(','), "0,1,4,9,16,25,36,49,64,81");
 	var dt = Date.now() - t0;
 	//ok(dt < 600, "elapsed: " + dt + "ms");
@@ -210,7 +209,7 @@ starTest("parallel shuffle", 1, function*() {
 		count: 4,
 		shuffle: true,
 	}, function(source) {
-		return source.map(wait(rand(10, 10))).map(pow(2));
+		return source.mapG(wait(rand(10, 10))).mapG(pow(2));
 	}).toArrayStar()).sort(function(i, j) {
 		return i - j;
 	}).join(','), "0,1,4,9,16,25,36,49,64,81");
@@ -223,10 +222,10 @@ starTest("fork/join limit before", 1, function*() {
 	strictEqual((yield numbers().limit(10).fork([
 
 	function(source) {
-		return source.map(wait(rand(20, 20))).map(pow(2));
+		return source.mapG(wait(rand(20, 20))).mapG(pow(2));
 	}, function(source) {
-		return source.buffer(Infinity).map(wait(rand(10, 10))).map(pow(3));
-	}]).join(minJoiner).toArrayStar()).join(','), "0,1,4,8,9,16,25,27,36,49,64,81,125,216,343,512,729");
+		return source.buffer(Infinity).mapG(wait(rand(10, 10))).mapG(pow(3));
+	}]).joinG(minJoiner).toArrayStar()).join(','), "0,1,4,8,9,16,25,27,36,49,64,81,125,216,343,512,729");
 	start();
 });
 
@@ -234,10 +233,10 @@ starTest("fork/join limit after", 1, function*() {
 	strictEqual((yield numbers().fork([
 
 	function(source) {
-		return source.map(wait(rand(20, 20))).map(pow(2));
+		return source.mapG(wait(rand(20, 20))).mapG(pow(2));
 	}, function(source) {
-		return source.buffer(Infinity).map(wait(rand(10, 10))).map(pow(3));
-	}]).join(minJoiner).limit(12).toArrayStar()).join(','), "0,1,4,8,9,16,25,27,36,49,64,81");
+		return source.buffer(Infinity).mapG(wait(rand(10, 10))).mapG(pow(3));
+	}]).joinG(minJoiner).limit(12).toArrayStar()).join(','), "0,1,4,8,9,16,25,27,36,49,64,81");
 	start();
 });
 
@@ -245,10 +244,10 @@ starTest("fork/join limit one branch", 1, function*() {
 	strictEqual((yield numbers().fork([
 
 	function(source) {
-		return source.map(wait(rand(20, 20))).map(pow(2)).limit(3);
+		return source.mapG(wait(rand(20, 20))).mapG(pow(2)).limit(3);
 	}, function(source) {
-		return source.buffer(6).map(wait(rand(10, 10))).map(pow(3));
-	}]).join(minJoiner).limit(10).toArrayStar()).join(','), "0,1,4,8,27,64,125,216,343,512");
+		return source.buffer(6).mapG(wait(rand(10, 10))).mapG(pow(3));
+	}]).joinG(minJoiner).limit(10).toArrayStar()).join(','), "0,1,4,8,27,64,125,216,343,512");
 	start();
 });
 
@@ -256,9 +255,9 @@ starTest("fork slow and fast", 2, function*() {
 	var readers = numbers().fork([
 
 	function(source) {
-		return source.map(wait(rand(20, 20))).map(pow(2));
+		return source.mapG(wait(rand(20, 20))).mapG(pow(2));
 	}, function(source) {
-		return source.map(wait(rand(10, 10))).map(pow(3));
+		return source.mapG(wait(rand(10, 10))).mapG(pow(3));
 	}, ]).readers;
 	var f1 = galaxy.spin(readers[0].limit(10).toArrayStar());
 	var f2 = galaxy.spin(readers[1].limit(10).toArrayStar());
@@ -271,9 +270,9 @@ starTest("fork slow and fast with different limits (fast ends first)", 2, functi
 	var readers = numbers().fork([
 
 	function(source) {
-		return source.map(wait(rand(20, 20))).map(pow(2)).limit(10);
+		return source.mapG(wait(rand(20, 20))).mapG(pow(2)).limit(10);
 	}, function(source) {
-		return source.map(wait(rand(10, 10))).map(pow(3)).limit(4);
+		return source.mapG(wait(rand(10, 10))).mapG(pow(3)).limit(4);
 	}, ]).readers;
 	var f1 = galaxy.spin(readers[0].toArrayStar());
 	var f2 = galaxy.spin(readers[1].toArrayStar());
@@ -286,9 +285,9 @@ starTest("fork slow and fast with different limits (slow ends first)", 2, functi
 	var readers = numbers().fork([
 
 	function(source) {
-		return source.map(wait(rand(10, 10))).map(pow(2)).limit(10);
+		return source.mapG(wait(rand(10, 10))).mapG(pow(2)).limit(10);
 	}, function(source) {
-		return source.map(wait(rand(20, 20))).map(pow(3)).limit(4);
+		return source.mapG(wait(rand(20, 20))).mapG(pow(3)).limit(4);
 	}, ]).readers;
 	var f1 = galaxy.spin(readers[0].toArrayStar());
 	var f2 = galaxy.spin(readers[1].toArrayStar());
