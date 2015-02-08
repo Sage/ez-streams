@@ -6,9 +6,13 @@ var fsp = require('path');
 var os = require('os');
 
 asyncTest("echo ok", 1, function(_) {
-	var proc = cp.spawn('echo', ['hello\nworld']);
-	var got = ez.devices.child_process.reader(proc).toArray(_);
-	deepEqual(got, ['hello', 'world']);
+    if (os.type() === 'Windows_NT') {
+        ok("Ignore on Windows");
+    } else {
+        var proc = cp.spawn('echo', ['hello\nworld']);
+        var got = ez.devices.child_process.reader(proc).toArray(_);
+        deepEqual(got, ['hello', 'world']);
+    }
 	start();
 });
 
@@ -18,7 +22,7 @@ asyncTest("bad command", 1, function(_) {
 		var got = ez.devices.child_process.reader(proc).toArray(_);
 		ok(false);
 	} catch (ex) {
-		equal(ex.code, -1);
+		ok(ex.code < 0); // -1 on node 0.10 but -2 on 0.12
 	}
 	start();
 });
