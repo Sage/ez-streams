@@ -406,6 +406,32 @@ ez.devices.file.text.reader('users.csv').transform(ez.transforms.csv.parser())
 }, ez.devices.file.text.writer('females.json'));
 ```
 
+<a name="stopping"/>
+## Stopping a stream
+
+Streams are not always consumed in full. If a consumer stops reading before it has reached the end of a stream, it must inform the stream that it won't read any further so that the stream can release its resources. This is achieved by propagating a `stop` notification upwards, to the source of the stream. Streams that wrap node stream will release their event listeners when they receive this notification.
+
+The stop API is a simple `stop` method on readers:
+
+``` javascript
+reader.stop(arg); // arg is optional - see below
+```
+
+Stopping becomes a bit tricky when a stream has been forked or teed. The stop API provides 3 options to stop a branch:
+
+* Stopping only the current branch: the notification will be propagated to the fork but not further upwards, unless the other branches have also been stopped. This is the default when `arg` is falsy or omitted.
+* Stopping the current branch and closing the other branches silently. This is achieved by passing `true` as `arg`. The consumers of the other branches will receive the `undefined` end-of-stream marker when reading further.
+* Stopping the current branch and closing the other branches with an error. This is achieved by passing an error object as `arg`. The consumers of the other branches will get this error when reading further.
+
+Note: In the second and third case values which had been buffered in the other branches before the stop call will still be delivered, before the end-of-stream marker or the error. So they may not stop _immediately_.
+
+Operations like `limit`, `while` or `until` send a `stop` notification upwards.
+
+A writer may also decide to stop its stream processing chain. If its `write` method throws an exception the current branch will be stopped and the exception will be propagated to other branches. A writer may also stop the chain silently by throwing a `new StopException(arg)` where `arg` is the falsy or `true` value which will be propagated towards the source of the chain.
+
+Note: writers also have a `stop` method but this method is only used internally to propagate exceptions in a `tee` or `fork`.
+
+
 <a name="writer-chaining"/>
 ## Writer chaining
 

@@ -12,6 +12,10 @@
 * `writer = writer.writeAll(_, val)`  
   writes `val` and ends the writer
 
+* `writer = writer.stop(err)`  
+  stops the writer.  
+  by default err is silently ignored
+
 * `writer = writer.end()`  
   ends the writer - compatiblity call (errors won't be thrown to caller)
 * `writer = writer.pre.action(fn)`  

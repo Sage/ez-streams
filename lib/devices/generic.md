@@ -2,8 +2,8 @@
 
 `var ez = require('ez-streams');`
 
-* `reader = ez.devices.generic.reader(read)`  
-  creates an EZ reader from a given `read(_)` function.
+* `reader = ez.devices.generic.reader(read[, stop])`  
+  creates an EZ reader from a given `read(_)` function and an optional `stop([arg])` function.
 * `writer = ez.devices.generic.writer(write)`  
   creates an ES writer from a given `write(_, val)` function.
 ## Special streams

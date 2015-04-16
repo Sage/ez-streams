@@ -59,18 +59,21 @@
   Similar to `filter` on arrays.  
   The `fn` function is called as `fn(_, elt, i)`.  
   Returns another reader on which other operations may be chained.
-* `result = reader.until(fn, testVal, thisObj)`  
+* `result = reader.until(fn, testVal, thisObj, stopArg)`  
   Cuts the stream by when the `fn` condition becomes true.  
   The `fn` function is called as `fn(_, elt, i)`.  
+  `stopArg` is an optional argument which is passed to `stop` when `fn` becomes true.  
   Returns another reader on which other operations may be chained.
-* `result = reader.while(fn, testVal, thisObj)`  
+* `result = reader.while(fn, testVal, thisObj, stopArg)`  
   Cuts the stream by when the `fn` condition becomes false.  
   This is different from `filter` in that the result streams _ends_ when the condition
   becomes false, instead of just skipping the entries.
   The `fn` function is called as `fn(_, elt, i)`.  
+  `stopArg` is an optional argument which is passed to `stop` when `fn` becomes false.  
   Returns another reader on which other operations may be chained.
-* `result = reader.limit(count)`  
+* `result = reader.limit(count, stopArg)`  
   Limits the stream to produce `count` results.  
+  `stopArg` is an optional argument which is passed to `stop` when the limit is reached.  
   Returns another reader on which other operations may be chained.
 * `result = reader.skip(count)`  
   Skips the first `count` entries of the reader.  
@@ -99,6 +102,16 @@
   pipes the reader into a node duplex stream. Returns another reader. 
 * `cmp = reader1.compare(_, reader2)`  
   compares reader1 and reader2 return 0 if equal,  
+* `reader.stop(arg)`  
+  Informs the source that the consumer(s) has(ve) stopped reading.  
+  The source should override this method if it needs to free resources when the stream ends.  
+  `arg` is an optional argument.  
+  If `arg` is falsy and the reader has been forked (or teed) upstream, only this reader stops (silently).  
+  If `arg` is true, readers that have been forked upstream are stopped silently (their `read` returns undefined).  
+  Otherwise `arg` should be an error object which will be thrown when readers that have been forked upstream try to read.  
+  The default `stop` function is a no-op.  
+  Note: `stop` is only called if reading stops before reaching the end of the stream.  
+  Sources should free their resources both on `stop` and on end-of-stream.  
 ## StreamGroup API
 * `reader = group.dequeue()`  
   Dequeues values in the order in which they are delivered by the readers.
