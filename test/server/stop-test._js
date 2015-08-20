@@ -164,6 +164,7 @@ asyncTest("dup stops 1 first, 0 later", 3, function(_) {
 	var altF = dups[0].limit(5).toArray(!_);
 	var result = resultF(_).join();
 	var alt = altF(_).join();
+	setTimeout(~_, 0);
 	strictEqual(result, '0,1');
 	strictEqual(alt, '0,1,2,3,4');
 	ok(source.stopped, 'source stopped');
