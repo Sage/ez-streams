@@ -12,8 +12,6 @@ EZ streams for node.js
    Console EZ streams
 * [ez-streams/lib/devices/file](lib/devices/file.md)  
    File based EZ streams
-* [ez-streams/lib/devices/galaxy](lib/devices/galaxy.md)  
-   Stream constructors for galaxy
 * [ez-streams/lib/devices/generic](lib/devices/generic.md)  
    Generic stream constructors
 * [ez-streams/lib/devices/http](lib/devices/http.md)  

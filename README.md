@@ -8,8 +8,6 @@ The data that you push or pull may be anything: buffers and strings of course, b
 
 EZ streams are implemented with [streamline.js](https://github.com/Sage/streamlinejs). Most of the examples and API descriptions below use the streamline.js syntax because this is more concise but the `ez-streams` package can also be used directly with callback code. Some of examples also provided both in streamline.js and in pure callback form.
 
-EZ streams are also compatible with [galaxy](https://github.com/Sage/galaxy). See [Galaxy-support](#galaxy-support) below for details.
-
 <a name="installation"/>
 ## Installation
 
@@ -470,45 +468,6 @@ It is easy to interface ez-streams with node.js database drivers. Database suppo
 * [ez-mysql](https://github.com/Sage/ez-mysql): MySQL driver
 * [ez-oracle](https://github.com/Sage/ez-oracle): node-oracle driver
 * [ez-tedious](https://github.com/Sage/ez-tedious): Microsoft SQL Server _tedious_ driver
-
-<a name="galaxy-support"/>
-## Galaxy support
-
-EZ streams is the recommended streams package for [galaxy](https://github.com/Sage/galaxy). The API is overloaded to facilitate integration with generator functions. 
-
-If you develop with galaxy, you should use the API as follows:
-
-* add a `Star` postfix to the _reducer_ methods (the methods that have `_` as first parameter: `forEach`, `every`, `some`, `reduce`, `pipe`, `toArray`). You should also `yield` on these `Star` calls.
-* add a `G` (for generator/galaxy postfix to the non _reducer_ methods.
-* pass generator functions (`function*(...) { ... }`) instead of regular asynchronous functions (`function(_, ...) { ...}`) to the methods that expect a callback (`forEach`, `map`, `filter`, `transform`, ...).
-
-For example, instead of:
-
-``` javascript
-console.log("pi~=" + 4 * numberReader(10000).filter(function(_, n) {
-	return n % 2; // keep only odd numbers
-}).map(function(_, n) {
-	return n % 4 === 1 ? 1 / n : -1 / n;
-}).reduce(_, function(_, res, val) {
-	return res + val;
-}, 0));
-```
-
-you would write:
-
-``` javascript
-console.log("pi~=" + 4 * (yield numberReader(10000).filterG(function*(n) {
-	return n % 2; // keep only odd numbers
-}).mapG(function*(n) {
-	return n % 4 === 1 ? 1 / n : -1 / n;
-}).reduceStar(function*(res, val) {
-	return res + val;
-}, 0)));
-```
-
-_Note:_ do not forget the `*` after `function` in the functions inside your chains; and do not forget to `yield` on reducers (`reduceStar` in the example above).
-
-See the [galaxy unit test](test/server/galaxy-test.js) for more examples.
 
 <a name="api"/>
 ## API
