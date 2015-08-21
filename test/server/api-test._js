@@ -264,7 +264,7 @@ function pow(n) {
 function wait(millis) {
 	return function(_, val) {
 		var ms = typeof millis === "function" ? millis() : millis;
-		setTimeout(~_, ms)
+		setTimeout(_, ms)
 		return val;
 	}
 }

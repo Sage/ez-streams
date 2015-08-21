@@ -11,7 +11,7 @@ function numbers() {
 }
 
 function wait(_, val) {
-	setTimeout(~_, 1000);
+	setTimeout(_, 1000);
 	return val;
 }
 
