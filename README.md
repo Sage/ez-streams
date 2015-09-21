@@ -216,7 +216,7 @@ Note: `while` and `until` conditions can also be expressed as mongodb conditions
 <a name="transforms"/>
 ## Transformations
 
-The array functions are nice but they have limited power. They work well to process stream entries independently from each other but they don't allow us to do more complex operation like combining several entries into a bigger one, or splitting one entry into several smaller ones, or a mix of both. This is something we typically do when we parse text streams: we receive chunks of texts; we look for special boundaries and we emit the items that we have isolated between boundaries. Usally, there is not a one to one correspondance between the chunks that we receive and the items that we emit.
+The array functions are nice but they have limited power. They work well to process stream entries independently from each other but they don't allow us to do more complex operation like combining several entries into a bigger one, or splitting one entry into several smaller ones, or a mix of both. This is something we typically do when we parse text streams: we receive chunks of texts; we look for special boundaries and we emit the items that we have isolated between boundaries. Usually, there is not a one to one correspondance between the chunks that we receive and the items that we emit.
 
 The `transform` function is designed to handle these more complex operations. Typical code looks like:
 
@@ -290,7 +290,7 @@ ez.devices.file.text.reader('users.csv').transform(ez.transforms.csv.parser())
 The transforms library is rather embryonic at this stage but you can expect it to grow.
 
 <a name="node-interop"/>
-## Interoperabily with native node.js streams
+## Interoperability with native node.js streams
 
 `ez-streams` are fully interoperable with native node.js streams.
 
