@@ -1,6 +1,6 @@
 "use strict";
 
-var fs = require('streamline-fs');
+var fs = require('fs');
 var path = require('path');
 var ez = require('ez-streams');
 var lines = ez.transforms.lines;

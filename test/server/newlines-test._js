@@ -5,7 +5,7 @@ var file = require("ez-streams").devices.file;
 
 var inputFile = require('os').tmpdir() + '/jsonInput.json';
 var outputFile = require('os').tmpdir() + '/jsonOutput.json';
-var fs = require('streamline-fs');
+var fs = require('fs');
 var string = require("ez-streams").devices.string;
 
 function nodeStream(_, text) {

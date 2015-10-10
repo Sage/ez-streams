@@ -1,7 +1,7 @@
 "use strict";
 QUnit.module(module.id);
 var ez = require("ez-streams");
-var fs = require("streamline-fs");
+var fs = require("fs");
 
 function parseTest(_, xml, js, skipRT) {
 	var full = '<?xml version="1.0"?><root>' + xml + "</root>\n";

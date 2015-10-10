@@ -5,7 +5,7 @@ var jsonTrans = require("ez-streams").transforms.json;
 
 var inputFile = require('os').tmpdir() + '/jsonInput.json';
 var outputFile = require('os').tmpdir() + '/jsonOutput.json';
-var fs = require('streamline-fs');
+var fs = require('fs');
 var string = require("ez-streams").devices.string;
 
 var mixedData = '[' + //
