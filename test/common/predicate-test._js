@@ -1,8 +1,9 @@
 "use strict";
 QUnit.module(module.id);
 
-var safeConverter = require("ez-streams/lib/predicate").convert;
-var unsafeConverter = require("ez-streams/lib/predicate").converter({
+var ez = require("ez-streams");
+var safeConverter = ez.predicate.convert;
+var unsafeConverter = ez.predicate.converter({
 	allowEval: true
 });
 
