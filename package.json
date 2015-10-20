@@ -1,7 +1,7 @@
 {
   "name": "ez-streams",
   "description": "EZ streams for node.js",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "license": "MIT",
   "author": "Bruno Jouhier",
   "repository": {
@@ -12,7 +12,7 @@
     "node": ">=0.10.8"
   },
   "dependencies": {
-    "streamline-runtime": "^1.0.12"
+    "streamline-runtime": "^1.0.13"
   },
   "devDependencies": {
     "babel": "^5.8.0",
