@@ -116,7 +116,7 @@ This is a wrapper around node's `http.Server` object:
   creates the wrapper.  
   `requestListener` is called as `requestListener(request, response, _)` 
   where `request` and `response` are wrappers around `http.ServerRequest` and `http.ServerResponse`.  
-  A fresh empty global context is set before every call to `requestListener`. See [streamline/lib/globals](../../globals.md).
+  A fresh empty global context is set before every call to `requestListener`. See [Global context API](https://github.com/Sage/streamline-runtime/blob/master/index.md).
 * `server.listen(_, port[, host])`
 * `server.listen(_, path)`  
   (same as `http.Server`)
@@ -196,7 +196,7 @@ This is a wrapper around node's `net.Server` object:
   creates the wrapper.  
   `connectionListener` is called as `connectionListener(stream, _)` 
   where `stream` is a `NetStream` wrapper around the native connection.  
-  A fresh empty global context is set before every call to `connectionListener`. See [streamline/lib/globals](../../globals.md).
+  A fresh empty global context is set before every call to `connectionListener`. See [Global context API](https://github.com/Sage/streamline-runtime/blob/master/index.md).
 * `server.listen(_, port[, host])`  
 * `server.listen(_, path)`  
   (same as `net.Server`)

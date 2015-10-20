@@ -5,7 +5,7 @@
 /// `var ez = require("ez-streams")`  
 /// 
 var generic = require('../devices/generic');
-var flows = require('streamline/lib/util/flows');
+var flows = require('streamline-runtime').flows;
 
 function parseContentType(contentType) {
 	if (!contentType) throw new Error("content-type missing");

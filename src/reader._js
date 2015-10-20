@@ -29,7 +29,7 @@
 /// `var ez = require("ez-streams")`  
 /// 
 var streams = require('./node-wrappers');
-var flows = require('streamline/lib/util/flows');
+var flows = require('streamline-runtime').flows;
 var predicate = require('./predicate').convert;
 var stopException = require('./stop-exception');
 

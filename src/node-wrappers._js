@@ -22,8 +22,8 @@
 /// For a simple example of this API in action, 
 /// see the [google client example](../../../examples/streams/googleClient._js)
 var parseUrl = require("url").parse;
-var globals = require('streamline/lib/globals');
-var flows = require('streamline/lib/util/flows');
+var globals = require('streamline-runtime').globals;
+var flows = require('streamline-runtime').flows;
 var os = require("os");
 var generic;
 
@@ -568,7 +568,7 @@ Server.prototype = Object.create(Wrapper.prototype);
 ///   creates the wrapper.  
 ///   `requestListener` is called as `requestListener(request, response, _)` 
 ///   where `request` and `response` are wrappers around `http.ServerRequest` and `http.ServerResponse`.  
-///   A fresh empty global context is set before every call to `requestListener`. See [streamline/lib/globals](../../globals.md).
+///   A fresh empty global context is set before every call to `requestListener`. See [Global context API](https://github.com/Sage/streamline-runtime/blob/master/index.md).
 /// * `server.listen(_, port[, host])`
 /// * `server.listen(_, path)`  
 ///   (same as `http.Server`)
@@ -931,7 +931,7 @@ function NetClient(options, args) {
 ///   creates the wrapper.  
 ///   `connectionListener` is called as `connectionListener(stream, _)` 
 ///   where `stream` is a `NetStream` wrapper around the native connection.  
-///   A fresh empty global context is set before every call to `connectionListener`. See [streamline/lib/globals](../../globals.md).
+///   A fresh empty global context is set before every call to `connectionListener`. See [Global context API](https://github.com/Sage/streamline-runtime/blob/master/index.md).
 /// * `server.listen(_, port[, host])`  
 /// * `server.listen(_, path)`  
 ///   (same as `net.Server`)

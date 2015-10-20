@@ -1,7 +1,7 @@
 "use strict";
 
 var generic = require('./generic');
-var flows = require('streamline/lib/util/flows');
+var flows = require('streamline-runtime').flows;
 
 /// !doc
 /// ## Queue device
