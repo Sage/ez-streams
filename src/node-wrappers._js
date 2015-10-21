@@ -576,7 +576,7 @@ Server.prototype = Object.create(Wrapper.prototype);
 exports.httpListener = function(listener, options) {
 	options = options || {};
 	return function(request, response) {
-		return globals.withContext(function() {
+		return flows.withContext(function() {
 			return listener(new HttpServerRequest(request, options), new HttpServerResponse(response, options), function(err) {
 				// handlers do not read GET requests - so we remove the listeners, in case
 				if (!/^(post|put)$/i.test(request.method)) request.removeAllListeners();
@@ -949,7 +949,7 @@ function NetServer(serverOptions, connectionListener, streamOptions) {
 	}
 	net = net || require("net");
 	var emitter = net.createServer(serverOptions, function(connection) {
-			globals.withContext(function() {
+			flows.withContext(function() {
 				connectionListener(new NetStream(connection, streamOptions || {}), function(err) {
 					if (err) throw err;
 				});
