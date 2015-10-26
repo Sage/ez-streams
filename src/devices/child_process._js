@@ -63,9 +63,9 @@ module.exports = {
 					closeCb = cb;
 				})(_);
 			}
-		}, function stop(arg) {
-			stdout.stop(arg);
-			stderr.stop(arg);
+		}, function stop(_, arg) {
+			stdout.stop(_, arg);
+			stderr.stop(_, arg);
 		});
 	},
 	/// * `writer = ez.devices.child_process.writer(proc, options)`  

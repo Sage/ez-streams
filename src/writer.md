@@ -12,7 +12,7 @@
 * `writer = writer.writeAll(_, val)`  
   writes `val` and ends the writer
 
-* `writer = writer.stop(err)`  
+* `writer = writer.stop(_, err)`  
   stops the writer.  
   by default err is silently ignored
 

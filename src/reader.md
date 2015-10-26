@@ -102,7 +102,7 @@
   pipes the reader into a node duplex stream. Returns another reader. 
 * `cmp = reader1.compare(_, reader2)`  
   compares reader1 and reader2 return 0 if equal,  
-* `reader.stop(arg)`  
+* `reader.stop(_, arg)`  
   Informs the source that the consumer(s) has(ve) stopped reading.  
   The source should override this method if it needs to free resources when the stream ends.  
   `arg` is an optional argument.  

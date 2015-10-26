@@ -47,11 +47,11 @@ function forward(_, reader, writer, val) {
 		return val;
 	} catch (ex) {
 		if (stopException.isStopException(ex)) {
-			reader.stop(ex.arg);
+			reader.stop(_, ex.arg);
 			if (ex.arg && ex.arg !== true) throw ex.arg;
 			return undefined;
 		} else {
-			reader.stop(ex);
+			reader.stop(_, ex);
 			throw ex;
 		}
 	}
@@ -106,7 +106,7 @@ exports.decorate = function(proto) {
 			var val = self.read(_);
 			if (val === undefined) return true;
 			if (!fn.call(thisObj, _, val)) {
-				self.stop();
+				self.stop(_);
 				return false;
 			};
 		}
@@ -125,7 +125,7 @@ exports.decorate = function(proto) {
 			var val = self.read(_);
 			if (val === undefined) return false;
 			if (fn.call(thisObj, _, val)) {
-				self.stop();
+				self.stop(_);
 				return true;
 			}
 		}
@@ -180,22 +180,22 @@ exports.decorate = function(proto) {
 					var writeStop = [stopException.isStopException(ex) ? ex.arg : ex];
 					if (writeStop[0]) readStop = readStop || writeStop;
 					if (readStop) {
-						self.stop(readStop);
+						self.stop(_, readStop);
 						return stopResult(readStop[0]);
 					}
 				}
 			}
 			return val;
-		}, function stop(arg) {
+		}, function stop(_, arg) {
 			//console.error("TEE STOPPED: arg=" + arg + ', writeStop=' + writeStop);
 			if (readStop) return;
 			readStop = [arg];
 			if (arg && !writeStop) {
 				writeStop = readStop;
-				writer.stop(arg);
+				writer.stop(_, arg);
 			}
 			if (writeStop) {
-				self.stop(readStop);
+				self.stop(_, readStop);
 			} else {
 				self.pipe(function(err) {
 					if (err) throw err;
@@ -222,9 +222,9 @@ exports.decorate = function(proto) {
 			var val;
 			while (stream && (val = stream.read(_)) === undefined) stream = streams.shift();
 			return val;
-		}, function stop(arg) {
+		}, function stop(_, arg) {
 			while (stream) {
-				stream.stop(arg);
+				stream.stop(_, arg);
 				stream = streams.shift();
 			}
 		});
@@ -296,7 +296,7 @@ exports.decorate = function(proto) {
 			(val = reader.read(_)) !== undefined; i++) {
 				if (fn.call(thisObj, _, val, i)) {
 					// stops teed readers
-					reader.stop(stopArg);
+					reader.stop(_, stopArg);
 					return;
 				}
 				writer.write(_, val);
@@ -389,7 +389,7 @@ exports.decorate = function(proto) {
 				callbacks[i] = cb;
 				ready++;
 				flush();
-			}, function stop(arg) {
+			}, function stop(_, arg) {
 				console.error("FORK STOPPED: " + i + ", stopArg=" + arg + ", active=" + active + ", ready=" + ready);
 				if (callbacks[i]) {
 					console.error("FORK cancelling pending callback: " + i);
@@ -405,7 +405,7 @@ exports.decorate = function(proto) {
 					if (!stopArg || (stopArg === true && arg !== true)) stopArg = arg || false;
 				}
 				active--;
-				if (active === 0) self.stop(arg);
+				if (active === 0) self.stop(_, arg);
 				setImmediate(flush);
 			}));
 			return new Decorated(rd, function read(cb) {
@@ -413,7 +413,7 @@ exports.decorate = function(proto) {
 					if (err || val === undefined) {
 						callbacks[i] = null;
 						active--;
-						if (active === 0 && stopArg != null) self.stop(stopArg);
+						if (active === 0 && stopArg != null) self.stop(_, stopArg);
 						else flush();
 					}
 					return cb(err, val);
@@ -450,10 +450,10 @@ exports.decorate = function(proto) {
 						inside--;
 						return val;
 					});
-				}, function stop(arg) {
+				}, function stop(_, arg) {
 					if (stopArg) return;
 					stopArg = arg;
-					self.stop(arg);
+					self.stop(_, arg);
 				})));
 			})(i);
 		}
@@ -598,7 +598,7 @@ exports.decorate = function(proto) {
 		}
 	};
 
-	/// * `reader.stop(arg)`  
+	/// * `reader.stop(_, arg)`  
 	///   Informs the source that the consumer(s) has(ve) stopped reading.  
 	///   The source should override this method if it needs to free resources when the stream ends.  
 	///   `arg` is an optional argument.  
@@ -608,8 +608,8 @@ exports.decorate = function(proto) {
 	///   The default `stop` function is a no-op.  
 	///   Note: `stop` is only called if reading stops before reaching the end of the stream.  
 	///   Sources should free their resources both on `stop` and on end-of-stream.  
-	proto.stop = proto.stop || function(arg) {
-		if (this.parent) this.parent.stop(arg);
+	proto.stop = proto.stop || function(_, arg) {
+		if (this.parent) this.parent.stop(_, arg);
 	};
 
 	return proto;
@@ -626,9 +626,9 @@ exports.create = function(read, stop) {
 function StreamGroup(readers) {
 	var self = this;
 	this.readers = readers;
-	this.stop = function(arg) {
-		self.readers.forEach(function(rd) {
-			if (rd) rd.stop(arg);
+	this.stop = function(_, arg) {
+		self.readers.forEach_(_, function(_, rd) {
+			if (rd) rd.stop(_, arg);
 		});
 	};
 }

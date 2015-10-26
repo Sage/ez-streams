@@ -293,7 +293,7 @@ function ReadableStream(emitter, options) {
 		}, 0);
 	};
 
-	var stop = function(arg) {
+	var stop = function(_, arg) {
 		if (arg && arg !== true) _error = _error || arg;
 		self.unwrap();
 		emitter = null;

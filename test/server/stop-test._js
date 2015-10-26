@@ -8,7 +8,7 @@ function numbers(limit) {
 	return ez.devices.generic.reader(function read(_) {
 		if (this.stopped) throw new Error("attempt to read after stop: " + i);
 		return i >= limit ? undefined : i++;
-	}, function stop(arg) {
+	}, function stop(_, arg) {
 		this.stopped = {
 			at: i,
 			arg: arg,
@@ -20,7 +20,7 @@ asyncTest("explicit stop", 2, function(_) {
 	var source = numbers(100);
 	var result = ''
 	for (var i = 0; i < 5; i++) result += source.read(_);
-	source.stop();
+	source.stop(_);
 	strictEqual(result, "01234");
 	strictEqual(source.stopped && source.stopped.at, 5);
 	start();
@@ -31,7 +31,7 @@ asyncTest("explicit stop with err", 2, function(_) {
 	var result = ''
 	for (var i = 0; i < 5; i++) result += source.read(_);
 	var err = new Error("testing");
-	source.stop(err);
+	source.stop(_, err);
 	strictEqual(result, "01234");
 	strictEqual(source.stopped && source.stopped.arg, err);
 	start();

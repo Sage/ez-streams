@@ -25,7 +25,7 @@ var flows = require('streamline-runtime').flows;
 ///   Note that `queue.writer will not discard the data but instead will wait for the queue to become available. 
 module.exports = function(options) {
 	var queue = flows.queue(options);
-	queue.reader = generic.reader(queue.read.bind(queue), queue.end.bind(queue));
+	queue.reader = generic.reader(queue.read.bind(queue),  function(_) { queue.end.call(queue); });
 	queue.writer = generic.writer(queue.write.bind(queue));
 	return queue;
 };

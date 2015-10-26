@@ -77,9 +77,9 @@ module.exports = {
 			xcb = null;
 		}
 
-		var readStop = function(arg) {
+		var readStop = function(cb, arg) {
 			//console.error(debugId + ": UTURN READ STOP: arg=" + arg + ", xcb=" + typeof xcb + ", done=" + done);
-			if (done) return;
+			if (done) return cb();
 			done = true;
 			stopArgs = [arg];
 
@@ -87,29 +87,43 @@ module.exports = {
 				// read is pending - cancel it - may happen when we propagate stop
 				xval = undefined;
 				state = 0;
-				setImmediate(flush);
+				setImmediate(function() {
+					flush();
+					cb();
+				});
 			}
-			if (state === -1) {
+			else if (state === -1) {
 				xval = stopArgs;
 				state = 0;
-				setImmediate(flush);
+				setImmediate(function() {
+					flush();
+					cb();
+				});
+			}
+			else {
+				cb();
 			}
 		};
 
-		var writeStop = function(arg) {
+		var writeStop = function(cb, arg) {
 			//console.error(debugId + ": UTURN WRITE STOP: arg=" + arg + ", xcb=" + typeof xcb + ", done=" + done);
-			if (done) return;
+			if (done) return cb();
 			done = true;
 			stopArgs = [arg];
 
-			if (state === -1) throw new Error("cannot stop while write is pending");
+			if (state === -1) return cb(new Error("cannot stop while write is pending"));
 			if (state === 1) {
 				if (arg && arg !== true) xerr = xerr || arg;
 				xval = undefined;
 				state = 0;
-				setImmediate(flush);
+				setImmediate(function() {
+					flush();
+					cb();
+				});
+			} else {
+				cb();
 			}
-		}
+		};
 
 		return {
 			reader: generic.reader(bouncer(1), readStop),

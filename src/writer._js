@@ -84,10 +84,10 @@ exports.decorate = function(proto) {
 	};
 
 	/// 
-	/// * `writer = writer.stop(err)`  
+	/// * `writer = writer.stop(_, err)`  
 	///   stops the writer.  
 	///   by default err is silently ignored
-	proto.stop = function(err) {
+	proto.stop = function(_, err) {
 		this.end();
 		return this;
 	};

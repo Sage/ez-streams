@@ -8,7 +8,7 @@ function numbers(limit) {
 	var i = 0;
 	var source = generic.reader(function read(_) {
 		return i >= limit ? undefined : i++;
-	}, function stop(arg) {
+	}, function stop(_, arg) {
 		this.stopped = {
 			at: i,
 			arg: arg,
