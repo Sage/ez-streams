@@ -1,9 +1,11 @@
 {
   "name": "ez-streams",
   "description": "EZ streams for node.js",
-  "version": "1.0.3",
+  "version": "1.2.0",
   "license": "MIT",
-  "author": "Bruno Jouhier",
+  "author": {
+    "name": "Bruno Jouhier"
+  },
   "repository": {
     "type": "git",
     "url": "git://github.com/Sage/ez-streams.git"
@@ -21,5 +23,10 @@
   "scripts": {
     "prepublish": "node build.js || nodejs build.js"
   },
-  "main": "index.js"
+  "main": "index.js",
+  "readmeFilename": "README.md",
+  "bugs": {
+    "url": "https://github.com/Sage/ez-streams/issues"
+  },
+  "homepage": "https://github.com/Sage/ez-streams#readme"
 }
