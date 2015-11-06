@@ -1,7 +1,7 @@
 "use strict";
 QUnit.module(module.id);
 
-var ez = require("ez-streams");
+var ez = require("../..");
 var safeConverter = ez.predicate.convert;
 var unsafeConverter = ez.predicate.converter({
 	allowEval: true
@@ -9,7 +9,7 @@ var unsafeConverter = ez.predicate.converter({
 
 function t(_, condition, obj, expected, unsafe) {
 	var got = (unsafe ? unsafeConverter : safeConverter)(condition)(_, obj);
-	equals(got, expected, JSON.stringify(condition) + " with " + JSON.stringify(obj) + " => " + expected);
+	equal(got, expected, JSON.stringify(condition) + " with " + JSON.stringify(obj) + " => " + expected);
 }
 
 asyncTest("direct values", 6, function(_) {

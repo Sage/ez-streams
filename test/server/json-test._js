@@ -1,12 +1,14 @@
 "use strict";
 QUnit.module(module.id);
-var file = require("ez-streams").devices.file;
-var jsonTrans = require("ez-streams").transforms.json;
+var ez = require('../..');
+var file = ez.devices.file;
+var jsonTrans = ez.transforms.json;
 
 var inputFile = require('os').tmpdir() + '/jsonInput.json';
 var outputFile = require('os').tmpdir() + '/jsonOutput.json';
 var fs = require('fs');
-var string = require("ez-streams").devices.string;
+var ez = require("../..");
+var string = ez.devices.string;
 
 var mixedData = '[' + //
 '{ "firstName": "Jimy", "lastName": "Hendrix" },' + //

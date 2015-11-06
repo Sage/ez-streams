@@ -4,3 +4,5 @@ examples/config-custom.*
 test/fixtures/rss-sample.zip
 /node_modules/
 /lib/
+/test-callbacks/
+/test-fibers/

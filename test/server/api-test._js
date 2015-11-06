@@ -1,8 +1,9 @@
 "use strict";
 QUnit.module(module.id);
 
-var generic = require("ez-streams").devices.generic;
-var arraySink = require("ez-streams").devices.array.writer;
+var ez = require("../..");
+var generic = ez.devices.generic;
+var arraySink = ez.devices.array.writer;
 
 function numbers(limit) {
 	var i = 0;

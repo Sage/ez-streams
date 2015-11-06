@@ -1,8 +1,9 @@
 "use strict";
 QUnit.module(module.id);
 
-var buffer = require("ez-streams").devices.buffer;
-var multipart = require("ez-streams").transforms.multipart
+var ez = require("../..");
+var buffer = ez.devices.buffer;
+var multipart = ez.transforms.multipart
 
 var boundary = "-- my boundary --";
 

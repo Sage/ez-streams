@@ -1,12 +1,13 @@
 "use strict";
 QUnit.module(module.id);
-var lines = require("ez-streams").transforms.lines;
-var file = require("ez-streams").devices.file;
+var ez = require("../..");
+var lines = ez.transforms.lines;
+var file = ez.devices.file;
 
 var inputFile = require('os').tmpdir() + '/jsonInput.json';
 var outputFile = require('os').tmpdir() + '/jsonOutput.json';
 var fs = require('fs');
-var string = require("ez-streams").devices.string;
+var string = ez.devices.string;
 
 function nodeStream(_, text) {
 	fs.writeFile(inputFile, text, "utf8", _);

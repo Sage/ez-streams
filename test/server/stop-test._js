@@ -1,7 +1,7 @@
 "use strict";
 QUnit.module(module.id);
 
-var ez = require("ez-streams");
+var ez = require("../..");
 
 function numbers(limit) {
 	var i = 0;

@@ -29,7 +29,7 @@ asyncTest("bad command", 1, function(_) {
 
 asyncTest("exit 2", 1, function(_) {
 	var cmd = 'exit2' + (os.type() === 'Windows_NT' ? '.cmd' : '.sh');
-	var proc = cp.spawn(fsp.join(__dirname, '../fixtures', cmd), ['2']);
+	var proc = cp.spawn(fsp.join(__dirname, '../../test/fixtures', cmd), ['2']);
 	try {
 		var got = ez.devices.child_process.reader(proc).toArray(_);
 		ok(false);

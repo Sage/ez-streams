@@ -1,7 +1,8 @@
 "use strict";
 QUnit.module(module.id);
-var csv = require("ez-streams").transforms.csv;
-var string = require("ez-streams").devices.string;
+var ez = require("../..");
+var csv = ez.transforms.csv;
+var string = ez.devices.string;
 
 var legends = 'firstName,lastName,gender,dob\n' + //
 	'Jimi,Hendrix,M,27-11-1942\n' + //

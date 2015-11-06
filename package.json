@@ -18,10 +18,12 @@
   },
   "devDependencies": {
     "babel": "^5.8.0",
-    "babel-plugin-streamline": "^1.0.8"
+    "babel-plugin-streamline": "^1.0.8",
+    "qunit": "^0.7.7"
   },
   "scripts": {
-    "prepublish": "node build.js || nodejs build.js"
+    "prepublish": "node build.js || nodejs build.js",
+    "test": "node test-callbacks && node test-fibers"
   },
   "main": "index.js",
   "readmeFilename": "README.md",

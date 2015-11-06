@@ -1,7 +1,7 @@
 "use strict";
 QUnit.module(module.id);
-var ez = require("ez-streams");
-var sample = __dirname + '/../fixtures/rss-sample.xml';
+var ez = require("../..");
+var sample = __dirname + '/../../test/fixtures/rss-sample.xml';
 var zlib = require('zlib');
 
 asyncTest("gzip roundtrip", 1, function(_) {
@@ -9,7 +9,7 @@ asyncTest("gzip roundtrip", 1, function(_) {
 	var sampleReader2 = ez.devices.file.text.reader(sample);
 	var stringify = ez.mappers.convert.stringify();
 	var cutter = ez.transforms.cut(10);
-	var out = require('fs').createWriteStream(__dirname + '/../fixtures/rss-sample.zip');
+	var out = require('fs').createWriteStream(__dirname + '/../../test/fixtures/rss-sample.zip');
 	sampleReader2 = sampleReader2.nodeTransform(zlib.createGzip()).nodeTransform(zlib.createGunzip()).map(stringify);
 	var cmp = sampleReader1.transform(cutter).compare(_, sampleReader2.transform(cutter));
 	equal(cmp, 0);

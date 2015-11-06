@@ -2,7 +2,7 @@
 
 QUnit.module(module.id);
 
-var ez = require('ez-streams');
+var ez = require("../..");
 
 var server;
 asyncTest("Echo service test", 5, function(_) {

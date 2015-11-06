@@ -1,11 +1,11 @@
 "use strict";
 QUnit.module(module.id);
 
-var ez = require("ez-streams");
+var ez = require("../..");
 var TESTBUF = new Buffer([1, 4, 9, 16, 25, 36, 49, 64, 81, 100]);
 
 function eqbuf(b1, b2, msg) {
-	equals(b1.toString('hex'), b2.toString('hex'), msg);
+	equal(b1.toString('hex'), b2.toString('hex'), msg);
 }
 
 asyncTest("roundtrip", 52, function(_) {
@@ -30,17 +30,17 @@ asyncTest("roundtrip", 52, function(_) {
 		reader.unread(3);
 		eqbuf(reader.peek(_, 5), TESTBUF.slice(4, 9), 'unread 3 then peek 5');
 		eqbuf(reader.read(_, 6), TESTBUF.slice(4), 'read 6');
-		equals(reader.readInt8(_), 1, 'int8 roundtrip');
-		equals(reader.peekInt16(_), 2, 'int16 roundtrip (peek)');
-		equals(reader.readInt16(_), 2, 'int16 roundtrip');
-		equals(reader.readInt32(_), 3, 'int32 roundtrip');
-		equals(reader.readFloat(_), 0.5, 'float roundtrip');
-		equals(reader.peekDouble(_), 0.125, 'double roundtrip (peek)');
-		equals(reader.readDouble(_), 0.125, 'double roundtrip');
+		equal(reader.readInt8(_), 1, 'int8 roundtrip');
+		equal(reader.peekInt16(_), 2, 'int16 roundtrip (peek)');
+		equal(reader.readInt16(_), 2, 'int16 roundtrip');
+		equal(reader.readInt32(_), 3, 'int32 roundtrip');
+		equal(reader.readFloat(_), 0.5, 'float roundtrip');
+		equal(reader.peekDouble(_), 0.125, 'double roundtrip (peek)');
+		equal(reader.readDouble(_), 0.125, 'double roundtrip');
 		reader.unreadDouble();
-		equals(reader.readDouble(_), 0.125, 'double roundtrip (after unread)');
-		equals(reader.readInt8(_), 5, 'int8 roundtrip again');
-		equals(reader.read(_), undefined, 'EOF roundtrip');
+		equal(reader.readDouble(_), 0.125, 'double roundtrip (after unread)');
+		equal(reader.readInt8(_), 5, 'int8 roundtrip again');
+		equal(reader.read(_), undefined, 'EOF roundtrip');
 	})
 	start();
 });

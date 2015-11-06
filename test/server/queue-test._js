@@ -1,7 +1,7 @@
 "use strict";
 QUnit.module(module.id);
 
-var ez = require("ez-streams");
+var ez = require("../..");
 
 asyncTest("put (lossy)", 7, function(_) {
 	var queue = ez.devices.queue({

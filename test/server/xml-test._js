@@ -1,6 +1,6 @@
 "use strict";
 QUnit.module(module.id);
-var ez = require("ez-streams");
+var ez = require("../..");
 var fs = require("fs");
 
 function parseTest(_, xml, js, skipRT) {
@@ -153,7 +153,7 @@ asyncTest('empty element in list', 1, function(_) {
 
 
 asyncTest("rss feed", 5, function(_) {
-	var entries = ez.devices.file.text.reader(__dirname + '/../fixtures/rss-sample.xml') //
+	var entries = ez.devices.file.text.reader(__dirname + '/../../test/fixtures/rss-sample.xml') //
 	.transform(ez.transforms.cut(2)) //
 	.transform(ez.transforms.xml.parser("rss/channel/item")).toArray(_);
 	strictEqual(entries.length, 10);
@@ -165,8 +165,8 @@ asyncTest("rss feed", 5, function(_) {
 });
 
 asyncTest("rss roundtrip", 1, function(_) {
-	var expected = fs.readFile(__dirname + '/../fixtures/rss-sample.xml', 'utf8', _);
-	var result = ez.devices.file.text.reader(__dirname + '/../fixtures/rss-sample.xml') //
+	var expected = fs.readFile(__dirname + '/../../test/fixtures/rss-sample.xml', 'utf8', _);
+	var result = ez.devices.file.text.reader(__dirname + '/../../test/fixtures/rss-sample.xml') //
 	.transform(ez.transforms.cut(5)) //
 	.transform(ez.transforms.xml.parser("rss/channel/item")) //
 	.transform(ez.transforms.xml.formatter({

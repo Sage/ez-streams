@@ -45,9 +45,9 @@ function build(src, dst, runtime) {
 	fs.readdirSync(src).forEach(function(name) {
 		var path = fsp.join(src, name);
 		var stat = fs.statSync(path);
+		mkdirs(dst);
 		if (stat.isDirectory()) {
 			var sub = fsp.join(dst, name);
-			mkdirs(sub);
 			build(path, sub, runtime);
 		} else if (/\._?js$/.test(name)) {
 			transform(path, 
@@ -61,4 +61,7 @@ function build(src, dst, runtime) {
 
 ['callbacks', 'fibers', 'generators'].forEach(function(runtime) {
 	build(fsp.join(__dirname, 'src'), fsp.join(__dirname, 'lib', runtime), runtime);
-})
+});
+['callbacks', 'fibers'].forEach(function(runtime) {
+	build(fsp.join(__dirname, 'test'), fsp.join(__dirname, 'test-' + runtime), runtime);
+});
