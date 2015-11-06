@@ -1,6 +1,6 @@
 "use strict";
-// install streamline hooks
-require('streamline').register();
+// install streamline hooks (only if files are not precompiled)
+if (/[\\\/]test$/.test(__dirname)) require('streamline').register();
 
 // patch asyncTest because streamline test function needs a callback.
 var original = global.asyncTest;
