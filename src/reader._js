@@ -575,7 +575,7 @@ exports.decorate = function(proto) {
 	///   pipes the reader into a node duplex stream. Returns another reader. 
 	proto.nodeTransform = function(duplex) {
 		var piped = this.nodify().pipe(duplex);
-		return require('ez-streams').devices.node.reader(piped);
+		return require('./devices/node').reader(piped);
 	};
 
 	/// * `cmp = reader1.compare(_, reader2)`  
