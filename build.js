@@ -3,7 +3,7 @@
 // This script rebuilds the lib/builtins-*.js files
 // It is run before publishing to NPM.
 // You must npm install babel and babel-plugin-streamline before running it.
-var babel = require('babel');
+var babel = require('babel-core');
 require('babel-plugin-streamline');
 var fs = require('fs');
 var fsp = require('path');
