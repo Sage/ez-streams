@@ -221,6 +221,7 @@ module.exports = {
 					if (ch) return ch;
 					if (ent[0] != '#') throw error("invalid entity: &" + ent + ";");
 					ent = ent.substring(1);
+					if (ent[0] === 'x') ent = ent.substring(1);
 					var v = parseInt(ent, 16);
 					if (isNaN(v)) throw error("hex value expected, got " + ent);
 					return String.fromCharCode(v);
@@ -350,11 +351,13 @@ module.exports = {
 			}
 
 			function escape(val) {
-				// note: no need to escape ' and "
-				return typeof(val) !== "string" ? "" + val : val.replace(/[\n\r\t&<>]/g, function(ch) {
+				return typeof(val) !== "string" ? "" + val : val.replace(/([&<>"']|[^ -\ud7ff\ue000-\ufffd])/g, function(ch) {
 					var ent = entitiesByChar[ch];
 					if (ent) return '&' + ent + ';';
-					return '&#' + ('00' + ch.charCodeAt(0).toString(16)).slice(-2) + ';';
+					var hex = ch.charCodeAt(0).toString(16);
+					while (hex.length < 2) hex = '0' + hex;
+					while (hex.length > 2 && hex.length < 4) hex = '0' + hex;
+					return '&#x' + hex + ';';
 				});
 			}
 			return {

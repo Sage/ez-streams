@@ -3,16 +3,20 @@ QUnit.module(module.id);
 var ez = require("../..");
 var fs = require("fs");
 
+function short(s) {
+	return s.length < 50 ? s : s.substring(0, 47) + '...';
+}
+
 function parseTest(_, xml, js, skipRT) {
 	var full = '<?xml version="1.0"?><root>' + xml + "</root>\n";
 	var parsed = ez.devices.string.reader(full).transform(ez.transforms.cut(2)) //
 	.transform(ez.transforms.xml.parser('root')).toArray(_);
-	deepEqual(parsed[0].root, js, "parse " + xml);
+	deepEqual(parsed[0].root, js, "parse " + short(xml));
 	if (!skipRT) {
 		var rt = ez.devices.string.reader(full).transform(ez.transforms.cut(2)) //
 		.transform(ez.transforms.xml.parser('root')) //
 		.transform(ez.transforms.xml.formatter('root')).toArray(_).join('');
-		strictEqual(rt, full, "roundtrip " + full);
+		strictEqual(rt, full, "roundtrip " + short(full));
 	}
 }
 
@@ -137,7 +141,7 @@ asyncTest('reformatting', 7, function(_) {
 	rtTest(_, 'spaces around children', '<a> <b />\n<c\n/>\t</a>', null, '<a><b/><c/></a>');
 	rtTest(_, 'spaces and cdata', '<a> \n<![CDATA[ <abc>\n\t]]>\t</a>', null, '<a><![CDATA[ <abc>\n\t]]></a>');
 	rtTest(_, 'spaces in value', '<a> </a>', null, '<a> </a>');
-	rtTest(_, 'more spaces in value', '<a> \r\n\t</a>', null, '<a> &#0d;&#0a;&#09;</a>');
+	rtTest(_, 'more spaces in value', '<a> \r\n\t</a>', null, '<a> &#x0d;&#x0a;&#x09;</a>');
 	rtTest(_, 'indentation', '<a><b x="3">5</b><c><d/></c></a>', '\t', '\n\t<a>\n\t\t<b x="3">5</b>\n\t\t<c>\n\t\t\t<d/>\n\t\t</c>\n\t</a>\n');
 	start();
 });
@@ -177,5 +181,35 @@ asyncTest("rss roundtrip", 1, function(_) {
 	expected = expected.replace(/\r?\n */g, '').replace(/<\!--.*-->/g, '');
 	result = result.replace(/\r?\n */g, '');
 	strictEqual(result, expected);
+	start();
+});
+
+asyncTest('escaping', 2, function(_) {
+	var xml = '<a>';
+	var js = '';
+	for (var i = 0; i < 0x10000; i++) {
+		if (i > 300 && i % 100) continue;
+		// tab, cr, lf, ' and " could be formatted verbatim but we escape them
+		if ((i >= 0x20 && i <= 0xd7ff) || (i >= 0xe000 && i <= 0xfffd)) {
+			if (i >= 0x2000 && i < 0xd000) continue; // skip to speed up test
+			var ch = String.fromCharCode(i);
+			if (ch === '<') xml += '&lt;'
+			else if (ch === '>') xml += '&gt;'
+			else if (ch === '&') xml += '&amp;'
+			else if (ch === '"') xml += '&quot;'
+			else if (ch === "'") xml += '&apos;'
+			else xml += ch;
+		} else {
+			var hex = i.toString(16);
+			while (hex.length < 2) hex = '0' + hex;
+			while (hex.length > 2 && hex.length < 4) hex = '0' + hex;
+			xml += '&#x' + hex + ';'
+		}
+		js += String.fromCharCode(i);
+	}
+	xml += '</a>';
+	parseTest(_, xml, {
+		a: js 
+	});
 	start();
 });
