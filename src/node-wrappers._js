@@ -392,7 +392,7 @@ function WritableStream(emitter, options) {
 			//
 			if (!emitter.write(data)) _drain(_);
 		} else {
-			emitter.end();
+			emitter.end(_);
 		}
 	});
 }
