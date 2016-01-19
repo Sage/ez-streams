@@ -351,7 +351,7 @@ module.exports = {
 			}
 
 			function escape(val) {
-				return typeof(val) !== "string" ? "" + val : val.replace(/([&<>"']|[^ -\ud7ff\ue000-\ufffd])/g, function(ch) {
+				return typeof(val) !== "string" ? "" + val : val.replace(/([&<>"']|[^ -~\u00a1-\ud7ff\ue000-\ufffd])/g, function(ch) {
 					var ent = entitiesByChar[ch];
 					if (ent) return '&' + ent + ';';
 					var hex = ch.charCodeAt(0).toString(16);
