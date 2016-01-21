@@ -8,14 +8,12 @@ The data that you push or pull may be anything: buffers and strings of course, b
 
 EZ streams are implemented with [streamline.js](https://github.com/Sage/streamlinejs). Most of the examples and API descriptions below use the streamline.js syntax because this is more concise but the `ez-streams` package can also be used directly with callback code. Some of examples also provided both in streamline.js and in pure callback form.
 
-<a name="installation"/>
 ## Installation
 
 ``` sh
 npm install ez-streams
 ```
 
-<a name="devices"/>
 ## Creating a stream
 
 The `devices` modules let you get or create various kinds of EZ streams. For example:
@@ -75,7 +73,6 @@ var writer = function(collection) {
 
 But you don't have to do it. There are already ez-streams _devices_ for MongoDB and popular databases. See [below](#database-support).
 
-<a name="basic-api"/>
 ## Basic read and write
 
 You can read from a reader by calling its `read` method and you can write to a writer by calling its `write` method:
@@ -90,7 +87,6 @@ The `read` and `write` methods are both asynchronous.
 `read` returns `undefined` at the end of a stream. Symmetrically, passing `undefined` to the `write` method of a writer ends the writer.
 
 
-<a name="array-api"/>
 ## Array-like API
 
 You can treat an EZ reader very much like a JavaScript array: you can filter it, map it, reduce it, etc. For example you can write:
@@ -155,7 +151,6 @@ reader =  numberReader(1000).filter({
 });
 ```
 
-<a name="pipe"/>
 ## Pipe
 
 Readers have a `pipe` method that lets you pipe them into a writer:
@@ -184,7 +179,6 @@ var result = numberReader(100).map(function(_, n) {
 
 In this example, the integers are mapped to strings which are written to an in-memory string writer. The string writer is returned by the `pipe` call and we obtain its contents by applying `toString()`.
 
-<a name="infinite-streams"/>
 ## Infinite streams
 
 You can easily create an infinite stream. For example, here is a reader stream that will return all numbers (*) in sequence:
@@ -213,7 +207,6 @@ infiniteReader().until(function(_, n) {
 
 Note: `while` and `until` conditions can also be expressed as mongodb conditions.
 
-<a name="transforms"/>
 ## Transformations
 
 The array functions are nice but they have limited power. They work well to process stream entries independently from each other but they don't allow us to do more complex operation like combining several entries into a bigger one, or splitting one entry into several smaller ones, or a mix of both. This is something we typically do when we parse text streams: we receive chunks of texts; we look for special boundaries and we emit the items that we have isolated between boundaries. Usually, there is not a one to one correspondance between the chunks that we receive and the items that we emit.
@@ -267,7 +260,6 @@ ez.devices.file.text.reader('mydata.csv').transform(csvParser)
 
 Note that the transform is written with a `forEach` call which loops through all the items read from the input chain. This may seem incompatible with streaming but it is not. This loop advances by executing asynchronous `reader.read(_)` and `writer.write(_, obj)` calls. So it yields to the event loop and gives it chance to wake up other pending calls at other steps of the chain. So, even though the code may look like a tight loop, it is not. It gets processed one piece at a time, interleaved with other steps in the chain.
 
-<a name="transforms-library"/>
 ## Transforms library
 
 The `lib/transforms` directory contains standard transforms:
@@ -289,7 +281,6 @@ ez.devices.file.text.reader('users.csv').transform(ez.transforms.csv.parser())
 
 The transforms library is rather embryonic at this stage but you can expect it to grow.
 
-<a name="node-interop"/>
 ## Interoperability with native node.js streams
 
 `ez-streams` are fully interoperable with native node.js streams.
@@ -319,7 +310,6 @@ And you can transform an _ez_ stream with a node duplex stream:
 reader = reader.nodeTransform(duplexStream)
 ```
 
-<a name="lookahead"/>
 ## Lookahead
 
 It is often handy to be able to look ahead in a stream when implementing parsers. The reader API does not directly support lookahead but it includes a `peekable()` method which extends the stream with `peek` and `unread` methods:
@@ -332,7 +322,6 @@ val = peekableReader.read(_); // normal read
 peekableReader.unread(val); // pushes back val so that it can be read again.
 ```
 
-<a name="parallelizing"/>
 ## Parallelizing
 
 You can parallelize operations on a stream with the `parallel` call:
@@ -347,7 +336,6 @@ In this example the `parallel` call will dispatch the items to 4 identical chain
 
 You can control the `parallel` call by passing an options object instead of an integer as first parameter. The `shuffle` option lets you control if the order of entries is preserved or not. By default it is false and the order is preserved but you can get better thoughput by setting `shuffle` to true if order does not matter.
 
-<a name="fork-and-join"/>
 ## Fork and join
 
 You can also fork a reader into a set of identical readers that you pass through different chains:
@@ -376,7 +364,6 @@ var streams = reader.fork([
 
 This part of the API is still fairly experimental and may change a bit.
 
-<a name="exceptions"/>
 ## Exception handling
 
 Exceptions are propagated through the chains and you can trap them in the reducer which pulls the items from the chain. If you write your code with streamline.js, you will naturally use try/catch:
@@ -404,7 +391,6 @@ ez.devices.file.text.reader('users.csv').transform(ez.transforms.csv.parser())
 }, ez.devices.file.text.writer('females.json'));
 ```
 
-<a name="stopping"/>
 ## Stopping a stream
 
 Streams are not always consumed in full. If a consumer stops reading before it has reached the end of a stream, it must inform the stream that it won't read any further so that the stream can release its resources. This is achieved by propagating a `stop` notification upwards, to the source of the stream. Streams that wrap node stream will release their event listeners when they receive this notification.
@@ -430,7 +416,6 @@ A writer may also decide to stop its stream processing chain. If its `write` met
 Note: writers also have a `stop` method but this method is only used internally to propagate exceptions in a `tee` or `fork`.
 
 
-<a name="writer-chaining"/>
 ## Writer chaining
 
 You can also chain operations on writers via a special `pre` property. For example:
@@ -448,7 +433,6 @@ can also be applied to writers through this `pre` property.
 Note: the `pre` property was introduced to stress the fact that the operation is applied _before_ 
 writing to the original writer, even though it appears _after_ in the chain.
 
-<a name="backpressure"/>
 ## Backpressure
 
 Backpressure is a non-issue. The ez-streams plumbing takes care of the low level pause/resume dance on the reader side, and of the write/drain dance on the write side. The event loop takes care of the rest. So you don't have to worry about backpressure when writing EZ streams code.
@@ -459,7 +443,6 @@ Instead of worrying about backpressure, you should worry about buffering. You ca
 reader.transform(T1).buffer(N).transform(T2).pipe(_, writer);
 ```
 
-<a name="database-support"/>
 ## Database support
 
 It is easy to interface ez-streams with node.js database drivers. Database support was bundled with ez-streams until version 0.1.6 but it is now provided through separate node.js packages. The following packages are published to NPM:
@@ -469,19 +452,16 @@ It is easy to interface ez-streams with node.js database drivers. Database suppo
 * [ez-oracle](https://github.com/Sage/ez-oracle): node-oracle driver
 * [ez-tedious](https://github.com/Sage/ez-tedious): Microsoft SQL Server _tedious_ driver
 
-<a name="api"/>
 ## API
 
 See the [API reference](API.md).
 
-<a name="more-info"/>
 ## More information
 
 The following blog article gives background information on this API design:
 
 * [Easy node.js streams](http://bjouhier.wordpress.com/2013/12/17)
 
-<a name="license"/>
 # License
 
 This work is licensed under the terms of the [MIT license](http://en.wikipedia.org/wiki/MIT_License).
