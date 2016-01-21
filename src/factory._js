@@ -3,12 +3,14 @@
 var fs = require('fs');
 var path = require('path');
 
-// standard factories
-var factories = {
+var glob = typeof global === "object" ? global : window;
+var secret = "_6522f20750bf404ea2fbccd561613115";
+var factories = (glob[secret] = (glob[secret] || {
+    // standard factories
     "console": "./devices/console",
     "http": "./devices/http",
     "file": "./devices/file"
-}
+}));
 
 function scanDirs(dir) {
     var ndir = path.join(dir, "../node_modules");
