@@ -1,7 +1,7 @@
 {
   "name": "ez-streams",
   "description": "EZ streams for node.js",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "license": "MIT",
   "author": {
     "name": "Bruno Jouhier"
@@ -11,7 +11,7 @@
     "url": "git://github.com/Sage/ez-streams.git"
   },
   "engines": {
-    "node": ">=0.10.8"
+    "node": ">=0.12.0"
   },
   "dependencies": {
     "streamline-runtime": "^1.0.13"
