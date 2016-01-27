@@ -8,8 +8,8 @@ function StopException(arg) {
 StopException.message = "stream stopped";
 StopException.stack = StopException.message + "\n\t<no stack trace>"
 
-exports.isStopException = function(ex) {
-	return ex instanceof StopException;
+exports.unwrap = function(ex) {
+	return ex instanceof StopException ? ex.arg : ex;
 }
 
 exports.make = function(arg) {

@@ -38,24 +38,9 @@ var generic;
 var Decorated = function Decorated(parent, read, stop) {
 	this.parent = parent;
 	this.read = read;
+	this.stopped = false;
 	if (stop) this.stop = stop;
 };
-
-function forward(_, reader, writer, val) {
-	try {
-		writer.write(_, val);
-		return val;
-	} catch (ex) {
-		if (stopException.isStopException(ex)) {
-			reader.stop(_, ex.arg);
-			if (ex.arg && ex.arg !== true) throw ex.arg;
-			return undefined;
-		} else {
-			reader.stop(_, ex);
-			throw ex;
-		}
-	}
-}
 
 /// * `ez.reader.decorate(proto)`  
 ///   Adds the EZ streams reader API to an object. 
@@ -75,6 +60,7 @@ exports.decorate = function(proto) {
 		(val = this.read(_)) !== undefined; i++) {
 			fn.call(thisObj, _, val, i);
 		}
+		
 		return i;
 	};
 
@@ -153,7 +139,19 @@ exports.decorate = function(proto) {
 		var self = this;
 		do {
 			var val = self.read(_);
-			val = forward(_, self, writer, val);
+			try {
+				writer.write(_, val);
+			} catch (ex) {
+				var arg = stopException.unwrap(ex);
+				if (arg && arg !== true) {
+					self.stop(_, arg);
+					throw arg;
+				} else {
+					self.stop(_, arg);
+					break;
+				}
+			}
+
 		} while (val !== undefined);
 		return writer;
 	};
@@ -166,40 +164,57 @@ exports.decorate = function(proto) {
 		var writeStop;
 		var readStop;
 		function stopResult(arg) {
-			if (arg === true) return undefined;
+			if (!arg || arg === true) return undefined;
 			else throw arg;			
 		}
-		// do not implement with map because we need to emit undefined at end
-		return new Decorated(self, function read(_) {
-			if (readStop) return stopResult(readStop[0]);
+		function readDirect(_) {
 			var val = self.read(_);
 			if (!writeStop) {
 				try {
 					writer.write(_, val);
 				} catch (ex) {
-					var writeStop = [stopException.isStopException(ex) ? ex.arg : ex];
-					if (writeStop[0]) readStop = readStop || writeStop;
+					var arg = stopException.unwrap(ex);
+					var writeStop = [arg];
 					if (readStop) {
-						self.stop(_, readStop);
-						return stopResult(readStop[0]);
+						// both outputs are now stopped
+						// stop parent if readStop was a soft stop
+						if (!readStop[0]) self.stop(_, arg);
+						if (arg && arg !== true) throw arg;
+						else val = undefined;
+					} else if (arg) {
+						// direct output was not stopped and received a full stop
+						readStop = writeStop;
+						self.stop(_, arg);
+						if (arg && arg !== true) throw arg;
+						else val = undefined;
 					}
 				}
 			}
 			return val;
+		}
+
+		return new Decorated(self, function read(_) {
+			if (readStop) return stopResult(readStop[0]);
+			return readDirect(_);
 		}, function stop(_, arg) {
-			//console.error("TEE STOPPED: arg=" + arg + ', writeStop=' + writeStop);
 			if (readStop) return;
 			readStop = [arg];
 			if (arg && !writeStop) {
+				// full stop - writer output still running
+				// stop writer and parent
 				writeStop = readStop;
 				writer.stop(_, arg);
-			}
-			if (writeStop) {
-				self.stop(_, readStop);
-			} else {
-				self.pipe(function(err) {
-					if (err) throw err;
-				}, writer);				
+				self.stop(_, arg);
+			} else if (writeStop && !writeStop[0]) {
+				// only writer was stopped before
+				// stop parent
+				self.stop(_, arg);
+			} else if (!writeStop) {
+				// direct output is stopped.
+				// we continue to read it, to propagate to the secondary output
+				(function(_) {
+					while (readDirect(_) !== undefined);
+				})(flows.check);
 			}
 		});
 	};
@@ -261,10 +276,10 @@ exports.decorate = function(proto) {
 		thisObj = thisObj !== undefined ? thisObj : this;
 		var self = this;
 		var uturn = require('./devices/uturn').create();
-		var writer = require('./devices/generic').writer(function(_, val) {
-			forward(_, self, uturn.writer, val);
-		});
-		fn.call(thisObj, uturn.end, self, writer);
+		fn.call(thisObj, function(err) {
+			// stop parent at end
+			self.stop(uturn.end);
+		}, self, uturn.writer);
 		return uturn.reader;
 	};
 
@@ -291,16 +306,13 @@ exports.decorate = function(proto) {
 	proto.until = function(fn, thisObj, stopArg) {
 		thisObj = thisObj !== undefined ? thisObj : this;
 		if (typeof fn !== 'function') fn = predicate(fn);
-		return this.transform(function(_, reader, writer) {
-			for (var i = 0, val;
-			(val = reader.read(_)) !== undefined; i++) {
-				if (fn.call(thisObj, _, val, i)) {
-					// stops teed readers
-					reader.stop(_, stopArg);
-					return;
-				}
-				writer.write(_, val);
-			}
+		var self = this;
+		var i = 0;
+		return new Decorated(self, function(_) {
+			var val = self.read(_);
+			if (val === undefined) return undefined;
+			if (!fn.call(thisObj, _, val, i++)) return val;
+			self.stop(_, stopArg);
 		});
 	};
 
@@ -359,67 +371,6 @@ exports.decorate = function(proto) {
 			readers.push(consumers[consumers.length - 1](source));
 		}
 		return new StreamGroup(readers);
-		// Old implementation - stop handling needs work - may resurrect later as it may be more performant
-		// in the mean time we are stressing dup, which is a good thing.
-		/* 
-		var self = this;
-		var callbacks = [];
-		var ready = 0;
-		var stopArg;
-		var active = consumers.length;
-
-		function flush() {
-			if (ready === active) {
-				ready = 0;
-				var cbs = callbacks;
-				callbacks = [];
-				var data = self.read(function(err, data) {
-					cbs.forEach(function(cb) {
-						cb && cb(err, data);
-					});
-				});
-			}
-		}
-
-		return new StreamGroup(consumers.map(function(consumer, i) {
-			var rd = consumer(new Decorated(self, function read(cb) {
-				console.error("FORK READ: " + i + ", stopArg=" + stopArg);
-				if (callbacks[i]) throw new Error("invalid attempt to read busy reader");
-				if (stopArg) return cb(stopArg === true ? null : stopArg);
-				callbacks[i] = cb;
-				ready++;
-				flush();
-			}, function stop(_, arg) {
-				console.error("FORK STOPPED: " + i + ", stopArg=" + arg + ", active=" + active + ", ready=" + ready);
-				if (callbacks[i]) {
-					console.error("FORK cancelling pending callback: " + i);
-					//throw new Error("cannot stop while read is pending");
-					var cb = callbacks[i];
-					callbacks[i] = null;
-					ready--;
-					setImmediate(function() {
-						cb(arg && arg !== true ? arg : null);
-					});
-				}
-				if (arg) {
-					if (!stopArg || (stopArg === true && arg !== true)) stopArg = arg || false;
-				}
-				active--;
-				if (active === 0) self.stop(_, arg);
-				setImmediate(flush);
-			}));
-			return new Decorated(rd, function read(cb) {
-				rd.read(function(err, val) {
-					if (err || val === undefined) {
-						callbacks[i] = null;
-						active--;
-						if (active === 0 && stopArg != null) self.stop(_, stopArg);
-						else flush();
-					}
-					return cb(err, val);
-				})
-			});
-		}));*/
 	};
 
 	/// * `group = reader.parallel(count, consumer)`  
@@ -498,7 +449,7 @@ exports.decorate = function(proto) {
 			pending = true;
 			self.read(function(e, v) {
 				pending = false;
-				if (e) err = e;
+				if (e) err = err || e;
 				else buffered.push(v);
 
 				if (resume) {
@@ -609,6 +560,8 @@ exports.decorate = function(proto) {
 	///   Note: `stop` is only called if reading stops before reaching the end of the stream.  
 	///   Sources should free their resources both on `stop` and on end-of-stream.  
 	proto.stop = proto.stop || function(_, arg) {
+		if (this.stopped) return;
+		this.stopped = true;
 		if (this.parent) this.parent.stop(_, arg);
 	};
 
@@ -642,6 +595,7 @@ StreamGroup.prototype.dequeue = function() {
 	var resume;
 	this.readers.forEach(function(stream, i) {
 		var next = function next() {
+			if (alive === 0) return;
 				stream.read(function(e, v) {
 					if (!e && v === undefined) alive--;
 					if (e || v !== undefined || alive === 0) {

@@ -4,6 +4,7 @@ var generic = require('./generic');
 var stopException = require('../stop-exception');
 
 var lastId = 0;
+var tracer; // = console.error;
 
 module.exports = {
 	/// !doc
@@ -16,119 +17,158 @@ module.exports = {
 	///   The device has two properties: a `uturn.writer` to which you can write,   
 	///   and a `uturn.reader` from which you can read.  
 	create: function() {
-		var xcb, xerr, xval, state = 0, done = false, stopArgs;
-		var debugId = ++lastId;
-		var bouncer = function(st) {
-			return function(cb, val) {
-				//console.error(debugId + ": UTURN1: " + (st === 1 ? "READING" : "WRITING " + val));
-				setImmediate(function() {
-					//console.error(debugId + ": UTURN2: " + (st === 1 ? "READING" : "WRITING " + val));
-					if (st === -1 && val === undefined) done = true;
-					if (stopArgs) {
-						//console.error(debugId + ": UTURN AFTER STOP: st=" + st + ', stopArgs=' + stopArgs);
-						if (st === 1) {
-							if (stopArgs[0] && stopArgs[0] !== true) return cb(stopArgs[0]);
-							else return cb(null, undefined);
-						} else {
-							return cb(stopException.make(stopArgs[0]));
-						}
-					}
-					if (xerr) return cb(xerr);
-					if (state === st) return cb(new Error(st === 1 ? "already reading" : "already writing"));
-					if (state === -st) {
-						// reverse operation pending
-						state = 0;
-						try {
-							xcb(null, val);
-						} catch (e) {
-							xerr = xerr || e;
-						}
-						cb(xerr, xval);
-						xval = undefined;
-						xcb = null;
-					} else if (done) {
-						// state === 0 - nothing pending but read or write after eof
-						cb(xerr, xval);
-					} else {
-						// state === 0 - nothing pending
-						xval = val;
-						xcb = cb;
-						state = st;
-					}			
-				});
-			};
-		};
-		var end = function(err) {
-			//console.error(debugId + ": UTURN: end, done=" + done + ", xcb=" + typeof xcb + ", done=" + done);
-			setImmediate(function() {
-				if (done) return;
-				xerr = xerr || err;
-				done = true;
-				if (state !== 0) {
-					state = 0;
-					xcb(xerr);
-					xcb = null;
-				}
-			});
-		};
+		var state = 'idle', pendingData, pendingCb, error;
+		var id = ++lastId;
 
-		function flush() {
-			if (xcb) xcb(xerr, xval);
-			xcb = null;
+		function bounce(err, val) {
+			var lcb = pendingCb;
+			pendingCb = null;
+			if (lcb) lcb(err, val);
 		}
 
-		var readStop = function(cb, arg) {
-			//console.error(debugId + ": UTURN READ STOP: arg=" + arg + ", xcb=" + typeof xcb + ", done=" + done);
-			if (done) return cb();
-			done = true;
-			stopArgs = [arg];
-
-			if (state === 1) {
-				// read is pending - cancel it - may happen when we propagate stop
-				xval = undefined;
-				state = 0;
-				setImmediate(function() {
-					flush();
-					cb();
-				});
-			}
-			else if (state === -1) {
-				xval = stopArgs;
-				state = 0;
-				setImmediate(function() {
-					flush();
-					cb();
-				});
-			}
-			else {
-				cb();
-			}
-		};
-
-		var writeStop = function(cb, arg) {
-			//console.error(debugId + ": UTURN WRITE STOP: arg=" + arg + ", xcb=" + typeof xcb + ", done=" + done);
-			if (done) return cb();
-			done = true;
-			stopArgs = [arg];
-
-			if (state === -1) return cb(new Error("cannot stop while write is pending"));
-			if (state === 1) {
-				if (arg && arg !== true) xerr = xerr || arg;
-				xval = undefined;
-				state = 0;
-				setImmediate(function() {
-					flush();
-					cb();
-				});
-			} else {
-				cb();
-			}
-		};
-
 		return {
-			reader: generic.reader(bouncer(1), readStop),
-			writer: generic.writer(bouncer(-1), writeStop),
-			end: end,
+			reader: generic.reader(function read(cb) {
+				setImmediate(function() {
+					tracer && tracer(id, "READ", state, pendingData);
+					var st = state;
+					switch (st) {
+						case 'writing':
+							state = pendingData === undefined ? 'done' : 'idle';
+							// acknowledge the write
+							bounce();
+							// return the data posted by the write
+							cb(null, pendingData);
+							pendingData = null;
+							break;
+						case 'idle':
+							// remember it
+							state = 'reading';
+							pendingCb = cb;
+							break;
+						case 'readStopping':
+						case 'writeStopping':
+							state = 'done';
+							var arg = stopException.unwrap(error);
+							// acknowledge the stop
+							bounce();
+							// return undefined or throw
+							cb(arg && arg !== true ? arg : null);
+							break;
+						case 'done':
+							cb(error);
+							break;
+						default:
+							state = 'done';
+							cb(error || new Error('invalid state ' + st));
+							break;
+					}
+				});
+			}, function stop(cb, arg) {
+				setImmediate(function() {
+					error = error || stopException.make(arg);
+					tracer && tracer(id, "STOP READER", state, arg);
+					var st = state;
+					switch (st) {
+						case 'reading':
+							state = 'done';
+							// send undefined or exception to read
+							bounce(arg && arg !== 1 ? arg : null);
+							// acknowledge the stop
+							cb();
+							break;
+						case 'writing':
+							state = 'done';
+							// send to write
+							bounce(error);
+							// acknowledge the stop
+							cb();
+							break;
+						case 'idle':
+							// remember it
+							state = 'readStopping';
+							pendingCb = cb;
+							break;
+						case 'done':
+							cb(error);
+							break;
+						default:
+							state = 'done';
+							cb(error || new Error('invalid state ' + st));
+							break;
+					}
+				});
+			}),
+			writer: generic.writer(function write(cb, data) {
+				setImmediate(function() {
+					tracer && tracer(id, "WRITE", state, data);
+					var st = state;
+					switch (st) {
+						case 'reading':
+							state = data === undefined ? 'done' : 'idle';
+							// acknowledge the read
+							bounce(error, data);
+							// return the data posted by the write
+							cb();
+							break;
+						case 'idle':
+							// remember it
+							state = 'writing';
+							pendingCb = cb;
+							pendingData = data;
+							break;
+						case 'readStopping':
+							state = 'done';
+							// acknowledge the stop
+							bounce();
+							// throw the error
+							cb(error);
+							break;
+						case 'done':
+							cb(error || 'invalid state ' + st);
+							break;
+						default:
+							state = 'done';
+							cb(new Error('invalid state ' + st));
+							break;
+					}
+				});
+			}, function stop(cb, arg) {
+				setImmediate(function() {
+					tracer && tracer(id, "STOP WRITER", state, arg);
+					error = error || stopException.make(arg);
+					var st = state;
+					switch (st) {
+						case 'reading':
+							// send undefined or exception to read
+							state = 'done';
+							bounce(arg && arg !== 1 ? arg : null);
+							// acknowledge the stop
+							cb();
+							break;
+						case 'idle':
+							// remember it
+							state = 'writeStopping';
+							pendingCb = cb;
+							break;
+						case 'done':
+							cb(error);
+							break;
+						default:
+							state = 'done';
+							cb(new Error('invalid state ' + st));
+							break;
+					}
+				});
+			}),
+			end: function(err) {
+				setImmediate(function() {
+					tracer && tracer(id, "END", state, err);
+					err = stopException.unwrap(err);
+					error = error || err;
+					state = 'done';
+					bounce(error);
+				});
+			},
 		};
 	},
 };
