@@ -60,7 +60,7 @@ exports.decorate = function(proto) {
 		(val = this.read(_)) !== undefined; i++) {
 			fn.call(thisObj, _, val, i);
 		}
-		
+
 		return i;
 	};
 
@@ -290,10 +290,13 @@ exports.decorate = function(proto) {
 	proto.filter = function(fn, thisObj) {
 		thisObj = thisObj !== undefined ? thisObj : this;
 		if (typeof fn !== 'function') fn = predicate(fn);
-		return this.transform(function(_, reader, writer) {
-			for (var i = 0, val;
-			(val = reader.read(_)) !== undefined; i++) {
-				if (fn.call(thisObj, _, val, i)) writer.write(_, val);
+		var parent = this;
+		var i = 0, done = false;
+		return new Decorated(parent, function(_) {
+			while (!done) {
+				var val = parent.read(_);
+				done = val === undefined;
+				if (done || fn.call(thisObj, _, val, i++)) return val;
 			}
 		});
 	};
