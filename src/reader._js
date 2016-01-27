@@ -70,10 +70,10 @@ exports.decorate = function(proto) {
 	///   Returns another reader on which other operations may be chained.
 	proto.map = function(fn, thisObj) {
 		thisObj = thisObj !== undefined ? thisObj : this;
-		var self = this;
+		var parent = this;
 		var count = 0;
-		return new Decorated(self, function(_) {
-			var val = self.read(_);
+		return new Decorated(parent, function(_) {
+			var val = parent.read(_);
 			if (val === undefined) return undefined;
 			return fn.call(thisObj, _, val, count++);
 		});
@@ -160,7 +160,7 @@ exports.decorate = function(proto) {
 	///   Branches another writer on the chain`.  
 	///   Returns another reader on which other operations may be chained.
 	proto.tee = function(writer) {
-		var self = this;
+		var parent = this;
 		var writeStop;
 		var readStop;
 		function stopResult(arg) {
@@ -168,7 +168,7 @@ exports.decorate = function(proto) {
 			else throw arg;			
 		}
 		function readDirect(_) {
-			var val = self.read(_);
+			var val = parent.read(_);
 			if (!writeStop) {
 				try {
 					writer.write(_, val);
@@ -178,13 +178,13 @@ exports.decorate = function(proto) {
 					if (readStop) {
 						// both outputs are now stopped
 						// stop parent if readStop was a soft stop
-						if (!readStop[0]) self.stop(_, arg);
+						if (!readStop[0]) parent.stop(_, arg);
 						if (arg && arg !== true) throw arg;
 						else val = undefined;
 					} else if (arg) {
 						// direct output was not stopped and received a full stop
 						readStop = writeStop;
-						self.stop(_, arg);
+						parent.stop(_, arg);
 						if (arg && arg !== true) throw arg;
 						else val = undefined;
 					}
@@ -193,7 +193,7 @@ exports.decorate = function(proto) {
 			return val;
 		}
 
-		return new Decorated(self, function read(_) {
+		return new Decorated(parent, function read(_) {
 			if (readStop) return stopResult(readStop[0]);
 			return readDirect(_);
 		}, function stop(_, arg) {
@@ -204,11 +204,11 @@ exports.decorate = function(proto) {
 				// stop writer and parent
 				writeStop = readStop;
 				writer.stop(_, arg);
-				self.stop(_, arg);
+				parent.stop(_, arg);
 			} else if (writeStop && !writeStop[0]) {
 				// only writer was stopped before
 				// stop parent
-				self.stop(_, arg);
+				parent.stop(_, arg);
 			} else if (!writeStop) {
 				// direct output is stopped.
 				// we continue to read it, to propagate to the secondary output
@@ -274,12 +274,12 @@ exports.decorate = function(proto) {
 	///   Returns another reader on which other operations may be chained.
 	proto.transform = function(fn, thisObj) {
 		thisObj = thisObj !== undefined ? thisObj : this;
-		var self = this;
+		var parent = this;
 		var uturn = require('./devices/uturn').create();
 		fn.call(thisObj, function(err) {
 			// stop parent at end
-			self.stop(uturn.end);
-		}, self, uturn.writer);
+			parent.stop(uturn.end);
+		}, parent, uturn.writer);
 		return uturn.reader;
 	};
 
@@ -306,13 +306,13 @@ exports.decorate = function(proto) {
 	proto.until = function(fn, thisObj, stopArg) {
 		thisObj = thisObj !== undefined ? thisObj : this;
 		if (typeof fn !== 'function') fn = predicate(fn);
-		var self = this;
+		var parent = this;
 		var i = 0;
-		return new Decorated(self, function(_) {
-			var val = self.read(_);
+		return new Decorated(parent, function(_) {
+			var val = parent.read(_);
 			if (val === undefined) return undefined;
 			if (!fn.call(thisObj, _, val, i++)) return val;
-			self.stop(_, stopArg);
+			parent.stop(_, stopArg);
 		});
 	};
 
@@ -357,12 +357,12 @@ exports.decorate = function(proto) {
 	///   Returns a `StreamGroup` on which other operations can be chained.
 	proto.fork = function(consumers) {
 		// simple implementation with repeated dup.
-		var self = this;
+		var parent = this;
 		var readers = [];
 		if (consumers.length === 1) {
-			readers.push(consumers[0](self));
+			readers.push(consumers[0](parent));
 		} else {
-			var source = self;
+			var source = parent;
 			for (var i = 0; i < consumers.length - 1; i ++) {
 				var dup = source.dup()
 				readers.push(consumers[i](dup[0]));
@@ -383,28 +383,28 @@ exports.decorate = function(proto) {
 		if (typeof options === "number") options = {
 			count: options,
 		};
-		var self = this;
+		var parent = this;
 		var streams = [];
 		var funnel = flows.funnel(1);
 		var inside = 0;
 		var stopArg;
 		for (var i = 0; i < options.count; i++) {
 			(function(i) { // i for debugging
-				streams.push(consumer(new Decorated(self, function read(_) {
+				streams.push(consumer(new Decorated(parent, function read(_) {
 					if (stopArg) {
 						if (stopArg === true) return undefined;
 						else throw stopArg;
 					}
 					return funnel(_, function(_) {
 						if (inside++ !== 0) throw new Error("funnel error: " + inside);
-						var val = self.read(_);
+						var val = parent.read(_);
 						inside--;
 						return val;
 					});
 				}, function stop(_, arg) {
 					if (stopArg) return;
 					stopArg = arg;
-					self.stop(_, arg);
+					parent.stop(_, arg);
 				})));
 			})(i);
 		}
@@ -418,10 +418,10 @@ exports.decorate = function(proto) {
 	///   - `reader.peek(_)`: same as `read(_)` but does not consume the item. 
 	///   - `reader.unread(val)`: pushes `val` back so that it will be returned by the next `read(_)`
 	proto.peekable = function() {
-		var self = this;
+		var parent = this;
 		var buffered = [];
-		var stream = new Decorated(self, function(_) {
-			return buffered.length > 0 ? buffered.pop() : self.read(_);
+		var stream = new Decorated(parent, function(_) {
+			return buffered.length > 0 ? buffered.pop() : parent.read(_);
 		});
 		stream.unread = function(val) {
 			buffered.push(val);
@@ -438,7 +438,7 @@ exports.decorate = function(proto) {
 	/// * `reader = reader.buffer(max)`  
 	///   Returns a stream which is identical to the original one but in which up to `max` entries may have been buffered.  
 	proto.buffer = function(max) {
-		var self = this;
+		var parent = this;
 		var buffered = [];
 		var resume;
 		var err;
@@ -447,7 +447,7 @@ exports.decorate = function(proto) {
 		function fill() {
 			if (pending) return;
 			pending = true;
-			self.read(function(e, v) {
+			parent.read(function(e, v) {
 				pending = false;
 				if (e) err = err || e;
 				else buffered.push(v);
@@ -478,7 +478,7 @@ exports.decorate = function(proto) {
 				resume = cb;
 			}
 		}
-		return new Decorated(self, function(_) {
+		return new Decorated(parent, function(_) {
 			return read(_);
 		});
 	};
