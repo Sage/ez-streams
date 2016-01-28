@@ -16,7 +16,7 @@ function numbers(limit) {
 		};
 	});
 	source.finalCheck = function() {
-		ok(this.stopped || i == limit);
+		ok(this.stopped || i == limit, "final check");
 	}
 	return source;
 }
@@ -276,6 +276,12 @@ function rand(min, max) {
 	};
 }
 
+asyncTest("simple chain (no buffer)", 2, function(_) {
+	var source;
+	strictEqual((source = numbers()).skip(2).limit(5).pipe(_, arraySink()).toArray().join(','), "2,3,4,5,6");
+	source.finalCheck();
+	start();
+});
 asyncTest("buffer in simple chain", 6, function(_) {
 	var source;
 	strictEqual((source = numbers()).buffer(3).skip(2).limit(5).pipe(_, arraySink()).toArray().join(','), "2,3,4,5,6");

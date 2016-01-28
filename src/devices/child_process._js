@@ -37,6 +37,15 @@ module.exports = {
 		});
 		var stdout = node.reader(proc.stdout, options);
 		var stderr = node.reader(proc.stderr, options);
+		// node does not send close event if we remove all listeners on stdin and stdout
+		// so we disable the stop methods and we call stop explicitly after the close.
+		var stops = [stdout.stop.bind(stdout), stderr.stop.bind(stderr)];
+		stdout.stop = stderr.stop = function(_) {};
+		function stopStreams(_, arg) {
+			stops.forEach_(_, function(_, stop) {
+				stop(_, arg);
+			});
+		}
 		if (options.encoding !== 'buffer') {
 			stdout = stdout.map(stringify).transform(lineParser);
 			stderr = stderr.map(stringify).transform(lineParser);
@@ -62,11 +71,9 @@ module.exports = {
 				(function(cb) {
 					closeCb = cb;
 				})(_);
+				stopStreams(_);
 			}
-		}, function stop(_, arg) {
-			stdout.stop(_, arg);
-			stderr.stop(_, arg);
-		});
+		}, stopStreams);
 	},
 	/// * `writer = ez.devices.child_process.writer(proc, options)`  
 	///   wraps a node.js child process as an EZ writer.  
