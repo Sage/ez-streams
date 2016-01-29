@@ -16,3 +16,10 @@ asyncTest("roundtrip", 1, function(_) {
 	equal(sink.toString(), legends);
 	start();
 });
+
+asyncTest("binary input", 1, function(_) {
+	var sink = string.writer();
+	ez.devices.buffer.reader(new Buffer(legends, 'utf8')).transform(csv.parser()).transform(csv.formatter()).pipe(_, sink);
+	equal(sink.toString(), legends);
+	start();
+});

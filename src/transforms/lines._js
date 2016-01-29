@@ -17,6 +17,7 @@ module.exports = {
 		return function(_, reader, writer) {
 			var remain = "";
 			reader.forEach(_, function(_, chunk) {
+				if (Buffer.isBuffer(chunk)) chunk = chunk.toString(options.encoding || 'utf8');
 				var lines = chunk.split(options.sep || '\n');
 				if (lines.length > 1) {
 					writer.write(_, clean(remain + lines[0]));

@@ -61,8 +61,12 @@ module.exports = {
 		options = options || {};
 
 		return function(_, reader, writer) {
+			function read(_) {
+				var data = reader.read(_);
+				return Buffer.isBuffer(data) ? data.toString(options.encoding || 'utf8') : data;
+			}
 			var pos = 0,
-				chunk = reader.read(_),
+				chunk = read(_),
 				beg, collected = "",
 				line = 1,
 				depth = 1,
@@ -81,7 +85,7 @@ module.exports = {
 						collected += chunk.substring(beg);
 						beg = 0;
 					}
-					chunk = reader.read(_);
+					chunk = read(_);
 					if (!chunk) return undefined;
 					pos = 0;
 				}

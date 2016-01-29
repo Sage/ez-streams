@@ -50,6 +50,15 @@ asyncTest("fragmented read", 9, function(_) {
 	start();
 });
 
+asyncTest("binary input", 9, function(_) {
+	var stream = ez.devices.buffer.reader(new Buffer(mixedData, 'utf8')).transform(jsonTrans.parser());
+	var expected = JSON.parse(mixedData);
+	stream.forEach(_, function(_, elt, i) {
+		deepEqual(elt, expected[i], expected[i]);
+	});
+	start();
+});
+
 asyncTest("roundtrip", 11, function(_) {
 	var writer = string.writer();
 	nodeStream(_, mixedData).transform(jsonTrans.parser()).map(function(_, elt) {

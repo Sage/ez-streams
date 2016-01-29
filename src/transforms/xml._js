@@ -176,6 +176,7 @@ module.exports = {
 		return function(_, reader, writer) {
 			var str = reader.read(_);
 			if (str === undefined) return;
+			if (Buffer.isBuffer(str)) str = str.toString(options.encoding || 'utf8');
 			var pos = 0,
 				bld = builder(error);
 

@@ -51,3 +51,11 @@ asyncTest("roundtrip", 1, function(_) {
 	strictEqual(writer.toString(), text, text);
 	start();
 });
+
+asyncTest("binary input", 1, function(_) {
+	var writer = string.writer();
+	var text = 'abc\n\ndef\nghi';
+	ez.devices.buffer.reader(new Buffer(text, 'utf8')).transform(lines.parser()).transform(lines.formatter()).pipe(_, writer);
+	strictEqual(writer.toString(), text, text);
+	start();
+});

@@ -14,6 +14,7 @@ module.exports = {
 		options = options || {};
 		var sep = options.sep == null ? ',' : options.sep;
 		return function(_, data) {
+			if (Buffer.isBuffer(data)) data = data.toString(options.encoding || 'utf8');
 			if (data === '') return;
 			// remove trailing separator, if any
 			if (sep && data.substring(data.length - sep.length) === sep) data = data.substring(0, data.length - sep.length);
