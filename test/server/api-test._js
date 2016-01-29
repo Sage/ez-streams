@@ -21,6 +21,13 @@ function numbers(limit) {
 	return source;
 }
 
+function fail(result) {
+	return function(_, val) {
+		if (val === 3) throw new Error('FAILED');
+		return result;
+	}
+} 
+
 function minJoiner(_, values) {
 	var min = Math.min.apply(null, values.filter(function(val) { return val !== undefined; }));
 	values.forEach(function(val, i) {
@@ -40,11 +47,35 @@ asyncTest("forEach", 2, function(_) {
 	start();
 });
 
+asyncTest("forEach error", 2, function(_) {
+	var source = numbers(5);
+	try {
+		source.forEach(_, fail());
+		ok(false);
+	} catch (ex) {
+		strictEqual(ex.message, 'FAILED');
+	}
+	source.finalCheck();
+	start();
+});
+
 asyncTest("map", 2, function(_) {
 	var source = numbers(5);
 	strictEqual(source.map(function(_, num) {
 		return num * num;
 	}).pipe(_, arraySink()).toArray().join(','), "0,1,4,9,16");
+	source.finalCheck();
+	start();
+});
+
+asyncTest("map error", 2, function(_) {
+	var source = numbers(5);
+	try {
+		source.map(fail(1)).pipe(_, arraySink());
+		ok(false);
+	} catch (ex) {
+		strictEqual(ex.message, 'FAILED');
+	}
 	source.finalCheck();
 	start();
 });
@@ -78,6 +109,18 @@ asyncTest("every", 12, function(_) {
 	start();
 });
 
+asyncTest("every error", 2, function(_) {
+	var source = numbers(5);
+	try {
+		source.every(_, fail(true));
+		ok(false);
+	} catch (ex) {
+		strictEqual(ex.message, 'FAILED');
+	}
+	source.finalCheck();
+	start();
+});
+
 asyncTest("some", 12, function(_) {
 	var source;
 	strictEqual((source = numbers(5)).some(_, function(_, num) {
@@ -107,11 +150,37 @@ asyncTest("some", 12, function(_) {
 	start();
 });
 
+asyncTest("some error", 2, function(_) {
+	var source = numbers(5);
+	try {
+		source.some(_, fail(false));
+		ok(false);
+	} catch (ex) {
+		strictEqual(ex.message, 'FAILED');
+	}
+	source.finalCheck();
+	start();
+});
+
 asyncTest("reduce", 2, function(_) {
 	var source = numbers(5);
 	strictEqual(source.reduce(_, function(_, r, num) {
 		return r + '/' + num;
 	}, ""), "/0/1/2/3/4");
+	source.finalCheck();
+	start();
+});
+
+asyncTest("reduce error", 2, function(_) {
+	var source = numbers(5);
+	try {
+		source.reduce(_, function(_, r, v) {
+			if (v === 3) throw new Error('FAILED');
+		});
+		ok(false);
+	} catch (ex) {
+		strictEqual(ex.message, 'FAILED');
+	}
 	source.finalCheck();
 	start();
 });
@@ -130,11 +199,27 @@ asyncTest("pipe", 2, function(_) {
 	start();
 });
 
+// pipe error already tested in map
+
 asyncTest("tee", 3, function(_) {
 	var source = numbers(5);
 	var secondary = arraySink();
 	strictEqual(source.tee(secondary).pipe(_, arraySink()).toArray().join(','), "0,1,2,3,4");
 	strictEqual(secondary.toArray().join(','), "0,1,2,3,4");
+	source.finalCheck();
+	start();
+});
+
+asyncTest("tee error", 3, function(_) {
+	var source = numbers(5);
+	var secondary = arraySink();
+	try {
+		source.tee(secondary).map(fail(2)).pipe(_, arraySink());
+		ok(false);
+	} catch (ex) {
+		strictEqual(ex.message, 'FAILED');
+	}
+	strictEqual(secondary.toArray().join(','), "0,1,2,3");
 	source.finalCheck();
 	start();
 });
@@ -150,6 +235,48 @@ asyncTest("dup", 3, function(_) {
 	start();
 });
 
+asyncTest("dup error 0", 3, function(_) {
+	var source = numbers(5);
+	var streams = source.dup();
+	var f1 = streams[0].map(fail(2)).toArray(!_);
+	var f2 = streams[1].toArray(!_);
+	try {
+		f1(_);
+		ok(false);
+	} catch (ex) {
+		strictEqual(ex.message, 'FAILED');
+	}
+	try {
+		f2(_);
+		ok(false);
+	} catch (ex) {
+		strictEqual(ex.message, 'FAILED');
+	}
+	source.finalCheck();
+	start();
+});
+
+asyncTest("dup error 1", 3, function(_) {
+	var source = numbers(5);
+	var streams = source.dup();
+	var f1 = streams[0].toArray(!_);
+	var f2 = streams[1].map(fail(2)).toArray(!_);
+	try {
+		f1(_);
+		ok(false);
+	} catch (ex) {
+		strictEqual(ex.message, 'FAILED');
+	}
+	try {
+		f2(_);
+		ok(false);
+	} catch (ex) {
+		strictEqual(ex.message, 'FAILED');
+	}
+	source.finalCheck();
+	start();
+});
+
 asyncTest("concat", 4, function(_) {
 	var source;
 	var rd1 = (source = numbers(5)).concat(numbers(8).skip(6), numbers(10).skip(10), numbers(15).skip(12));
@@ -157,6 +284,19 @@ asyncTest("concat", 4, function(_) {
 	source.finalCheck();
 	var rd2 = (source = numbers(5)).concat([numbers(8).skip(6), numbers(10).skip(10), numbers(15).skip(12)]);
 	strictEqual(rd2.toArray(_).join(), "0,1,2,3,4,6,7,12,13,14");
+	source.finalCheck();
+	start();
+});
+
+asyncTest("concat error", 2, function(_) {
+	var source = numbers(5);
+	var rd1 = source.concat(numbers(8).skip(6), numbers(10).skip(10), numbers(15).skip(2).map(fail(2)));
+	try {
+		rd1.toArray(_);
+		ok(false);
+	} catch (ex) {
+		strictEqual(ex.message, 'FAILED');
+	}
 	source.finalCheck();
 	start();
 });
@@ -199,6 +339,24 @@ asyncTest("transform - less reads than writes", 2, function(_) {
 			for (var i = 0; i < val; i++) writer.write(_, val);
 		}
 	}).pipe(_, arraySink()).toArray().join(','), "1,2,2,3,3,3,4,4,4,4");
+	source.finalCheck();
+	start();
+});
+
+asyncTest("transform error", 2, function(_) {
+	var source = numbers(5);
+	try {
+		source.transform(function(_, reader, writer) {
+			var str = "", val;
+			while ((val = reader.read(_)) !== undefined) {
+				fail(2)(_, val);
+				writer.write(_, val);
+			}
+		}).pipe(_, arraySink());
+		ok(false);
+	} catch (ex) {
+		strictEqual(ex.message, 'FAILED');
+	}
 	source.finalCheck();
 	start();
 });

@@ -42,6 +42,15 @@ var Decorated = function Decorated(parent, read, stop) {
 	if (stop) this.stop = stop;
 };
 
+function tryCatch(_, that, f) {
+	try {
+		return f.call(that, _);
+	} catch (ex) {
+		that.stop(_, ex);
+		throw ex;
+	}
+}
+
 /// * `ez.reader.decorate(proto)`  
 ///   Adds the EZ streams reader API to an object. 
 ///   Usually the object is a prototype but it may be any object with a `read(_)` method.  
@@ -56,11 +65,11 @@ exports.decorate = function(proto) {
 	proto.forEach = function(_, fn, thisObj) {
 		thisObj = thisObj !== undefined ? thisObj : this;
 		var val;
-		for (var i = 0;
-		(val = this.read(_)) !== undefined; i++) {
-			fn.call(thisObj, _, val, i);
-		}
-
+		return tryCatch(_, this, function(_) {
+			for (var i = 0; (val = this.read(_)) !== undefined; i++) {
+				fn.call(thisObj, _, val, i);
+			}			
+		});
 		return i;
 	};
 
@@ -88,14 +97,16 @@ exports.decorate = function(proto) {
 		thisObj = thisObj !== undefined ? thisObj : this;
 		if (typeof fn !== 'function') fn = predicate(fn);
 		var self = this;
-		while (true) {
-			var val = self.read(_);
-			if (val === undefined) return true;
-			if (!fn.call(thisObj, _, val)) {
-				self.stop(_);
-				return false;
-			};
-		}
+		return tryCatch(_, this, function(_) {
+			while (true) {
+				var val = self.read(_);
+				if (val === undefined) return true;
+				if (!fn.call(thisObj, _, val)) {
+					self.stop(_);
+					return false;
+				};
+			}
+		});
 	};
 
 	/// * `result = reader.some(_, fn, thisObj)`  
@@ -107,14 +118,16 @@ exports.decorate = function(proto) {
 		thisObj = thisObj !== undefined ? thisObj : this;
 		if (typeof fn !== 'function') fn = predicate(fn);
 		var self = this;
-		while (true) {
-			var val = self.read(_);
-			if (val === undefined) return false;
-			if (fn.call(thisObj, _, val)) {
-				self.stop(_);
-				return true;
+		return tryCatch(_, this, function(_) {
+			while (true) {
+				var val = self.read(_);
+				if (val === undefined) return false;
+				if (fn.call(thisObj, _, val)) {
+					self.stop(_);
+					return true;
+				}
 			}
-		}
+		});
 	};
 
 	/// * `result = reader.reduce(_, fn, initial, thisObj)`  
@@ -125,11 +138,13 @@ exports.decorate = function(proto) {
 	proto.reduce = function(_, fn, v, thisObj) {
 		thisObj = thisObj !== undefined ? thisObj : this;
 		var self = this;
-		while (true) {
-			var val = self.read(_);
-			if (val === undefined) return v;
-			v = fn.call(thisObj, _, v, val);
-		}
+		return tryCatch(_, this, function(_) {
+			while (true) {
+				var val = self.read(_);
+				if (val === undefined) return v;
+				v = fn.call(thisObj, _, v, val);
+			}
+		});
 	};
 
 	/// * `writer = reader.pipe(_, writer)`  
@@ -138,7 +153,13 @@ exports.decorate = function(proto) {
 	proto.pipe = function(_, writer) {
 		var self = this;
 		do {
-			var val = self.read(_);
+			var val;
+			try {
+				val = self.read(_);
+			} catch (ex) {
+				if (!this.stopped) this.stop(_, ex);
+				throw ex;
+			}
 			try {
 				writer.write(_, val);
 			} catch (ex) {
@@ -278,7 +299,9 @@ exports.decorate = function(proto) {
 		var uturn = require('./devices/uturn').create();
 		fn.call(thisObj, function(err) {
 			// stop parent at end
-			parent.stop(uturn.end);
+			parent.stop(function(e) {
+				uturn.end(err || e);
+			});
 		}, parent, uturn.writer);
 		return uturn.reader;
 	};
