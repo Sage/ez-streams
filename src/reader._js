@@ -152,28 +152,24 @@ exports.decorate = function(proto) {
 	///   Returns the writer for chaining.
 	proto.pipe = function(_, writer) {
 		var self = this;
-		do {
-			var val;
-			try {
-				val = self.read(_);
-			} catch (ex) {
-				if (!this.stopped) this.stop(_, ex);
-				throw ex;
-			}
-			try {
-				writer.write(_, val);
-			} catch (ex) {
-				var arg = stopException.unwrap(ex);
-				if (arg && arg !== true) {
-					self.stop(_, arg);
-					throw arg;
-				} else {
-					self.stop(_, arg);
-					break;
+		tryCatch(_, this, function(_) {
+			do {
+				var val = self.read(_);
+				try {
+					writer.write(_, val);
+				} catch (ex) {
+					var arg = stopException.unwrap(ex);
+					if (arg && arg !== true) {
+						self.stop(_, arg);
+						throw arg;
+					} else {
+						self.stop(_, arg);
+						break;
+					}
 				}
-			}
 
-		} while (val !== undefined);
+			} while (val !== undefined);
+		});
 		return writer;
 	};
 
