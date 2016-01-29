@@ -2,9 +2,9 @@
 /// !doc
 /// ## helpers for binary streams
 /// 
-/// `var ez = require("ez-streams")`  
+/// `const ez = require("ez-streams")`  
 
-var NUMBERS = [//
+const NUMBERS = [//
 ['Int8', 1], ['UInt8', 1], //
 ['Int16', 2], ['UInt16', 2], //
 ['Int32', 4], ['UInt32', 4], //
@@ -29,7 +29,7 @@ Reader.prototype.ensure = function(_, len) {
 	if (this.buf === undefined) return false;
 	if (this.pos + len <= this.buf.length) return len;
 	var got = this.buf.length - this.pos;
-	var bufs = got ? [this.buf.slice(this.pos)] : [];
+	const bufs = got ? [this.buf.slice(this.pos)] : [];
 	this.pos = 0;
 	while (got < len) {
 		var buf = this.reader.read(_);
@@ -61,9 +61,9 @@ Reader.prototype.read = function(_, len, peekOnly) {
 			return this.buf;
 		}
 	}
-	var l = this.ensure(_, len);
+	const l = this.ensure(_, len);
 	if (l === 0 && len > 0) return undefined;
-	var result = this.buf.slice(this.pos, this.pos + l);
+	const result = this.buf.slice(this.pos, this.pos + l);
 	if (!peekOnly) this.pos += l;
 	return result;
 }
@@ -107,10 +107,10 @@ Reader.prototype.unread = function(len) {
 ///   Specialized peekers for numbers.
 function numberReader(name, len, peekOnly) {
 	return function(_) {
-		var got = this.ensure(_, len);
+		const got = this.ensure(_, len);
 		if (got === 0) return undefined;
 		if (got < len) throw new Error("unexpected EOF: expected " + len + ", got " + got);
-		var result = this.buf[name](this.pos);
+		const result = this.buf[name](this.pos);
 		if (!peekOnly) this.pos += len;
 		return result;
 	};
@@ -199,8 +199,8 @@ function numberWriter(name, len) {
 }
 
 NUMBERS.forEach(function(pair) {
-	var len = pair[1];
-	var names = len > 1 ? [pair[0] + 'BE', pair[0] + 'LE'] : [pair[0]];
+	const len = pair[1];
+	const names = len > 1 ? [pair[0] + 'BE', pair[0] + 'LE'] : [pair[0]];
 	names.forEach(function(name) {
 		Reader.prototype['read' + name] = numberReader('read' + name, len, false);
 		Reader.prototype['peek' + name] = numberReader('read' + name, len, true);
@@ -210,7 +210,7 @@ NUMBERS.forEach(function(pair) {
 });
 
 function makeEndian(base, verbs, suffix) {
-	var construct = function() {
+	const construct = function() {
 		base.apply(this, arguments);
 	}
 	construct.prototype = Object.create(base.prototype);
@@ -224,10 +224,10 @@ function makeEndian(base, verbs, suffix) {
 
 require('../reader').decorate(Reader.prototype);
 require('../writer').decorate(Writer.prototype);
-var ReaderLE = makeEndian(Reader, ['read', 'peek', 'unread'], 'LE');
-var ReaderBE = makeEndian(Reader, ['read', 'peek', 'unread'], 'BE');
-var WriterLE = makeEndian(Writer, ['write'], 'LE');
-var WriterBE = makeEndian(Writer, ['write'], 'BE');
+const ReaderLE = makeEndian(Reader, ['read', 'peek', 'unread'], 'LE');
+const ReaderBE = makeEndian(Reader, ['read', 'peek', 'unread'], 'BE');
+const WriterLE = makeEndian(Writer, ['write'], 'LE');
+const WriterBE = makeEndian(Writer, ['write'], 'BE');
 
 module.exports = {
 	// Documentation above, next to the constructor

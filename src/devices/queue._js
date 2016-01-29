@@ -1,7 +1,7 @@
 "use strict";
 
-var generic = require('./generic');
-var flows = require('streamline-runtime').flows;
+const generic = require('./generic');
+const flows = require('streamline-runtime').flows;
 
 /// !doc
 /// ## Queue device
@@ -9,7 +9,7 @@ var flows = require('streamline-runtime').flows;
 /// The queue device can be used to desynchronize processing between one or several tasks that produce
 /// data and a task that consumes queued data.
 /// 
-/// `var ez = require('ez-streams');`
+/// `const ez = require('ez-streams');`
 /// 
 /// * `queue = ez.devices.queue(options)`  
 ///   creates a queue device.  
@@ -23,8 +23,8 @@ var flows = require('streamline-runtime').flows;
 ///   If you pass this option, `queue.put(data)` will return true if the data has been queued and false if 
 ///   the data has been discarded because the queue is full. 
 ///   Note that `queue.writer will not discard the data but instead will wait for the queue to become available. 
-module.exports = function(options) {
-	var queue = flows.queue(options);
+module.exports = (options) => {
+	const queue = flows.queue(options);
 	queue.reader = generic.reader(queue.read.bind(queue),  function(_) { queue.end.call(queue); });
 	queue.writer = generic.writer(queue.write.bind(queue));
 	return queue;

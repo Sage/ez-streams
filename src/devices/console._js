@@ -1,6 +1,6 @@
 "use strict";
 
-var generic = require('./generic');
+const generic = require('./generic');
 
 function consoleWriter(name) {
 	return generic.writer(function(_, value) {
@@ -11,7 +11,7 @@ function consoleWriter(name) {
 /// !doc
 /// ## Console EZ streams
 /// 
-/// `var ez = require('ez-streams');`
+/// `const ez = require('ez-streams');`
 /// 
 /// * `ez.devices.console.log`  
 /// * `ez.devices.console.info`  

@@ -50,19 +50,19 @@
 /// 
 /// ## API
 /// 
-/// `var ez = require("ez-streams")`  
+/// `const ez = require("ez-streams")`  
 /// 
 module.exports = {
 	/// * `transform = ez.transforms.json.parser(options)`  
 	///   creates a parser transform. The following options can be set:  
 	///   - `unbounded`: use _unbounded_ format  
 	///   - `reviver`: reviver function which is passed to [JSON.parse](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/parse)
-	parser: function(options) {
+	parser: (options) => {
 		options = options || {};
 
-		return function(_, reader, writer) {
+		return (_, reader, writer) => {
 			function read(_) {
-				var data = reader.read(_);
+				const data = reader.read(_);
 				return Buffer.isBuffer(data) ? data.toString(options.encoding || 'utf8') : data;
 			}
 			var pos = 0,
@@ -104,7 +104,7 @@ module.exports = {
 
 			function flush(_) {
 				collected += chunk.substring(beg, pos);
-				var val = JSON.parse(collected, options.reviver);
+				const val = JSON.parse(collected, options.reviver);
 				writer.write(_, val);
 				beg = undefined;
 				collected = "";
@@ -174,11 +174,11 @@ module.exports = {
 	///   - `unbounded`: use _unbounded_ format  
 	///   - `replacer`: replacer function which is passed to [JSON.stringify](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/parse)
 	///   - `space`: space formatting directive which is passed to JSON.stringify.
-	formatter: function(options) {
+	formatter: (options) => {
 		options = options || {};
-		return function(_, reader, writer) {
+		return (_, reader, writer) => {
 			if (!options.unbounded) writer.write(_, '[');
-			reader.forEach(_, function(_, obj, i) {
+			reader.forEach(_, (_, obj, i) => {
 				if (i > 0) writer.write(_, ',\n');
 				writer.write(_, JSON.stringify(obj, options.replacer, options.space));
 			});

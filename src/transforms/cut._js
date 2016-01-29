@@ -2,14 +2,14 @@
 /// !doc
 /// ## Transform to cut string and binary streams
 /// 
-/// `var ez = require("ez-streams")`  
+/// `const ez = require("ez-streams")`  
 /// 
 /// * `transform = ez.transforms.cut(options)`  
 ///   cuts a string or binary stream in chunks of equal size  
-module.exports = function(options) {
-	var options = options || {};
-	var size = typeof options === 'number' ? options : options.size;
-	return function(_, reader, writer) {
+module.exports = (options) => {
+	options = options || {};
+	const size = typeof options === 'number' ? options : options.size;
+	return (_, reader, writer) => {
 		if (!size) return reader.pipe(_, writer);
 		var data = reader.read(_);
 		while (data !== undefined) {

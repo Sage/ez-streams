@@ -1,7 +1,7 @@
 "use strict";
 
-var generic = require('./generic');
-var stopException = require('../stop-exception');
+const generic = require('./generic');
+const stopException = require('../stop-exception');
 
 var lastId = 0;
 var tracer; // = console.error;
@@ -10,7 +10,7 @@ module.exports = {
 	/// !doc
 	/// ## Special device that transforms a writer into a reader
 	/// 
-	/// `var ez = require('ez-streams');`
+	/// `const ez = require('ez-streams');`
 	/// 
 	/// * `uturn = ez.devices.uturn.create()`  
 	///   creates a uturn device.  
@@ -18,19 +18,19 @@ module.exports = {
 	///   and a `uturn.reader` from which you can read.  
 	create: function() {
 		var state = 'idle', pendingData, pendingCb, error;
-		var id = ++lastId;
+		const id = ++lastId;
 
 		function bounce(err, val) {
-			var lcb = pendingCb;
+			const lcb = pendingCb;
 			pendingCb = null;
 			if (lcb) lcb(err, val);
 		}
 
 		return {
 			reader: generic.reader(function read(cb) {
-				setImmediate(function() {
+				setImmediate(() => {
 					tracer && tracer(id, "READ", state, pendingData);
-					var st = state;
+					const st = state;
 					switch (st) {
 						case 'writing':
 							state = pendingData === undefined ? 'done' : 'idle';
@@ -48,7 +48,7 @@ module.exports = {
 						case 'readStopping':
 						case 'writeStopping':
 							state = 'done';
-							var arg = stopException.unwrap(error);
+							const arg = stopException.unwrap(error);
 							// acknowledge the stop
 							bounce();
 							// return undefined or throw
@@ -64,10 +64,10 @@ module.exports = {
 					}
 				});
 			}, function stop(cb, arg) {
-				setImmediate(function() {
+				setImmediate(() => {
 					error = error || stopException.make(arg);
 					tracer && tracer(id, "STOP READER", state, arg);
-					var st = state;
+					const st = state;
 					switch (st) {
 						case 'reading':
 							state = 'done';
@@ -99,9 +99,9 @@ module.exports = {
 				});
 			}),
 			writer: generic.writer(function write(cb, data) {
-				setImmediate(function() {
+				setImmediate(() => {
 					tracer && tracer(id, "WRITE", state, data);
-					var st = state;
+					const st = state;
 					switch (st) {
 						case 'reading':
 							state = data === undefined ? 'done' : 'idle';
@@ -133,10 +133,10 @@ module.exports = {
 					}
 				});
 			}, function stop(cb, arg) {
-				setImmediate(function() {
+				setImmediate(() => {
 					tracer && tracer(id, "STOP WRITER", state, arg);
 					error = error || stopException.make(arg);
-					var st = state;
+					const st = state;
 					switch (st) {
 						case 'reading':
 							// send undefined or exception to read
@@ -161,7 +161,7 @@ module.exports = {
 				});
 			}),
 			end: function(err) {
-				setImmediate(function() {
+				setImmediate(() => {
 					tracer && tracer(id, "END", state, err);
 					err = stopException.unwrap(err);
 					error = error || err;

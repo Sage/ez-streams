@@ -31,9 +31,9 @@
 /// 
 /// ## API
 /// 
-/// `var ez = require('ez-streams')`  
+/// `const ez = require('ez-streams')`  
 /// 
-var begWord = {},
+const begWord = {},
 	inWord = {},
 	space = {},
 	LF = '\n'.charCodeAt(0),
@@ -55,9 +55,9 @@ var begWord = {},
 	},
 	entitiesByName = {};
 
-(function() {
+(() => {
 	function add(clas, chs, i) {
-		chs.split('').forEach(function(ch) {
+		chs.split('').forEach((ch) => {
 			clas[ch.charCodeAt(0) + (i || 0)] = true;
 		});
 	}
@@ -65,7 +65,7 @@ var begWord = {},
 	for (var i = 0; i < 26; i++) add(begWord, 'aA', i), add(inWord, 'aA', i);
 	add(begWord, ':_'), add(inWord, ':_-.');
 	add(space, ' \t\r\n');
-	Object.keys(entitiesByChar).forEach(function(ch) {
+	Object.keys(entitiesByChar).forEach((ch) => {
 		entitiesByName[entitiesByChar[ch]] = ch;
 	});
 })();
@@ -74,23 +74,23 @@ function assert(cond, msg) {
 	if (!cond) throw new Error(msg);
 }
 
-var MARKER = '689c93f7-0147-40e9-a172-5c6c1c12ba11';
+const MARKER = '689c93f7-0147-40e9-a172-5c6c1c12ba11';
 
 module.exports = {
 	/// * `transform = ez.transforms.xml.parser(options)`  
 	///   creates a parser transform. The following options can be set:  
 	///   - `tags`: the list of tags that enclose each item returned by the reader
-	parser: function(options) {
+	parser: (options) => {
 		options = options || {};
 		var tags = typeof options === "string" ? options : options.tags;
 		tags = typeof tags === "string" ? tags.split('/') : tags;
 		if (!tags) throw new Error("cannot transform XML: 'tags' option missing")
 
 		function builder(error) {
-			var root = {
+			const root = {
 				$childCount: 0
-			},
-				elt = root;
+			};
+			var elt = root;
 
 			function mustEmit(parent, tag) {
 				if (tag !== tags[tags.length - 1]) return false;
@@ -102,7 +102,7 @@ module.exports = {
 			}
 
 			function clone(parent, tag, child) {
-				var pp = Object.keys(parent).reduce(function(r, k) {
+				const pp = Object.keys(parent).reduce((r, k) => {
 					if (k[0] !== '$' || k.length === 1) r[k] = tag === k ? child : parent[k];
 					return r;
 				}, {});
@@ -110,12 +110,12 @@ module.exports = {
 			}
 
 			return {
-				push: function(tag) {
+				push: (tag) => {
 					if (elt.$cdata != null) throw error("cannot mix CDATA and children");
 					if (elt.$value != null) throw error("cannot mix value and children");
 					elt.$childCount++;
-					var emit = mustEmit(elt, tag);
-					var child = {
+					const emit = mustEmit(elt, tag);
+					const child = {
 						$tag: tag,
 						$parent: elt,
 						$childCount: 0,
@@ -130,10 +130,10 @@ module.exports = {
 					}
 					elt = child;
 				},
-				pop: function(_, writer, tag) {
+				pop: (_, writer, tag) => {
 					if (tag && tag !== elt.$tag) throw error("closing tag mismatch: expected " + elt.$tag + ", got " + tag);
-					var parent = elt.$parent;
-					var emit = elt.$emit;
+					const parent = elt.$parent;
+					const emit = elt.$emit;
 					if (!parent) throw error("too many closing tags");
 					delete elt.$parent;
 					// if elt does not have attributes, replace it by value in parent
@@ -149,22 +149,22 @@ module.exports = {
 					if (emit) writer.write(_, clone(parent, tag, elt));
 					elt = parent;
 				},
-				attribute: function(atb, val) {
+				attribute: (atb, val) => {
 					elt.$ = elt.$ || {};
 					if (elt.$[atb] != null) throw error("duplicate attribute: " + atb);
 					elt.$[atb] = val;
 				},
-				value: function(val) {
+				value: (val) => {
 					if (elt.$cdata != null) throw error("cannot mix CDATA and value");
 					if (elt.$childCount) throw error("cannot mix children and value");
 					elt.$value = val;
 				},
-				cdata: function(val) {
+				cdata: (val) => {
 					if (elt.$value != null) throw error("cannot mix value and CDATA");
 					if (elt.$childCount) throw error("cannot mix children and CDATA");
 					elt.$cdata = val;
 				},
-				getResult: function() {
+				getResult: () => {
 					if (elt !== root) throw error("tag not closed: " + elt.$tag);
 					if (!root.$childCount) throw error("root tag not found");
 					if (root.$childCount !== 1) throw error("too many elements at top level");
@@ -173,7 +173,7 @@ module.exports = {
 				},
 			};
 		}
-		return function(_, reader, writer) {
+		return (_, reader, writer) => {
 			var str = reader.read(_);
 			if (str === undefined) return;
 			if (Buffer.isBuffer(str)) str = str.toString(options.encoding || 'utf8');
@@ -203,7 +203,7 @@ module.exports = {
 			function error(msg) {
 				var end = str.substring(pos).match(/[\n\>]/, pos);
 				end = end ? pos + end.index + 1 : str.length;
-				var line = str.substring(0, pos).split('\n').length;
+				const line = str.substring(0, pos).split('\n').length;
 				return new Error("Invalid XML: " + msg + " at line " + line + " near " + str.substring(pos, end));
 			}
 
@@ -217,13 +217,13 @@ module.exports = {
 			}
 
 			function clean(str) {
-				return str.replace(/&([^;]+);/g, function(s, ent) {
-					var ch = entitiesByName[ent];
+				return str.replace(/&([^;]+);/g, (s, ent) => {
+					const ch = entitiesByName[ent];
 					if (ch) return ch;
 					if (ent[0] != '#') throw error("invalid entity: &" + ent + ";");
 					ent = ent.substring(1);
 					if (ent[0] === 'x') ent = ent.substring(1);
-					var v = parseInt(ent, 16);
+					const v = parseInt(ent, 16);
 					if (isNaN(v)) throw error("hex value expected, got " + ent);
 					return String.fromCharCode(v);
 				});
@@ -337,12 +337,12 @@ module.exports = {
 	///   creates a formatter transform. The following options can be set:  
 	///   - `tags`: the list of tags that enclose each item returned by the reader
 	///   - `indent`: optional indentation string, should only contain spaces.
-	formatter: function(options) {
+	formatter: (options) => {
 		options = options || {};
 		var tags = typeof options === "string" ? options : options.tags;
 		tags = typeof tags === "string" ? tags.split('/') : tags;
 		if (!tags) throw new Error("cannot transform XML: 'tags' option missing")
-		var ident = options && options.indent;
+		const ident = options && options.indent;
 
 		function builder(depth) {
 			var str = '';
@@ -352,8 +352,8 @@ module.exports = {
 			}
 
 			function escape(val) {
-				return typeof(val) !== "string" ? "" + val : val.replace(/([&<>"']|[^ -~\u00a1-\ud7ff\ue000-\ufffd])/g, function(ch) {
-					var ent = entitiesByChar[ch];
+				return typeof(val) !== "string" ? "" + val : val.replace(/([&<>"']|[^ -~\u00a1-\ud7ff\ue000-\ufffd])/g, (ch) => {
+					const ent = entitiesByChar[ch];
 					if (ent) return '&' + ent + ';';
 					var hex = ch.charCodeAt(0).toString(16);
 					while (hex.length < 2) hex = '0' + hex;
@@ -362,19 +362,19 @@ module.exports = {
 				});
 			}
 			return {
-				beginTag: function(tag) {
+				beginTag: (tag) => {
 					options.indent && indent();
 					str += '<' + tag;
 					depth++;
 				},
-				addAttribute: function(atb, val) {
+				addAttribute: (atb, val) => {
 					str += ' ' + atb + '="' + escape(val) + '"';
 				},
-				endTag: function(close) {
+				endTag: (close) => {
 					close && depth--;
 					str += close ? '/>' : '>';
 				},
-				closeTag: function(tag, val) {
+				closeTag: (tag, val) => {
 					depth--;
 					if (val != null) {
 						str += escape(val);
@@ -383,10 +383,10 @@ module.exports = {
 					}
 					str += '</' + tag + '>';
 				},
-				cdata: function(data) {
+				cdata: (data) => {
 					str += '<![CDATA[' + data + ']]>';
 				},
-				getResult: function(extraIndent) {
+				getResult: (extraIndent) => {
 					if (extraIndent) indent();
 					// indexOf to eliminate newline that indent may put before root
 					return str.substring(str.indexOf('<'));
@@ -394,7 +394,7 @@ module.exports = {
 			};
 		}
 
-		return function(_, reader, writer) {
+		return (_, reader, writer) => {
 			function error(msg) {
 				return new Error(msg);
 			}
@@ -402,7 +402,7 @@ module.exports = {
 			function strfy(bld, elt, tag) {
 				if (elt === undefined) return bld;
 				if (Array.isArray(elt)) {
-					elt.forEach(function(child) {
+					elt.forEach((child) => {
 						strfy(bld, child, tag);
 					});
 					return bld;
@@ -416,14 +416,12 @@ module.exports = {
 					bld.closeTag(tag, elt);
 				} else {
 					if (elt.$) {
-						Object.keys(elt.$).forEach(function(atb) {
+						Object.keys(elt.$).forEach((atb) => {
 							var v;
 							if ((v = elt.$[atb]) != null) bld.addAttribute(atb, v);
 						});
 					}
-					var keys = Object.keys(elt).filter(function(key) {
-						return key[0] !== '$';
-					});
+					const keys = Object.keys(elt).filter((key) => key[0] !== '$');
 					if (elt.$value !== undefined) {
 						if (keys.length > 0) throw error("cannot mix $value and $children");
 						if (elt.$cdata) throw error("cannot mix $value and $cdata");
@@ -441,7 +439,7 @@ module.exports = {
 						bld.closeTag(tag);
 					} else if (keys.length > 0) {
 						bld.endTag();
-						keys.forEach(function(key) {
+						keys.forEach((key) => {
 							strfy(bld, elt[key], key);
 						});
 						bld.closeTag(tag);
@@ -459,22 +457,22 @@ module.exports = {
 				return elt;
 			}
 
-			var rootTag = tags[0];
-			var parentTag = tags[tags.length - 1];
+			const rootTag = tags[0];
+			const parentTag = tags[tags.length - 1];
 
-			var elt = reader.read(_);
+			const elt = reader.read(_);
 			if (elt === undefined) return;
 			var parent = getParent(elt);
-			var saved = parent[parentTag];
+			const saved = parent[parentTag];
 			parent[parentTag] = MARKER;
-			var envelope = strfy(builder(0), elt[rootTag], rootTag).getResult();
+			const envelope = strfy(builder(0), elt[rootTag], rootTag).getResult();
 			parent[parentTag] = saved;
 
-			var marker = '<' + parentTag + '>' + MARKER + '</' + parentTag + '>'; 
-			var markerPos = envelope.indexOf(marker);
+			const marker = '<' + parentTag + '>' + MARKER + '</' + parentTag + '>'; 
+			const markerPos = envelope.indexOf(marker);
 			if (markerPos < 0) throw new Error("internal error: marker not found");
 
-			var prologue = '<?xml version="1.0"?>' + (options.indent ? '\n' : '');
+			const prologue = '<?xml version="1.0"?>' + (options.indent ? '\n' : '');
 			writer.write(_, prologue + envelope.substring(0, markerPos));
 			while (true) {
 				var xml = strfy(builder(tags.length - 1), parent[parentTag], parentTag).getResult(true);

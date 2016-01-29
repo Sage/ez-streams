@@ -1,13 +1,13 @@
 "use strict";
 
-var readerApi = require('../reader');
-var writerApi = require('../writer');
+const readerApi = require('../reader');
+const writerApi = require('../writer');
 
 module.exports = {
 	/// !doc
 	/// ## In-memory buffer streams
 	/// 
-	/// `var ez = require('ez-streams');`
+	/// `const ez = require('ez-streams');`
 	/// 
 	/// * `reader = ez.devices.buffer.reader(buffer, options)`  
 	///   creates an EZ reader that reads its entries from `buffer`.  
@@ -15,19 +15,19 @@ module.exports = {
 	///   You can force synchronous delivery by setting `options.sync` to `true`.
 	///   The default chunk size is 1024. You can override it by passing 
 	///   a `chunkSize` option.
-	reader: function(buffer, options) {
+	reader: (buffer, options) => {
 		if (typeof options === "number") options = {
 			chunkSize: options
 		};
 		else options = options || {};
-		var chunkSize = options.chunkSize || 1024;
+		const chunkSize = options.chunkSize || 1024;
 		var pos = 0;
 		return readerApi.decorate({
 			read: function(_) {
 				if (!options.sync) setImmediate(_);
 				if (pos >= buffer.length) return;
-				var len = typeof chunkSize === "function" ? chunkSize() : chunkSize;
-				var s = buffer.slice(pos, pos + len);
+				const len = typeof chunkSize === "function" ? chunkSize() : chunkSize;
+				const s = buffer.slice(pos, pos + len);
 				pos += len;
 				return s;
 			},
@@ -39,9 +39,9 @@ module.exports = {
 	///   You can force synchronous write by setting `options.sync` to `true`.
 	///   `writer.toBuffer()` returns the internal buffer into which the 
 	///   chunks have been collected.
-	writer: function(options) {
+	writer: (options) => {
 		options = options || {};
-		var chunks = [];
+		const chunks = [];
 		return writerApi.decorate({
 			write: function(_, data) {
 				if (!options.sync) setImmediate(_);

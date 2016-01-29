@@ -2,18 +2,18 @@
 /// !doc
 /// ## Stream transform for MIME multipart
 /// 
-/// `var ez = require("ez-streams")`  
+/// `const ez = require("ez-streams")`  
 /// 
-var generic = require('../devices/generic');
-var flows = require('streamline-runtime').flows;
+const generic = require('../devices/generic');
+const flows = require('streamline-runtime').flows;
 
 function parseContentType(contentType) {
 	if (!contentType) throw new Error("content-type missing");
-	var match = /^multipart\/([\w\-]*)/.exec(contentType);
+	const match = /^multipart\/([\w\-]*)/.exec(contentType);
 	if (!match) return null;
-	var subType = match[1];
-	var atbs = contentType.split(/\s*;\s*/).reduce(function(r, s) {
-		var kv = s.split(/\s*=\s*/);
+	const subType = match[1];
+	const atbs = contentType.split(/\s*;\s*/).reduce((r, s) => {
+		const kv = s.split(/\s*=\s*/);
 		r[kv[0]] = kv[1];
 		return r;
 	}, {});
@@ -28,14 +28,14 @@ module.exports = {
 	///   Creates a parser transform.
 	///   The content type, which includes the boundary,
 	///   is passed via `options['content-type']`.
-	parser: function(options) {
-		var ct = parseContentType(options && options["content-type"]);
-		var boundary = ct.boundary;
+	parser: (options) => {
+		const ct = parseContentType(options && options["content-type"]);
+		const boundary = ct.boundary;
 		if (!boundary) throw new Error("multipart boundary missing");
 
-		return function(_, reader, writer) {
+		return (_, reader, writer) => {
 			reader = reader.peekable();
-			var handshake = flows.handshake();
+			const handshake = flows.handshake();
 			while (true) {
 				var buf = reader.read(_, 2048);
 				if (!buf || !buf.length) return;
@@ -43,27 +43,27 @@ module.exports = {
 				var i = str.indexOf(boundary);
 				if (i < 0) throw new Error("boundary not found");
 				var lines = str.substring(0, i).split(/\r?\n/);
-				var headers = lines.slice(0, lines.length - 2).reduce(function(h, l) {
-					var kv = l.split(/\s*:\s*/);
+				var headers = lines.slice(0, lines.length - 2).reduce((h, l) => {
+					const kv = l.split(/\s*:\s*/);
 					h[kv[0].toLowerCase()] = kv[1];
 					return h;
 				}, {});
 				i = str.indexOf('\n', i);
 				reader.unread(buf.slice(i + 1));
 
-				var read = function(_) {
-						var len = Math.max(boundary.length, 256);
-						var buf = reader.read(_, 32 * len);
+				var read = (_) => {
+						const len = Math.max(boundary.length, 256);
+						const buf = reader.read(_, 32 * len);
 						if (!buf || !buf.length) {
 							handshake.notify();
 							return;
 						}
 						// would be nice if Buffer had an indexOf. Would avoid a conversion to string.
 						// I could use node-buffertools but it introduces a dependency on a binary module.
-						var s = buf.toString("binary");
-						var i = s.indexOf(boundary);
+						const s = buf.toString("binary");
+						const i = s.indexOf(boundary);
 						if (i === 0) {
-							var j = s.indexOf('\n', boundary.length);
+							const j = s.indexOf('\n', boundary.length);
 							if (j < 0) throw new Error("newline missing after boundary");
 							reader.unread(buf.slice(j + 1));
 							handshake.notify();
@@ -78,7 +78,7 @@ module.exports = {
 							return buf.slice(0, 31 * len);
 						}
 					};
-				var partReader = generic.reader(read);
+				const partReader = generic.reader(read);
 				partReader.headers = headers;
 				writer.write(_, partReader);
 				handshake.wait(_);
@@ -90,21 +90,21 @@ module.exports = {
 	///   Creates a formatter transform.
 	///   The content type, which includes the boundary,
 	///   is passed via `options['content-type']`.
-	formatter: function(options) {
-		var ct = parseContentType(options && options["content-type"]);
-		var boundary = ct.boundary;
+	formatter: (options) => {
+		const ct = parseContentType(options && options["content-type"]);
+		const boundary = ct.boundary;
 		if (!boundary) throw new Error("multipart boundary missing");
 
-		return function(_, reader, writer) {
+		return (_, reader, writer) => {
 			var part;
 			while ((part = reader.read(_)) !== undefined) {
 				if (!part.headers) throw new Error("part does not have headers");
-				Object.keys(part.headers).forEach_(_, function(_, key) {
+				Object.keys(part.headers).forEach_(_, (_, key) => {
 					writer.write(_, new Buffer(key + ": " + part.headers[key] + "\n", "binary"));
 				});
 				writer.write(_, new Buffer("\n" + boundary + "\n"));
 				// cannot use pipe because pipe writes undefined at end.
-				part.forEach(_, function(_, data) {
+				part.forEach(_, (_, data) => {
 					writer.write(_, data);
 				});
 				writer.write(_, new Buffer("\n" + boundary + "\n"));

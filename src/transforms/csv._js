@@ -2,27 +2,27 @@
 /// !doc
 /// ## Stream transform for CSV files
 /// 
-/// `var ez = require("ez-streams")`  
+/// `const ez = require("ez-streams")`  
 /// 
 
-var lines = require('./lines');
+const lines = require('./lines');
 
 module.exports = {
 	/// * `transform = ez.transforms.csv.parser(options)`  
 	///   creates a parser transform. The following options can be set:  
 	///   - `sep`: the field separator, comma by default 
-	parser: function(options) {
-		var options = options || {};
+	parser: (options) => {
+		options = options || {};
 		options.sep = options.sep || ',';
-		return function(_, reader, writer) {
+		return (_, reader, writer) => {
 			reader = reader.transform(lines.parser());
-			var keys = reader.read(_).split(options.sep);
-			reader.forEach(_, function(_, line) {
+			const keys = reader.read(_).split(options.sep);
+			reader.forEach(_, (_, line) => {
 				// ignore empty line (we get one at the end if file is terminated by newline)
 				if (line.length === 0) return;
-				var values = line.split(options.sep);
-				var obj = {};
-				keys.forEach(function(key, i) {
+				const values = line.split(options.sep);
+				const obj = {};
+				keys.forEach((key, i) => {
 					obj[key] = values[i];
 				});
 				writer.write(_, obj);
@@ -33,19 +33,17 @@ module.exports = {
 	///   creates a formatter transform. The following options can be set:  
 	///   - `sep`: the field separator, comma by default 
 	///   - `eol`: the end of line marker (`\n`  or `\r\n`)  
-	formatter: function(options) {
-		var options = options || {};
+	formatter: (options) => {
+		options = options || {};
 		options.sep = options.sep || ',';
 		options.eol = options.eol || '\n';
-		return function(_, reader, writer) {
+		return (_, reader, writer) => {
 			var obj = reader.read(_);
 			if (!obj) return;
-			var keys = Object.keys(obj);
+			const keys = Object.keys(obj);
 			writer.write(_, keys.join(options.sep) + options.eol);
 			do {
-				var values = keys.map(function(key) {
-					return obj[key]
-				});
+				var values = keys.map((key) => obj[key]);
 				writer.write(_, values.join(options.sep) + options.eol);
 			} while ((obj = reader.read(_)) !== undefined);
 		};

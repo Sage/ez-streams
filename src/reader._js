@@ -26,16 +26,16 @@
 /// !doc
 /// ## EZ Streams core reader API
 /// 
-/// `var ez = require("ez-streams")`  
+/// `const ez = require("ez-streams")`  
 /// 
-var streams = require('./node-wrappers');
-var flows = require('streamline-runtime').flows;
-var predicate = require('./predicate').convert;
-var stopException = require('./stop-exception');
+const streams = require('./node-wrappers');
+const flows = require('streamline-runtime').flows;
+const predicate = require('./predicate').convert;
+const stopException = require('./stop-exception');
 
 var generic;
 
-var Decorated = function Decorated(parent, read, stop) {
+const Decorated = function Decorated(parent, read, stop) {
 	this.parent = parent;
 	this.read = read;
 	this.stopped = false;
@@ -64,13 +64,13 @@ exports.decorate = function(proto) {
 	///   This call is asynchonous. It returns the number of entries processed when the end of stream is reached.
 	proto.forEach = function(_, fn, thisObj) {
 		thisObj = thisObj !== undefined ? thisObj : this;
-		var val;
 		return tryCatch(_, this, (_) => {
-			for (var i = 0; (val = this.read(_)) !== undefined; i++) {
+			var i, val;
+			for (i = 0; (val = this.read(_)) !== undefined; i++) {
 				fn.call(thisObj, _, val, i);
 			}			
+			return i;
 		});
-		return i;
 	};
 
 	/// * `reader = reader.map(fn, thisObj)`  
@@ -79,9 +79,9 @@ exports.decorate = function(proto) {
 	///   Returns another reader on which other operations may be chained.
 	proto.map = function(fn, thisObj) {
 		thisObj = thisObj !== undefined ? thisObj : this;
-		var parent = this;
-		var count = 0;
+		const parent = this;
 		return new Decorated(parent, function(_) {
+			var count = 0;
 			var val = parent.read(_);
 			if (val === undefined) return undefined;
 			return fn.call(thisObj, _, val, count++);
@@ -173,21 +173,21 @@ exports.decorate = function(proto) {
 	///   Branches another writer on the chain`.  
 	///   Returns another reader on which other operations may be chained.
 	proto.tee = function(writer) {
-		var parent = this;
+		const parent = this;
 		var writeStop;
 		var readStop;
-		var stopResult = (arg) => {
+		const stopResult = (arg) => {
 			if (!arg || arg === true) return undefined;
 			else throw arg;			
 		}
-		var readDirect = (_) => {
+		const readDirect = (_) => {
 			var val = parent.read(_);
 			if (!writeStop) {
 				try {
 					writer.write(_, val);
 				} catch (ex) {
-					var arg = stopException.unwrap(ex);
-					var writeStop = [arg];
+					const arg = stopException.unwrap(ex);
+					writeStop = [arg];
 					if (readStop) {
 						// both outputs are now stopped
 						// stop parent if readStop was a soft stop
@@ -235,16 +235,15 @@ exports.decorate = function(proto) {
 	/// * `readers = reader.dup()`  
 	///   Duplicates a reader and returns a pair of readers which can be read from independently.
 	proto.dup = function() {
-		var uturn = require('./devices/uturn').create();
-		var readers = [this.tee(uturn.writer), uturn.reader];
-		return readers;
+		const uturn = require('./devices/uturn').create();
+		return [this.tee(uturn.writer), uturn.reader];
 	};
 
 	/// * `reader = reader.concat(reader1, reader2)`  
 	///   Concatenates reader with one or more readers.  
 	///   Works like array.concat: you can pass the readers as separate arguments, or pass an array of readers.  
 	proto.concat = function() {
-		var streams = Array.prototype.concat.apply([], arguments);
+		const streams = Array.prototype.concat.apply([], arguments);
 		var stream = this;
 		return new Decorated(this, function read(_) {
 			var val;
@@ -272,7 +271,7 @@ exports.decorate = function(proto) {
 	///   Reads all entries and returns them as a single string or buffer. Returns undefined if nothing has been read.
 	///   Note that this call is an anti-pattern for streaming but it may be useful when working with small streams.
 	proto.readAll = function(_) {
-		var arr = this.toArray(_);
+		const arr = this.toArray(_);
 		if (typeof arr[0] === 'string') return arr.join('');
 		if (Buffer.isBuffer(arr[0])) return Buffer.concat(arr);
 		return arr.length > 0 ? arr : undefined;
@@ -287,8 +286,8 @@ exports.decorate = function(proto) {
 	///   Returns another reader on which other operations may be chained.
 	proto.transform = function(fn, thisObj) {
 		thisObj = thisObj !== undefined ? thisObj : this;
-		var parent = this;
-		var uturn = require('./devices/uturn').create();
+		const parent = this;
+		const uturn = require('./devices/uturn').create();
 		fn.call(thisObj, (err) => {
 			// stop parent at end
 			parent.stop((e) => {
@@ -305,7 +304,7 @@ exports.decorate = function(proto) {
 	proto.filter = function(fn, thisObj) {
 		thisObj = thisObj !== undefined ? thisObj : this;
 		if (typeof fn !== 'function') fn = predicate(fn);
-		var parent = this;
+		const parent = this;
 		var i = 0, done = false;
 		return new Decorated(parent, function(_) {
 			while (!done) {
@@ -324,7 +323,7 @@ exports.decorate = function(proto) {
 	proto.until = function(fn, thisObj, stopArg) {
 		thisObj = thisObj !== undefined ? thisObj : this;
 		if (typeof fn !== 'function') fn = predicate(fn);
-		var parent = this;
+		const parent = this;
 		var i = 0;
 		return new Decorated(parent, function(_) {
 			var val = parent.read(_);
@@ -368,8 +367,8 @@ exports.decorate = function(proto) {
 	///   Returns a `StreamGroup` on which other operations can be chained.
 	proto.fork = function(consumers) {
 		// simple implementation with repeated dup.
-		var parent = this;
-		var readers = [];
+		const parent = this;
+		const readers = [];
 		if (consumers.length === 1) {
 			readers.push(consumers[0](parent));
 		} else {
@@ -394,9 +393,9 @@ exports.decorate = function(proto) {
 		if (typeof options === "number") options = {
 			count: options,
 		};
-		var parent = this;
-		var streams = [];
-		var funnel = flows.funnel(1);
+		const parent = this;
+		const streams = [];
+		const funnel = flows.funnel(1);
 		var inside = 0;
 		var stopArg;
 		for (var i = 0; i < options.count; i++) {
@@ -419,7 +418,7 @@ exports.decorate = function(proto) {
 				})));
 			})(i);
 		}
-		var group = new StreamGroup(streams);
+		const group = new StreamGroup(streams);
 		return options.shuffle ? group.dequeue() : group.rr();
 	};
 
@@ -429,9 +428,9 @@ exports.decorate = function(proto) {
 	///   - `reader.peek(_)`: same as `read(_)` but does not consume the item. 
 	///   - `reader.unread(val)`: pushes `val` back so that it will be returned by the next `read(_)`
 	proto.peekable = function() {
-		var parent = this;
-		var buffered = [];
-		var stream = new Decorated(parent, function(_) {
+		const parent = this;
+		const buffered = [];
+		const stream = new Decorated(parent, function(_) {
 			return buffered.length > 0 ? buffered.pop() : parent.read(_);
 		});
 		stream.unread = function(val) {
@@ -449,13 +448,13 @@ exports.decorate = function(proto) {
 	/// * `reader = reader.buffer(max)`  
 	///   Returns a stream which is identical to the original one but in which up to `max` entries may have been buffered.  
 	proto.buffer = function(max) {
-		var parent = this;
-		var buffered = [];
+		const parent = this;
+		const buffered = [];
 		var resume;
 		var err;
 		var pending = false;
 
-		var fill = () => {
+		const fill = () => {
 			if (pending) return;
 			pending = true;
 			parent.read((e, v) => {
@@ -492,19 +491,18 @@ exports.decorate = function(proto) {
 	};
 
 	proto.join = function(streams, fn, thisObj) {
-		var all = [this].concat(streams);
-		return new StreamGroup(all).dequeue();
+		return new StreamGroup([this].concat(streams)).dequeue();
 	};
 
 	/// * `stream = reader.nodify()`  
 	///   converts the reader into a native node Readable stream.  
 	proto.nodify = function() {
-		var stream = new (require('stream').Readable)();
+		const stream = new (require('stream').Readable)();
 		var pending = false;
-		var end = () => {
+		const end = () => {
 			stream.push(null);
 		}
-		var more = () => {
+		const more = () => {
 			if (pending) return;
 			var sync = true;
 			pending = true;
@@ -532,8 +530,7 @@ exports.decorate = function(proto) {
 	/// * `reader = reader.nodeTransform(duplex)`  
 	///   pipes the reader into a node duplex stream. Returns another reader. 
 	proto.nodeTransform = function(duplex) {
-		var piped = this.nodify().pipe(duplex);
-		return require('./devices/node').reader(piped);
+		return require('./devices/node').reader(this.nodify().pipe(duplex));
 	};
 
 	/// * `cmp = reader1.compare(_, reader2)`  
@@ -594,11 +591,11 @@ function StreamGroup(readers) {
 ///   Dequeues values in the order in which they are delivered by the readers.
 ///   Returns a stream on which other operations may be chained.
 StreamGroup.prototype.dequeue = function() {
-	var results = [];
+	const results = [];
 	var alive = this.readers.length;
 	var resume;
 	this.readers.forEach((stream, i) => {
-		var next = () => {
+		const next = () => {
 			if (alive === 0) return;
 				stream.read((e, v) => {
 					if (!e && v === undefined) alive--;
@@ -623,7 +620,7 @@ StreamGroup.prototype.dequeue = function() {
 	});
 	return new Decorated(this, function read(cb) {
 		if (alive <= 0) return cb(null);
-		var res = results.shift();
+		const res = results.shift();
 		if (res) {
 			if (res.next) res.next();
 			return cb(res.e, res.v);
@@ -636,12 +633,12 @@ StreamGroup.prototype.dequeue = function() {
 ///   Dequeues values in round robin fashion.
 ///   Returns a stream on which other operations may be chained.
 StreamGroup.prototype.rr = function() {
-	var entry = (stream, i) => ({
+	const entry = (stream, i) => ({
 		i: i,
 		stream: stream,
 		read: stream.read(!_),
 	});
-	var q = this.readers.map(entry);
+	const q = this.readers.map(entry);
 	return new Decorated(this, function(_) {
 		var elt;
 		while (elt = q.shift()) {
@@ -681,21 +678,21 @@ StreamGroup.prototype.join = function(fn, thisObj) {
 		} while (i !== last);
 	});
 
-	var values = [];
+	const values = [];
 	var active = this.readers.length;
 	var done = false;
 	var reply;
-	var joinerCb = (err, val) => {
-			if (err || val === undefined) {
-				done = true;
-				return reply(err, val);
-			}
-			// be careful with re-entrancy
-			var rep = reply;
-			reply = null;
-			rep(null, val);
-		};
-	var callbacks = this.readers.map((reader, i) => ((err, data) => {
+	const joinerCb = (err, val) => {
+		if (err || val === undefined) {
+			done = true;
+			return reply(err, val);
+		}
+		// be careful with re-entrancy
+		const rep = reply;
+		reply = null;
+		rep(null, val);
+	};
+	const callbacks = this.readers.map((reader, i) => ((err, data) => {
 		if (active === 0) return reply();
 		if (err) {
 			done = true;
@@ -706,13 +703,13 @@ StreamGroup.prototype.join = function(fn, thisObj) {
 			this.readers[i] = null;
 			if (--active === 0) return reply();
 		}
-		var vals = values.filter((val) => val !== undefined);
+		const vals = values.filter((val) => val !== undefined);
 		if (vals.length === active) {
 			fn.call(thisObj, joinerCb, values);
 		}
 	}));
 
-	var refill = () => {
+	const refill = () => {
 		var count = 0;
 		this.readers.forEach((rd, j) => {
 			if (rd && values[j] === undefined) {

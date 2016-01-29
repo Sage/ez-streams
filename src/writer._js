@@ -26,14 +26,13 @@
 /// !doc
 /// ## EZ Streams core writer API
 /// 
-/// `var ez = require("ez-streams")`  
+/// `const ez = require("ez-streams")`  
 /// 
-var streams = require('./node-wrappers');
-var flows = require('streamline-runtime').flows;
+const streams = require('./node-wrappers');
+const flows = require('streamline-runtime').flows;
 
-var Decorated = function Decorated(write, stop) {
+const Decorated = function Decorated(write, stop) {
 	this.ended = false;
-	var self = this;
 	this.write = function(_, data) {
 		if (data === undefined) {
 			if (!this.ended) write.call(this, _);
@@ -53,14 +52,14 @@ function Pre(writer) {
 
 // add reader methods to Pre.prototype
 !function() {
-	var api = require('./reader').decorate({});
-	Object.keys(api).forEach(function(name) {
+	const api = require('./reader').decorate({});
+	Object.keys(api).forEach((name) => {
 		// skip reducers
 		if (/^[^\()]*\(_/.test(api[name].toString())) return;
 		// skip calls that don't return a reader
 		if (/^(fork|nodify)$/.test(name)) return;
 		Pre.prototype[name] = function(fn) {
-			var uturn = require('./devices/uturn').create();
+			const uturn = require('./devices/uturn').create();
 			uturn.reader[name](fn).pipe(uturn.end, this.writer);
 			return uturn.writer;
 		}
@@ -86,9 +85,9 @@ exports.decorate = function(proto) {
 	/// 
 	/// * `writer = writer.stop(_, err)`  
 	///   stops the writer.  
-	///   by default err is silently ignored
-	proto.stop = function(_, err) {
-		this.end();
+	///   by default arg is silently ignored
+	proto.stop = function(_, arg) {
+		this.write(_);
 		return this;
 	};
 
@@ -97,9 +96,7 @@ exports.decorate = function(proto) {
 	///   ends the writer - compatiblity call (errors won't be thrown to caller)
 	proto.end = function() {
 		if (arguments.length > 0) throw new Error("invalid end call: " + arguments.length + " arg(s)");
-		this.write(function(err) {
-			if (err) throw err;
-		});
+		this.write(flows.check);
 		return this;
 	};
 
@@ -115,21 +112,21 @@ exports.decorate = function(proto) {
 	/// * `stream = writer.nodify()`  
 	///   converts the writer into a native node Writable stream.  
 	proto.nodify = function() {
-		var self = this;
-		var stream = new (require('stream').Writable)();
+		const self = this;
+		const stream = new (require('stream').Writable)();
 		stream._write = function(chunk, encoding, done) {
 			if (chunk && encoding && encoding !== 'buffer') chunk = chunk.toString(encoding);
-			self.write(function(err) {
+			self.write((err) => {
 				if (err) return stream.emit('error', err);
 				done();
 			}, chunk);
 		}
 		// override end to emit undefined marker
-		var end = stream.end;
+		const end = stream.end;
 		stream.end = function(chunk, encoding, cb) {
-			end.call(stream, chunk, encoding, function(err) {
+			end.call(stream, chunk, encoding, (err) => {
 				if (err) return stream.emit('error', err);
-				cb = cb || function(err) {};
+				cb = cb || ((err) => {});
 				self.write(cb);
 			});
 		};
