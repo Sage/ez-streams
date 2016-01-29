@@ -62,7 +62,7 @@ var benches = {
 	'streamline loop nextTick': {
 		fn: function(_, max) {
 			var i = 0;
-			for (var i = 0; i < max; i++) process.nextTick(_);
+			for (i = 0; i < max; i++) process.nextTick(_);
 			return dummy(_, i - 1);
 		},
 		time: 681
@@ -100,6 +100,16 @@ var benches = {
 		fn: function(_, max) {
 			var result;
 			myReader(max * 2).limit(max).filter((_) => true).forEach(_, function(_, val) {
+				result = val;
+			});
+			return result;
+		},
+		time: 3724
+	},
+	'reader with transform': {
+		fn: function(_, max) {
+			var result;
+			myReader(max).transform((_, reader, writer) => reader.pipe(_, writer)).forEach(_, function(_, val) {
 				result = val;
 			});
 			return result;
