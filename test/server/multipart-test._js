@@ -1,11 +1,11 @@
 "use strict";
 QUnit.module(module.id);
 
-var ez = require("../..");
-var buffer = ez.devices.buffer;
-var multipart = ez.transforms.multipart
+const ez = require("../..");
+const buffer = ez.devices.buffer;
+const multipart = ez.transforms.multipart
 
-var boundary = "-- my boundary --";
+const boundary = "-- my boundary --";
 
 function headers(subType) {
 		return {
@@ -14,7 +14,7 @@ function headers(subType) {
 	}
 
 function testStream() {
-	var parts = [{
+	const parts = [{
 		headers: {
 			A: "VA1",
 			B: "VB1",
@@ -38,9 +38,9 @@ function testStream() {
 	return buffer.reader(new Buffer(parts.map(formatPart).join(''), "binary"));
 }
 
-asyncTest('basic multipart/mixed', 13, function(_) {
-	var source = testStream("mixed");
-	var stream = source.transform(multipart.parser(headers("mixed")));
+asyncTest('basic multipart/mixed', 13, (_) => {
+	const source = testStream("mixed");
+	const stream = source.transform(multipart.parser(headers("mixed")));
 	var part = stream.read(_);
 	ok(part != null, "part != null");
 	strictEqual(part.headers.a, "VA1", "header A");
@@ -56,7 +56,7 @@ asyncTest('basic multipart/mixed', 13, function(_) {
 	strictEqual(part.headers.a, "VA2", "header A");
 	strictEqual(part.headers.b, "VB2", "header B");
 	strictEqual(part.headers["content-type"], "text/plain", "content-type");
-	var r = part.read(_);
+	r = part.read(_);
 	strictEqual(r.toString('binary'), 'C2', 'body C2');
 	r = part.read(_);
 	strictEqual(r, undefined, "end of part 2");
@@ -66,14 +66,14 @@ asyncTest('basic multipart/mixed', 13, function(_) {
 	start();
 });
 
-asyncTest('multipart/mixed roundtrip', 2, function(_) {
-	var heads = headers("mixed");
-	var source = testStream("mixed");
-	var writer = buffer.writer();
+asyncTest('multipart/mixed roundtrip', 2, (_) => {
+	const heads = headers("mixed");
+	const source = testStream("mixed");
+	const writer = buffer.writer();
 	source.transform(multipart.parser(heads)).transform(multipart.formatter(heads)).pipe(_, writer);
-	var result = writer.toBuffer();
+	const result = writer.toBuffer();
 	strictEqual(result.length, 158);
-	var writer2 = buffer.writer();
+	const writer2 = buffer.writer();
 	buffer.reader(result).transform(multipart.parser(heads)).transform(multipart.formatter(heads)).pipe(_, writer2);
 	strictEqual(result.toString("binary"), writer2.toBuffer().toString("binary"));
 	start();

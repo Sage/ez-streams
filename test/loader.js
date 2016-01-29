@@ -3,7 +3,7 @@
 if (/[\\\/]test$/.test(__dirname)) require('streamline').register();
 
 // patch asyncTest because streamline test function needs a callback.
-var original = global.asyncTest;
+const original = global.asyncTest;
 global.asyncTest = function(name, expect, fn) {
 	if (typeof expect === 'function') {
 		fn = expect;

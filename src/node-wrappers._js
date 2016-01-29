@@ -21,15 +21,15 @@
 /// 
 /// For a simple example of this API in action, 
 /// see the [google client example](../../../examples/streams/googleClient._js)
-var parseUrl = require("url").parse;
-var globals = require('streamline-runtime').globals;
-var flows = require('streamline-runtime').flows;
-var os = require("os");
+const parseUrl = require("url").parse;
+const globals = require('streamline-runtime').globals;
+const flows = require('streamline-runtime').flows;
+const os = require("os");
 var generic;
 
 function wrapProperties(constr, writable, props) {
 	props.forEach(function(name) {
-		var desc = {};
+		const desc = {};
 		desc.get = function() {
 			return this.emitter[name];
 		};
@@ -79,7 +79,7 @@ function wrapEvents(constr, events) {
 ///   creates a wrapper.
 
 function Wrapper(emitter) {
-	var self = this;
+	const self = this;
 	var closed = false;
 	emitter.on('close', function() {
 		_onClose && _onClose();
@@ -98,7 +98,7 @@ function Wrapper(emitter) {
 
 	self.close = function(callback) {
 			if (closed) return callback();
-			var close = emitter.end || emitter.close || emitter.destroySoon;
+			const close = emitter.end || emitter.close || emitter.destroySoon;
 			if (typeof close !== "function") return callback();
 			_onClose = function(err) {
 				closed = true;
@@ -131,7 +131,7 @@ function Wrapper(emitter) {
 	self.unwrap = function() {
 		emitter.removeAllListeners();
 		closed = true;
-		var em = emitter;
+		const em = emitter;
 		emitter = null;
 		return em;
 	};
@@ -146,14 +146,14 @@ function Wrapper(emitter) {
 ///   creates a readable stream wrapper.
 
 function ReadableStream(emitter, options) {
-	var self = this;
+	const self = this;
 	Wrapper.call(self, emitter);
 	options = options || {};
-	var _low = Math.max(options.lowMark || 0, 0);
-	var _high = Math.max(options.highMark || 0, _low);
+	const _low = Math.max(options.lowMark || 0, 0);
+	const _high = Math.max(options.highMark || 0, _low);
 	var _paused = false;
 	var _current = 0;
-	var _chunks = [];
+	const _chunks = [];
 	var _error;
 	var _done = false;
 	var _encoding;
@@ -188,9 +188,9 @@ function ReadableStream(emitter, options) {
 		!_done && _onData(new Error("stream was closed unexpectedly"));
 	});
 
-	var readChunk = function(callback) {
+	const readChunk = function(callback) {
 		if (_chunks.length > 0) {
-			var chunk = _chunks.splice(0, 1)[0];
+			const chunk = _chunks.splice(0, 1)[0];
 			_current -= chunk.length;
 			if (_current <= _low && _paused && !_done && !_error && !self.closed) {
 				emitter.resume();
@@ -220,7 +220,7 @@ function ReadableStream(emitter, options) {
 	function concat(chunks, total) {
 		if (_encoding) return chunks.join('');
 		if (chunks.length == 1) return chunks[0];
-		var result = new Buffer(total);
+		const result = new Buffer(total);
 		chunks.reduce(function(val, chunk) {
 			chunk.copy(result, val);
 			return val + chunk.length;
@@ -249,8 +249,8 @@ function ReadableStream(emitter, options) {
 			if (len == null) return self.reader.read(_);
 			if (len < 0) len = Infinity;
 			if (len == 0) return _encoding ? "" : new Buffer(0);
-			var chunks = [],
-				total = 0;
+			const chunks = [];
+			var total = 0;
 			while (total < len) {
 				var chunk = self.reader.read(_);
 				if (!chunk) return chunks.length == 0 ? undefined : concat(chunks, total);
@@ -271,7 +271,7 @@ function ReadableStream(emitter, options) {
 	///   reads till the end of stream.  
 	///   Equivalent to `stream.read(_, -1)`.
 	self.readAll = function(_) {
-		var result = self.read(_, -1);
+		const result = self.read(_, -1);
 		return result === undefined ? null : result;
 	};
 	/// * `stream.unread(chunk)`  
@@ -293,7 +293,7 @@ function ReadableStream(emitter, options) {
 		}, 0);
 	};
 
-	var stop = function(_, arg) {
+	const stop = function(_, arg) {
 		if (arg && arg !== true) _error = _error || arg;
 		self.unwrap();
 		emitter = null;
@@ -318,7 +318,7 @@ wrapEvents(ReadableStream, ["error", "data", "end", "close"]);
 ///   creates a writable stream wrapper.
 
 function WritableStream(emitter, options) {
-	var self = this;
+	const self = this;
 	Wrapper.call(self, emitter);
 	options = options || {};
 	var _error;
@@ -333,7 +333,7 @@ function WritableStream(emitter, options) {
 	});
 
 	self.autoClosed.push(function() {
-		var err = new Error("stream was closed unexpectedly");
+		const err = new Error("stream was closed unexpectedly");
 		if (_onDrain) _onDrain(err);
 		else _error = err;
 	});
@@ -402,12 +402,12 @@ WritableStream.prototype = Object.create(Wrapper.prototype);
 wrapEvents(WritableStream, ["drain", "close"]);
 
 function _getEncodingDefault(headers) {
-	var comps = (headers['content-type'] || 'text/plain').split(';');
-	var ctype = comps[0];
+	const comps = (headers['content-type'] || 'text/plain').split(';');
+	const ctype = comps[0];
 	for (var i = 1; i < comps.length; i++) {
-		var pair = comps[i].split('=');
+		const pair = comps[i].split('=');
 		if (pair.length == 2 && pair[0].trim() == 'charset') {
-			var enc = pair[1].trim();
+			const enc = pair[1].trim();
 			return (enc.toLowerCase() === "iso-8859-1") ? "binary" : enc;
 		}
 	}
@@ -421,10 +421,10 @@ function _getEncodingStrict(headers) {
 	// looking into content body - we don't)
 	if (!headers['content-type'] || headers['content-encoding']) return null;
 
-	var comps = headers['content-type'].split(';');
-	var ctype = comps[0];
+	const comps = headers['content-type'].split(';');
+	const ctype = comps[0];
 	for (var i = 1; i < comps.length; i++) {
-		var pair = comps[i].split('=');
+		const pair = comps[i].split('=');
 		if (pair.length === 2 && pair[0].trim() === 'charset') {
 			// List of charsets: http://www.iana.org/assignments/character-sets/character-sets.xml
 			// Node Buffer supported encodings: http://nodejs.org/api/buffer.html#buffer_buffer
@@ -472,7 +472,7 @@ function _getEncoding(headers, options) {
 ///    to control encoding detection (see section below).
 
 function HttpServerRequest(req, options) {
-	var self = this;
+	const self = this;
 	ReadableStream.call(self, req, options);
 	self._request = req;
 	self.setEncoding(_getEncoding(req.headers, options));
@@ -504,7 +504,7 @@ wrapProperties(HttpServerRequest, true, ["method", "url", "headers", "trailers",
 ///   returns a wrapper around `resp`, an `http.ServerResponse` object.
 
 function HttpServerResponse(resp, options) {
-	var self = this;
+	const self = this;
 	WritableStream.call(self, resp, options);
 	self._response = resp;
 }
@@ -535,14 +535,14 @@ function _fixHttpServerOptions(options) {
 
 // Abstract class shared by HttpServer and NetServer
 function Server(emitter) {
-	var self = this;
+	const self = this;
 	Wrapper.call(self, emitter);
 
 	self.listen = function(callback, args) {
 		if (self.closed) throw new Error("cannot listen: server is closed");
 		args = Array.prototype.slice.call(arguments, 1);
 			function reply(err, result) {
-				var cb = callback;
+				const cb = callback;
 				callback = null;
 				cb && cb(err, result);
 			}
@@ -591,9 +591,9 @@ exports.createHttpServer = function(requestListener, options) {
 };
 
 function HttpServer(requestListener, options) {
-	var self = this;
+	const self = this;
 	options = _fixHttpServerOptions(options);
-	var emitter = options.createServer(exports.httpListener(requestListener, options));
+	const emitter = options.createServer(exports.httpListener(requestListener, options));
 	Server.call(self, emitter);
 }
 
@@ -619,7 +619,7 @@ exports.HttpServer = HttpServer;
 ///    returns the response stream.
 
 function HttpClientResponse(resp, options) {
-	var self = this;
+	const self = this;
 	ReadableStream.call(self, resp, options);
 	self._response = resp;
 	self.setEncoding(_getEncoding(resp.headers, options));
@@ -653,7 +653,7 @@ function _fixHttpClientOptions(options) {
 		url: options
 	};
 	if (options.url) {
-		var parsed = parseUrl(options.url);
+		const parsed = parseUrl(options.url);
 		options.protocol = parsed.protocol;
 		options.host = parsed.hostname;
 		options.port = parsed.port;
@@ -712,7 +712,7 @@ function _fixHttpClientOptions(options) {
 						options.headers["Proxy-Authorization"] = "Basic " + proxyToken;
 					} else if (options.proxy.auth.toLowerCase() === "ntlm") {
 
-						var proxyAuthenticator = options.proxy.proxyAuthenticator;
+						const proxyAuthenticator = options.proxy.proxyAuthenticator;
 						if (!proxyAuthenticator) throw new Error("Proxy Authenticator module required");
 						if (!proxyAuthenticator.authenticate) throw new Error("NTLM Engine module MUST provide 'authenticate' function");
 						options.proxyAuthenticate = proxyAuthenticator.authenticate;
@@ -745,10 +745,10 @@ function _fixHttpClientOptions(options) {
 ///      Note that these values are only hints as the data is received in chunks.
 
 function HttpClientRequest(options) {
-	var self = this;
+	const self = this;
 	//options = _fixHttpClientOptions(options);
 	function _init() {
-		var _request = options.module.request(options, function(resp) {
+		const _request = options.module.request(options, function(resp) {
 			_onResponse(null, resp && new HttpClientResponse(resp, options));
 		});
 		WritableStream.call(self, _request, options);
@@ -789,7 +789,7 @@ function HttpClientRequest(options) {
 		if (options.isHttps) {
 			// TODO: Don't authenticate with ntlm, nodejs raises "Parse error" in return of connect with 407 -> HPE_INVALID_CONSTANT
 			return (function(callback) {
-				var proxyOpt = {
+				const proxyOpt = {
 						host: options.proxy.host,
 						port: options.proxy.port,
 						method: 'CONNECT',
@@ -825,7 +825,7 @@ HttpClientRequest.prototype = Object.create(WritableStream.prototype);
 ///    aborts the request. 
 wrapChainMethods(HttpClientRequest, ["abort"]);
 HttpClientRequest.prototype.setTimeout = function(ms) {
-	var self = this;
+	const self = this;
 	this.emitter.setTimeout(ms, function() {
 		self.emitter.emit('error', 'timeout');
 	});
@@ -848,7 +848,7 @@ exports.httpRequest = function(options) {
 ///    creates a network stream wrapper.
 
 function NetStream(emitter, options) {
-	var self = this;
+	const self = this;
 	ReadableStream.call(self, emitter, options.read || options);
 	WritableStream.call(self, emitter, options.write || options);
 }
@@ -886,10 +886,10 @@ exports.socketClient = function(path, options) {
 };
 
 function NetClient(options, args) {
-	var self = this;
+	const self = this;
 	args = Array.prototype.slice.call(arguments, 1);
 	net = net || require("net");
-	var _connection = net.createConnection.apply(net, args);
+	const _connection = net.createConnection.apply(net, args);
 	var _error;
 	var _done = false;
 
@@ -941,14 +941,14 @@ exports.createNetServer = function(serverOptions, connectionListener, streamOpti
 };
 
 function NetServer(serverOptions, connectionListener, streamOptions) {
-	var self = this;
+	const self = this;
 	if (typeof(serverOptions) === 'function') {
 		streamOptions = connectionListener;
 		connectionListener = serverOptions;
 		serverOptions = {};
 	}
 	net = net || require("net");
-	var emitter = net.createServer(serverOptions, function(connection) {
+	const emitter = net.createServer(serverOptions, function(connection) {
 			flows.withContext(function() {
 				connectionListener(new NetStream(connection, streamOptions || {}), function(err) {
 					if (err) throw err;
@@ -969,7 +969,7 @@ NetServer.prototype = Object.create(Server.prototype);
 ///    Returns the value returned by `fn`.
 exports.using = function(_, constructor, emitter, options, fn) {
 	if (!fn && typeof options === 'function') fn = options, options = null;
-	var stream = new constructor(emitter, options);
+	const stream = new constructor(emitter, options);
 	try {
 		return fn.call(this, _, stream);
 	} finally {

@@ -1,13 +1,13 @@
 "use strict";
 QUnit.module(module.id);
 
-var ez = require("../..");
-var generic = ez.devices.generic;
-var arraySink = ez.devices.array.writer;
+const ez = require("../..");
+const generic = ez.devices.generic;
+const arraySink = ez.devices.array.writer;
 
 function numbers(limit) {
 	var i = 0;
-	var source = generic.reader(function read(_) {
+	const source = generic.reader(function read(_) {
 		return i >= limit ? undefined : i++;
 	}, function stop(_, arg) {
 		this.stopped = {
@@ -29,16 +29,16 @@ function fail(result) {
 } 
 
 function minJoiner(_, values) {
-	var min = Math.min.apply(null, values.filter(function(val) { return val !== undefined; }));
+	const min = Math.min.apply(null, values.filter(function(val) { return val !== undefined; }));
 	values.forEach(function(val, i) {
 		if (val == min) values[i] = undefined;
 	});
 	return min;
 }
 
-asyncTest("forEach", 2, function(_) {
-	var results = [];
-	var source = numbers(5);
+asyncTest("forEach", 2, (_) => {
+	const results = [];
+	const source = numbers(5);
 	source.forEach(_, function(_, num) {
 		results.push(num);
 	});
@@ -47,8 +47,8 @@ asyncTest("forEach", 2, function(_) {
 	start();
 });
 
-asyncTest("forEach error", 2, function(_) {
-	var source = numbers(5);
+asyncTest("forEach error", 2, (_) => {
+	const source = numbers(5);
 	try {
 		source.forEach(_, fail());
 		ok(false);
@@ -59,8 +59,8 @@ asyncTest("forEach error", 2, function(_) {
 	start();
 });
 
-asyncTest("map", 2, function(_) {
-	var source = numbers(5);
+asyncTest("map", 2, (_) => {
+	const source = numbers(5);
 	strictEqual(source.map(function(_, num) {
 		return num * num;
 	}).pipe(_, arraySink()).toArray().join(','), "0,1,4,9,16");
@@ -68,8 +68,8 @@ asyncTest("map", 2, function(_) {
 	start();
 });
 
-asyncTest("map error", 2, function(_) {
-	var source = numbers(5);
+asyncTest("map error", 2, (_) => {
+	const source = numbers(5);
 	try {
 		source.map(fail(1)).pipe(_, arraySink());
 		ok(false);
@@ -80,7 +80,7 @@ asyncTest("map error", 2, function(_) {
 	start();
 });
 
-asyncTest("every", 12, function(_) {
+asyncTest("every", 12, (_) => {
 	var source;
 	strictEqual((source = numbers(5)).every(_, function(_, num) {
 		return num < 5;
@@ -109,8 +109,8 @@ asyncTest("every", 12, function(_) {
 	start();
 });
 
-asyncTest("every error", 2, function(_) {
-	var source = numbers(5);
+asyncTest("every error", 2, (_) => {
+	const source = numbers(5);
 	try {
 		source.every(_, fail(true));
 		ok(false);
@@ -121,7 +121,7 @@ asyncTest("every error", 2, function(_) {
 	start();
 });
 
-asyncTest("some", 12, function(_) {
+asyncTest("some", 12, (_) => {
 	var source;
 	strictEqual((source = numbers(5)).some(_, function(_, num) {
 		return num >= 5;
@@ -150,8 +150,8 @@ asyncTest("some", 12, function(_) {
 	start();
 });
 
-asyncTest("some error", 2, function(_) {
-	var source = numbers(5);
+asyncTest("some error", 2, (_) => {
+	const source = numbers(5);
 	try {
 		source.some(_, fail(false));
 		ok(false);
@@ -162,8 +162,8 @@ asyncTest("some error", 2, function(_) {
 	start();
 });
 
-asyncTest("reduce", 2, function(_) {
-	var source = numbers(5);
+asyncTest("reduce", 2, (_) => {
+	const source = numbers(5);
 	strictEqual(source.reduce(_, function(_, r, num) {
 		return r + '/' + num;
 	}, ""), "/0/1/2/3/4");
@@ -171,8 +171,8 @@ asyncTest("reduce", 2, function(_) {
 	start();
 });
 
-asyncTest("reduce error", 2, function(_) {
-	var source = numbers(5);
+asyncTest("reduce error", 2, (_) => {
+	const source = numbers(5);
 	try {
 		source.reduce(_, function(_, r, v) {
 			if (v === 3) throw new Error('FAILED');
@@ -185,15 +185,15 @@ asyncTest("reduce error", 2, function(_) {
 	start();
 });
 
-asyncTest("toArray", 2, function(_) {
-	var source = numbers(5);
+asyncTest("toArray", 2, (_) => {
+	const source = numbers(5);
 	deepEqual(source.toArray(_), [0, 1, 2, 3, 4]);
 	source.finalCheck();
 	start();
 });
 
-asyncTest("pipe", 2, function(_) {
-	var source = numbers(5);
+asyncTest("pipe", 2, (_) => {
+	const source = numbers(5);
 	strictEqual(source.pipe(_, arraySink()).toArray().join(','), "0,1,2,3,4");
 	source.finalCheck();
 	start();
@@ -201,18 +201,18 @@ asyncTest("pipe", 2, function(_) {
 
 // pipe error already tested in map
 
-asyncTest("tee", 3, function(_) {
-	var source = numbers(5);
-	var secondary = arraySink();
+asyncTest("tee", 3, (_) => {
+	const source = numbers(5);
+	const secondary = arraySink();
 	strictEqual(source.tee(secondary).pipe(_, arraySink()).toArray().join(','), "0,1,2,3,4");
 	strictEqual(secondary.toArray().join(','), "0,1,2,3,4");
 	source.finalCheck();
 	start();
 });
 
-asyncTest("tee error", 3, function(_) {
-	var source = numbers(5);
-	var secondary = arraySink();
+asyncTest("tee error", 3, (_) => {
+	const source = numbers(5);
+	const secondary = arraySink();
 	try {
 		source.tee(secondary).map(fail(2)).pipe(_, arraySink());
 		ok(false);
@@ -224,22 +224,22 @@ asyncTest("tee error", 3, function(_) {
 	start();
 });
 
-asyncTest("dup", 3, function(_) {
-	var source = numbers(5);
-	var streams = source.dup();
-	var f1 = streams[0].toArray(!_);
-	var f2 = streams[1].toArray(!_);
+asyncTest("dup", 3, (_) => {
+	const source = numbers(5);
+	const streams = source.dup();
+	const f1 = streams[0].toArray(!_);
+	const f2 = streams[1].toArray(!_);
 	strictEqual(f1(_).join(','), "0,1,2,3,4");
 	strictEqual(f2(_).join(','), "0,1,2,3,4");
 	source.finalCheck();
 	start();
 });
 
-asyncTest("dup error 0", 3, function(_) {
-	var source = numbers(5);
-	var streams = source.dup();
-	var f1 = streams[0].map(fail(2)).toArray(!_);
-	var f2 = streams[1].toArray(!_);
+asyncTest("dup error 0", 3, (_) => {
+	const source = numbers(5);
+	const streams = source.dup();
+	const f1 = streams[0].map(fail(2)).toArray(!_);
+	const f2 = streams[1].toArray(!_);
 	try {
 		f1(_);
 		ok(false);
@@ -256,11 +256,11 @@ asyncTest("dup error 0", 3, function(_) {
 	start();
 });
 
-asyncTest("dup error 1", 3, function(_) {
-	var source = numbers(5);
-	var streams = source.dup();
-	var f1 = streams[0].toArray(!_);
-	var f2 = streams[1].map(fail(2)).toArray(!_);
+asyncTest("dup error 1", 3, (_) => {
+	const source = numbers(5);
+	const streams = source.dup();
+	const f1 = streams[0].toArray(!_);
+	const f2 = streams[1].map(fail(2)).toArray(!_);
 	try {
 		f1(_);
 		ok(false);
@@ -277,20 +277,20 @@ asyncTest("dup error 1", 3, function(_) {
 	start();
 });
 
-asyncTest("concat", 4, function(_) {
+asyncTest("concat", 4, (_) => {
 	var source;
-	var rd1 = (source = numbers(5)).concat(numbers(8).skip(6), numbers(10).skip(10), numbers(15).skip(12));
+	const rd1 = (source = numbers(5)).concat(numbers(8).skip(6), numbers(10).skip(10), numbers(15).skip(12));
 	strictEqual(rd1.toArray(_).join(), "0,1,2,3,4,6,7,12,13,14");
 	source.finalCheck();
-	var rd2 = (source = numbers(5)).concat([numbers(8).skip(6), numbers(10).skip(10), numbers(15).skip(12)]);
+	const rd2 = (source = numbers(5)).concat([numbers(8).skip(6), numbers(10).skip(10), numbers(15).skip(12)]);
 	strictEqual(rd2.toArray(_).join(), "0,1,2,3,4,6,7,12,13,14");
 	source.finalCheck();
 	start();
 });
 
-asyncTest("concat error", 2, function(_) {
-	var source = numbers(5);
-	var rd1 = source.concat(numbers(8).skip(6), numbers(10).skip(10), numbers(15).skip(2).map(fail(2)));
+asyncTest("concat error", 2, (_) => {
+	const source = numbers(5);
+	const rd1 = source.concat(numbers(8).skip(6), numbers(10).skip(10), numbers(15).skip(2).map(fail(2)));
 	try {
 		rd1.toArray(_);
 		ok(false);
@@ -301,8 +301,8 @@ asyncTest("concat error", 2, function(_) {
 	start();
 });
 
-asyncTest("transform - same number of reads and writes", 2, function(_) {
-	var source = numbers(5);
+asyncTest("transform - same number of reads and writes", 2, (_) => {
+	const source = numbers(5);
 	strictEqual(source.transform(function(_, reader, writer) {
 		var sum = 0, val;
 		while ((val = reader.read(_)) !== undefined) {
@@ -314,8 +314,8 @@ asyncTest("transform - same number of reads and writes", 2, function(_) {
 	start();
 });
 
-asyncTest("transform - more reads than writes", 2, function(_) {
-	var source = numbers(12);
+asyncTest("transform - more reads than writes", 2, (_) => {
+	const source = numbers(12);
 	strictEqual(source.transform(function(_, reader, writer) {
 		var str = "", val;
 		while ((val = reader.read(_)) !== undefined) {
@@ -331,8 +331,8 @@ asyncTest("transform - more reads than writes", 2, function(_) {
 	start();
 });
 
-asyncTest("transform - less reads than writes", 2, function(_) {
-	var source = numbers(5);
+asyncTest("transform - less reads than writes", 2, (_) => {
+	const source = numbers(5);
 	strictEqual(source.transform(function(_, reader, writer) {
 		var str = "", val;
 		while ((val = reader.read(_)) !== undefined) {
@@ -343,8 +343,8 @@ asyncTest("transform - less reads than writes", 2, function(_) {
 	start();
 });
 
-asyncTest("transform error", 2, function(_) {
-	var source = numbers(5);
+asyncTest("transform error", 2, (_) => {
+	const source = numbers(5);
 	try {
 		source.transform(function(_, reader, writer) {
 			var str = "", val;
@@ -361,7 +361,7 @@ asyncTest("transform error", 2, function(_) {
 	start();
 });
 
-asyncTest("filter", 4, function(_) {
+asyncTest("filter", 4, (_) => {
 	var source;
 	strictEqual((source = numbers(10)).filter(function(_, val) {
 		return val % 2;
@@ -375,7 +375,7 @@ asyncTest("filter", 4, function(_) {
 	start();
 });
 
-asyncTest("while", 4, function(_) {
+asyncTest("while", 4, (_) => {
 	var source;
 	strictEqual((source = numbers()).while(function(_, val) {
 		return val < 5;
@@ -388,7 +388,7 @@ asyncTest("while", 4, function(_) {
 	start();
 });
 
-asyncTest("until", 4, function(_) {
+asyncTest("until", 4, (_) => {
 	var source;
 	strictEqual((source = numbers()).until(function(_, val) {
 		return val > 5;
@@ -401,16 +401,17 @@ asyncTest("until", 4, function(_) {
 	start();
 });
 
-asyncTest("limit", 2, function(_) {
-	var source;
-	strictEqual((source = numbers()).limit(5).pipe(_, arraySink()).toArray().join(','), "0,1,2,3,4");
+asyncTest("limit", 2, (_) => {
+	const source = numbers();
+	strictEqual(source.limit(5).pipe(_, arraySink()).toArray().join(','), "0,1,2,3,4");
 	source.finalCheck();
 	start();
 });
 
-asyncTest("skip", 1, function(_) {
-	var source;
-	strictEqual((source = numbers()).skip(2).limit(5).pipe(_, arraySink()).toArray().join(','), "2,3,4,5,6");
+asyncTest("skip", 2, (_) => {
+	const source = numbers();
+	strictEqual(source.skip(2).limit(5).pipe(_, arraySink()).toArray().join(','), "2,3,4,5,6");
+	source.finalCheck();
 	start();
 });
 
@@ -422,7 +423,7 @@ function pow(n) {
 
 function wait(millis) {
 	return function(_, val) {
-		var ms = typeof millis === "function" ? millis() : millis;
+		const ms = typeof millis === "function" ? millis() : millis;
 		setTimeout(_, ms)
 		return val;
 	}
@@ -434,13 +435,13 @@ function rand(min, max) {
 	};
 }
 
-asyncTest("simple chain (no buffer)", 2, function(_) {
-	var source;
-	strictEqual((source = numbers()).skip(2).limit(5).pipe(_, arraySink()).toArray().join(','), "2,3,4,5,6");
+asyncTest("simple chain (no buffer)", 2, (_) => {
+	const source = numbers();
+	strictEqual(source.skip(2).limit(5).pipe(_, arraySink()).toArray().join(','), "2,3,4,5,6");
 	source.finalCheck();
 	start();
 });
-asyncTest("buffer in simple chain", 6, function(_) {
+asyncTest("buffer in simple chain", 6, (_) => {
 	var source;
 	strictEqual((source = numbers()).buffer(3).skip(2).limit(5).pipe(_, arraySink()).toArray().join(','), "2,3,4,5,6");
 	source.finalCheck();
@@ -450,36 +451,36 @@ asyncTest("buffer in simple chain", 6, function(_) {
 	source.finalCheck();
 	start();
 });
-asyncTest("buffer with slower input", 2, function(_) {
-	var source;
-	strictEqual((source = numbers()).limit(10).map(wait(20)).buffer(5).map(wait(10)).pipe(_, arraySink()).toArray().join(','), "0,1,2,3,4,5,6,7,8,9");
+asyncTest("buffer with slower input", 2, (_) => {
+	const source = numbers();
+	strictEqual(source.limit(10).map(wait(20)).buffer(5).map(wait(10)).pipe(_, arraySink()).toArray().join(','), "0,1,2,3,4,5,6,7,8,9");
 	source.finalCheck();
 	start();
 });
 
-asyncTest("buffer with faster input", 2, function(_) {
-	var source;
-	strictEqual((source = numbers()).limit(10).map(wait(10)).buffer(5).map(wait(20)).pipe(_, arraySink()).toArray().join(','), "0,1,2,3,4,5,6,7,8,9");
+asyncTest("buffer with faster input", 2, (_) => {
+	const source = numbers();
+	strictEqual(source.limit(10).map(wait(10)).buffer(5).map(wait(20)).pipe(_, arraySink()).toArray().join(','), "0,1,2,3,4,5,6,7,8,9");
 	source.finalCheck();
 	start();
 });
 
-asyncTest("parallel preserve order", 2, function(_) {
-	var t0 = Date.now();
-	var source;
-	strictEqual((source = numbers()).limit(10).parallel(4, function(source) {
+asyncTest("parallel preserve order", 2, (_) => {
+	const t0 = Date.now();
+	const source = numbers();
+	strictEqual(source.limit(10).parallel(4, function(source) {
 		return source.map(wait(rand(10, 10))).map(pow(2));
 	}).pipe(_, arraySink()).toArray().join(','), "0,1,4,9,16,25,36,49,64,81");
 	source.finalCheck();
-	var dt = Date.now() - t0;
+	const dt = Date.now() - t0;
 	//ok(dt < 600, "elapsed: " + dt + "ms");
 	start();
 });
 
-asyncTest("parallel shuffle", 2, function(_) {
-	var t0 = Date.now();
-	var source;
-	strictEqual((source = numbers()).limit(10).parallel({
+asyncTest("parallel shuffle", 2, (_) => {
+	const t0 = Date.now();
+	const source = numbers();
+	strictEqual(source.limit(10).parallel({
 		count: 4,
 		shuffle: true,
 	}, function(source) {
@@ -488,14 +489,14 @@ asyncTest("parallel shuffle", 2, function(_) {
 		return i - j;
 	}).join(','), "0,1,4,9,16,25,36,49,64,81");
 	source.finalCheck();
-	var dt = Date.now() - t0;
+	const dt = Date.now() - t0;
 	//ok(dt < 600, "elapsed: " + dt + "ms");
 	start();
 });
 
-asyncTest("fork/join limit before", 2, function(_) {
-	var source;
-	strictEqual((source = numbers()).limit(10).fork([
+asyncTest("fork/join limit before", 2, (_) => {
+	const source = numbers();
+	strictEqual(source.limit(10).fork([
 		function(src) { return src.map(wait(rand(20, 20))).map(pow(2)); },
 		function(src) { return src.buffer(Infinity).map(wait(rand(10, 10))).map(pow(3)); },
 		]).join(minJoiner).pipe(_, arraySink()).toArray().join(','), "0,1,4,8,9,16,25,27,36,49,64,81,125,216,343,512,729");
@@ -503,9 +504,9 @@ asyncTest("fork/join limit before", 2, function(_) {
 	start();
 });
 
-asyncTest("fork/join limit after", 2, function(_) {
-	var source;
-	strictEqual((source = numbers()).fork([
+asyncTest("fork/join limit after", 2, (_) => {
+	const source = numbers();
+	strictEqual(source.fork([
 		function(src) { return src.map(wait(rand(20, 20))).map(pow(2)); },
 		function(src) { return src.buffer(Infinity).map(wait(rand(10, 10))).map(pow(3)); },
 		]).join(minJoiner).limit(12).pipe(_, arraySink()).toArray().join(','), "0,1,4,8,9,16,25,27,36,49,64,81");
@@ -513,9 +514,9 @@ asyncTest("fork/join limit after", 2, function(_) {
 	start();
 });
 
-asyncTest("fork/join limit one branch", 2, function(_) {
-	var source;
-	strictEqual((source = numbers()).fork([
+asyncTest("fork/join limit one branch", 2, (_) => {
+	const source = numbers();
+	strictEqual(source.fork([
 		function(src) { return src.map(wait(rand(20, 20))).map(pow(2)).limit(3); },
 		function(src) { return src.buffer(6).map(wait(rand(10, 10))).map(pow(3)); },
 		]).join(minJoiner).limit(10).pipe(_, arraySink()).toArray().join(','),  "0,1,4,8,27,64,125,216,343,512");
@@ -523,42 +524,42 @@ asyncTest("fork/join limit one branch", 2, function(_) {
 	start();
 });
 
-asyncTest("fork slow and fast", 3, function(_) {
-	var source;
-	var readers = (source = numbers()).fork([
+asyncTest("fork slow and fast", 3, (_) => {
+	const source = numbers();
+	const readers = source.fork([
 		function(src) { return src.map(wait(rand(20, 20))).map(pow(2)); },
 		function(src) { return src.map(wait(rand(10, 10))).map(pow(3)); },
 		]).readers;
-	var f1 = readers[0].limit(10).pipe(!_, arraySink());
-	var f2 = readers[1].limit(10).pipe(!_, arraySink());
+	const f1 = readers[0].limit(10).pipe(!_, arraySink());
+	const f2 = readers[1].limit(10).pipe(!_, arraySink());
 	strictEqual(f1(_).toArray().join(','), "0,1,4,9,16,25,36,49,64,81");
 	strictEqual(f2(_).toArray().join(','), "0,1,8,27,64,125,216,343,512,729");
 	source.finalCheck();
 	start();
 });
 
-asyncTest("fork slow and fast with different limits (fast ends first)", 3, function(_) {
-	var source;
-	var readers = (source = numbers()).fork([
+asyncTest("fork slow and fast with different limits (fast ends first)", 3, (_) => {
+	const source = numbers();
+	const readers = source.fork([
 		function(src) { return src.map(wait(rand(20, 20))).map(pow(2)).limit(10); },
 		function(src) { return src.map(wait(rand(10, 10))).map(pow(3)).limit(4); },
 		]).readers;
-	var f1 = readers[0].pipe(!_, arraySink());
-	var f2 = readers[1].pipe(!_, arraySink());
+	const f1 = readers[0].pipe(!_, arraySink());
+	const f2 = readers[1].pipe(!_, arraySink());
 	strictEqual(f1(_).toArray().join(','), "0,1,4,9,16,25,36,49,64,81");
 	strictEqual(f2(_).toArray().join(','), "0,1,8,27");
 	source.finalCheck();
 	start();
 });
 
-asyncTest("fork slow and fast with different limits (slow ends first)", 3, function(_) {
-	var source;
-	var readers = (source = numbers()).fork([
+asyncTest("fork slow and fast with different limits (slow ends first)", 3, (_) => {
+	const source = numbers();
+	const readers = source.fork([
 		function(src) { return src.map(wait(rand(10, 10))).map(pow(2)).limit(10); },
 		function(src) { return src.map(wait(rand(20, 20))).map(pow(3)).limit(4); },
 		]).readers;
-	var f1 = readers[0].pipe(!_, arraySink());
-	var f2 = readers[1].pipe(!_, arraySink());
+	const f1 = readers[0].pipe(!_, arraySink());
+	const f2 = readers[1].pipe(!_, arraySink());
 	strictEqual(f1(_).toArray().join(','), "0,1,4,9,16,25,36,49,64,81");
 	strictEqual(f2(_).toArray().join(','), "0,1,8,27");
 	source.finalCheck();

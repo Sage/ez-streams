@@ -1,6 +1,6 @@
 "use strict";
-var fs = require("fs");
-var ez = require('ez-streams');
+const fs = require("fs");
+const ez = require('ez-streams');
 
 function bench(_, name, fn) {
 	var max = 1;
@@ -30,7 +30,7 @@ function myReader(max) {
 	});
 }
 
-var benches = {
+const benches = {
 	'streamline dummy loop': {
 		fn: function(_, max) {
 			var result;
@@ -69,7 +69,7 @@ var benches = {
 	},
 	'reader with read loop': {
 		fn: function(_, max) {
-			var rd = myReader(max * 2);
+			const rd = myReader(max * 2);
 			var result;
 			for (var i = 0; i < max; i++) result = rd.read(_);
 			return result;

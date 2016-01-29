@@ -1,26 +1,26 @@
 "use strict";
 QUnit.module(module.id);
-var ez = require("../..");
-var sample = __dirname + '/../../test/fixtures/rss-sample.xml';
-var zlib = require('zlib');
+const ez = require("../..");
+const sample = __dirname + '/../../test/fixtures/rss-sample.xml';
+const zlib = require('zlib');
 
-asyncTest("gzip roundtrip", 1, function(_) {
-	var sampleReader1 = ez.devices.file.text.reader(sample);
+asyncTest("gzip roundtrip", 1, (_) => {
+	const sampleReader1 = ez.devices.file.text.reader(sample);
 	var sampleReader2 = ez.devices.file.text.reader(sample);
-	var stringify = ez.mappers.convert.stringify();
-	var cutter = ez.transforms.cut(10);
-	var out = require('fs').createWriteStream(__dirname + '/../../test/fixtures/rss-sample.zip');
+	const stringify = ez.mappers.convert.stringify();
+	const cutter = ez.transforms.cut(10);
+	const out = require('fs').createWriteStream(__dirname + '/../../test/fixtures/rss-sample.zip');
 	sampleReader2 = sampleReader2.nodeTransform(zlib.createGzip()).nodeTransform(zlib.createGunzip()).map(stringify);
-	var cmp = sampleReader1.transform(cutter).compare(_, sampleReader2.transform(cutter));
+	const cmp = sampleReader1.transform(cutter).compare(_, sampleReader2.transform(cutter));
 	equal(cmp, 0);
 	start();
 });
-asyncTest("writer nodify", 1, function(_) {
-	var sampleReader1 = ez.devices.file.text.reader(sample);
-	var sampleReader2 = ez.devices.file.text.reader(sample);
-	var dest = ez.devices.string.writer();
-	var expected = sampleReader2.toArray(_).join('');
-	var piped = sampleReader1.nodify().pipe(dest.nodify());
+asyncTest("writer nodify", 1, (_) => {
+	const sampleReader1 = ez.devices.file.text.reader(sample);
+	const sampleReader2 = ez.devices.file.text.reader(sample);
+	const dest = ez.devices.string.writer();
+	const expected = sampleReader2.toArray(_).join('');
+	const piped = sampleReader1.nodify().pipe(dest.nodify());
 	piped.on('finish', function() {
 		equal(dest.toString(), expected);
 		start();

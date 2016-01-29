@@ -1,17 +1,17 @@
 "use strict";
 QUnit.module(module.id);
 
-var ez = require("../..");
-var TESTBUF = new Buffer([1, 4, 9, 16, 25, 36, 49, 64, 81, 100]);
+const ez = require("../..");
+const TESTBUF = new Buffer([1, 4, 9, 16, 25, 36, 49, 64, 81, 100]);
 
 function eqbuf(b1, b2, msg) {
 	equal(b1.toString('hex'), b2.toString('hex'), msg);
 }
 
-asyncTest("roundtrip", 52, function(_) {
+asyncTest("roundtrip", 52, (_) => {
 	[1, 4, 11, 1000].forEach_(_, function(_, size) {
-		var dst = ez.devices.buffer.writer();
-		var writer = ez.helpers.binary.writer(dst, {
+		const dst = ez.devices.buffer.writer();
+		const writer = ez.helpers.binary.writer(dst, {
 			bufSize: size
 		});
 		writer.write(_, TESTBUF);
@@ -22,10 +22,10 @@ asyncTest("roundtrip", 52, function(_) {
 		writer.writeDouble(_, 0.125);
 		writer.writeInt8(_, 5);
 		writer.write(_);
-		var result = dst.toBuffer();
+		const result = dst.toBuffer();
 
-		var src = ez.devices.buffer.reader(result).transform(ez.transforms.cut(5));
-		var reader = ez.helpers.binary.reader(src);
+		const src = ez.devices.buffer.reader(result).transform(ez.transforms.cut(5));
+		const reader = ez.helpers.binary.reader(src);
 		eqbuf(reader.read(_, 7), TESTBUF.slice(0, 7), 'read 7 (size=' + size + ')');
 		reader.unread(3);
 		eqbuf(reader.peek(_, 5), TESTBUF.slice(4, 9), 'unread 3 then peek 5');

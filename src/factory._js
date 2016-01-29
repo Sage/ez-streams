@@ -1,11 +1,11 @@
 "use strict";
 
-var fs = require('fs');
-var path = require('path');
+const fs = require('fs');
+const path = require('path');
 
-var glob = typeof global === "object" ? global : window;
-var secret = "_6522f20750bf404ea2fbccd561613115";
-var factories = (glob[secret] = (glob[secret] || {
+const glob = typeof global === "object" ? global : window;
+const secret = "_6522f20750bf404ea2fbccd561613115";
+const factories = (glob[secret] = (glob[secret] || {
     // standard factories
     "console": "./devices/console",
     "http": "./devices/http",
@@ -13,14 +13,14 @@ var factories = (glob[secret] = (glob[secret] || {
 }));
 
 function scanDirs(dir) {
-    var ndir = path.join(dir, "../node_modules");
+    const ndir = path.join(dir, "../node_modules");
     if (fs.existsSync(ndir)) {
-        fs.readdirSync(ndir).forEach(function(pkg) {
-            var pkgPath = path.join(ndir, pkg, "package.json");
+        fs.readdirSync(ndir).forEach((pkg) => {
+            const pkgPath = path.join(ndir, pkg, "package.json");
             if (fs.existsSync(pkgPath)) {
                 try {
                     // add factories from package.json
-                    ((require(pkgPath).ez || {}).factories || []).reduce(function(prev, crt) {
+                    ((require(pkgPath).ez || {}).factories || []).reduce((prev, crt) => {
                         if (crt.protocol && crt.module) {
                             try {
                                 prev[crt.protocol] = crt.module;
@@ -36,14 +36,14 @@ function scanDirs(dir) {
             }
         });
     }
-    var d = path.join(dir, '..');
+    const d = path.join(dir, '..');
     if (d.length < dir.length) scanDirs(d);
 }
 
 scanDirs(__dirname);
 
 module.exports = function(url) {
-    var pp = (url || "").split(":")[0];
+    const pp = (url || "").split(":")[0];
     if (!pp) throw new Error("Missing protocol in url: " + url);
     if (!factories[pp]) throw new Error("Missing factory for protocol " + pp);
     //

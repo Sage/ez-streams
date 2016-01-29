@@ -1,19 +1,19 @@
 "use strict";
 QUnit.module(module.id);
-var ez = require("../..");
-var fs = require("fs");
+const ez = require("../..");
+const fs = require("fs");
 
 function short(s) {
 	return s.length < 50 ? s : s.substring(0, 47) + '...';
 }
 
 function parseTest(_, xml, js, skipRT) {
-	var full = '<?xml version="1.0"?><root>' + xml + "</root>\n";
-	var parsed = ez.devices.string.reader(full).transform(ez.transforms.cut(2)) //
+	const full = '<?xml version="1.0"?><root>' + xml + "</root>\n";
+	const parsed = ez.devices.string.reader(full).transform(ez.transforms.cut(2)) //
 	.transform(ez.transforms.xml.parser('root')).toArray(_);
 	deepEqual(parsed[0].root, js, "parse " + short(xml));
 	if (!skipRT) {
-		var rt = ez.devices.string.reader(full).transform(ez.transforms.cut(2)) //
+		const rt = ez.devices.string.reader(full).transform(ez.transforms.cut(2)) //
 		.transform(ez.transforms.xml.parser('root')) //
 		.transform(ez.transforms.xml.formatter('root')).toArray(_).join('');
 		strictEqual(rt, full, "roundtrip " + short(full));
@@ -21,9 +21,9 @@ function parseTest(_, xml, js, skipRT) {
 }
 
 function rtTest(_, name, xml, indent, result) {
-	var full = '<?xml version="1.0"?><root>' + xml + "</root>\n";
+	const full = '<?xml version="1.0"?><root>' + xml + "</root>\n";
 	result = '<?xml version="1.0"?>' + (indent ? '\n' : '') + '<root>' + (result || xml) + "</root>\n";
-	var rt = ez.devices.string.reader(full).transform(ez.transforms.cut(2)) //
+	const rt = ez.devices.string.reader(full).transform(ez.transforms.cut(2)) //
 	.transform(ez.transforms.xml.parser('root')) //
 	.transform(ez.transforms.xml.formatter({
 		tags: 'root',
@@ -32,7 +32,7 @@ function rtTest(_, name, xml, indent, result) {
 	strictEqual(rt, result, "roundtrip " + full);
 }
 
-asyncTest('simple tag without attributes', 6, function(_) {
+asyncTest('simple tag without attributes', 6, (_) => {
 	parseTest(_, '<a/>', {
 		a: {}
 	});
@@ -45,7 +45,7 @@ asyncTest('simple tag without attributes', 6, function(_) {
 	start();
 });
 
-asyncTest('simple tag with attributes', 6, function(_) {
+asyncTest('simple tag with attributes', 6, (_) => {
 	parseTest(_, '<a x="3" y="4">5</a>', {
 		a: {
 			$: {
@@ -73,7 +73,7 @@ asyncTest('simple tag with attributes', 6, function(_) {
 	start();
 });
 
-asyncTest('entities', 4, function(_) {
+asyncTest('entities', 4, (_) => {
 	parseTest(_, '<a x="a&gt;b&amp;c&lt;"/>', {
 		a: {
 			$: {
@@ -87,7 +87,7 @@ asyncTest('entities', 4, function(_) {
 	start();
 });
 
-asyncTest('children', 6, function(_) {
+asyncTest('children', 6, (_) => {
 	parseTest(_, '<a><b>3</b><c>4</c></a>', {
 		a: {
 			b: "3",
@@ -114,7 +114,7 @@ asyncTest('children', 6, function(_) {
 	start();
 });
 
-asyncTest('cdata', 4, function(_) {
+asyncTest('cdata', 4, (_) => {
 	parseTest(_, '<a><![CDATA[<abc>]]></a>', {
 		a: {
 			$cdata: "<abc>"
@@ -128,14 +128,14 @@ asyncTest('cdata', 4, function(_) {
 	start();
 });
 
-asyncTest('comments in text', 1, function(_) {
+asyncTest('comments in text', 1, (_) => {
 	parseTest(_, '<a>abc <!-- <b>def</b> --> ghi</a>', {
 		a: "abc  ghi"
 	}, true);
 	start();
 });
 
-asyncTest('reformatting', 7, function(_) {
+asyncTest('reformatting', 7, (_) => {
 	rtTest(_, 'spaces outside', ' \r\n\t <a/> \t', null, '<a/>');
 	rtTest(_, 'spaces inside tag', '<a  x="v1"\ny="v2"\t/>', null, '<a x="v1" y="v2"/>');
 	rtTest(_, 'spaces around children', '<a> <b />\n<c\n/>\t</a>', null, '<a><b/><c/></a>');
@@ -146,7 +146,7 @@ asyncTest('reformatting', 7, function(_) {
 	start();
 });
 
-asyncTest('empty element in list', 1, function(_) {
+asyncTest('empty element in list', 1, (_) => {
 	parseTest(_, '<a><b></b><b>x</b><b></b></a>', {
 		a: {
 			b: ["", "x", ""]
@@ -156,8 +156,8 @@ asyncTest('empty element in list', 1, function(_) {
 });
 
 
-asyncTest("rss feed", 5, function(_) {
-	var entries = ez.devices.file.text.reader(__dirname + '/../../test/fixtures/rss-sample.xml') //
+asyncTest("rss feed", 5, (_) => {
+	const entries = ez.devices.file.text.reader(__dirname + '/../../test/fixtures/rss-sample.xml') //
 	.transform(ez.transforms.cut(2)) //
 	.transform(ez.transforms.xml.parser("rss/channel/item")).toArray(_);
 	strictEqual(entries.length, 10);
@@ -168,8 +168,8 @@ asyncTest("rss feed", 5, function(_) {
 	start();
 });
 
-asyncTest("binary input", 5, function(_) {
-	var entries = ez.devices.file.binary.reader(__dirname + '/../../test/fixtures/rss-sample.xml') //
+asyncTest("binary input", 5, (_) => {
+	const entries = ez.devices.file.binary.reader(__dirname + '/../../test/fixtures/rss-sample.xml') //
 	.transform(ez.transforms.cut(2)) //
 	.transform(ez.transforms.xml.parser("rss/channel/item")).toArray(_);
 	strictEqual(entries.length, 10);
@@ -180,7 +180,7 @@ asyncTest("binary input", 5, function(_) {
 	start();
 });
 
-asyncTest("rss roundtrip", 1, function(_) {
+asyncTest("rss roundtrip", 1, (_) => {
 	var expected = fs.readFile(__dirname + '/../../test/fixtures/rss-sample.xml', 'utf8', _);
 	var result = ez.devices.file.text.reader(__dirname + '/../../test/fixtures/rss-sample.xml') //
 	.transform(ez.transforms.cut(5)) //
@@ -196,7 +196,7 @@ asyncTest("rss roundtrip", 1, function(_) {
 	start();
 });
 
-asyncTest('escaping', 2, function(_) {
+asyncTest('escaping', 2, (_) => {
 	var xml = '<a>';
 	var js = '';
 	for (var i = 0; i < 0x10000; i++) {

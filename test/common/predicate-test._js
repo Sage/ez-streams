@@ -1,18 +1,18 @@
 "use strict";
 QUnit.module(module.id);
 
-var ez = require("../..");
-var safeConverter = ez.predicate.convert;
-var unsafeConverter = ez.predicate.converter({
+const ez = require("../..");
+const safeConverter = ez.predicate.convert;
+const unsafeConverter = ez.predicate.converter({
 	allowEval: true
 });
 
 function t(_, condition, obj, expected, unsafe) {
-	var got = (unsafe ? unsafeConverter : safeConverter)(condition)(_, obj);
+	const got = (unsafe ? unsafeConverter : safeConverter)(condition)(_, obj);
 	equal(got, expected, JSON.stringify(condition) + " with " + JSON.stringify(obj) + " => " + expected);
 }
 
-asyncTest("direct values", 6, function(_) {
+asyncTest("direct values", 6, (_) => {
 	t(_, 5, 5, true);
 	t(_, 5, 6, false);
 	t(_, 'a', 'a', true);
@@ -22,7 +22,7 @@ asyncTest("direct values", 6, function(_) {
 	start();
 });
 
-asyncTest("gt", 3, function(_) {
+asyncTest("gt", 3, (_) => {
 	t(_, {
 		$gt: 4,
 	}, 5, true);
@@ -38,7 +38,7 @@ asyncTest("gt", 3, function(_) {
 	start();
 });
 
-asyncTest("gte", 3, function(_) {
+asyncTest("gte", 3, (_) => {
 	t(_, {
 		$gte: 4,
 	}, 5, true);
@@ -54,7 +54,7 @@ asyncTest("gte", 3, function(_) {
 	start();
 });
 
-asyncTest("lt", 3, function(_) {
+asyncTest("lt", 3, (_) => {
 	t(_, {
 		$lt: 4,
 	}, 5, false);
@@ -70,7 +70,7 @@ asyncTest("lt", 3, function(_) {
 	start();
 });
 
-asyncTest("lte", 3, function(_) {
+asyncTest("lte", 3, (_) => {
 	t(_, {
 		$lte: 4,
 	}, 5, false);
@@ -86,7 +86,7 @@ asyncTest("lte", 3, function(_) {
 	start();
 });
 
-asyncTest("ne", 3, function(_) {
+asyncTest("ne", 3, (_) => {
 	t(_, {
 		$ne: 4,
 	}, 5, true);
@@ -103,7 +103,7 @@ asyncTest("ne", 3, function(_) {
 	start();
 });
 
-asyncTest("range", 3, function(_) {
+asyncTest("range", 3, (_) => {
 	t(_, {
 		$gte: 3,
 		$lte: 7,
@@ -122,14 +122,14 @@ asyncTest("range", 3, function(_) {
 	start();
 });
 
-asyncTest("regexp", 2, function(_) {
+asyncTest("regexp", 2, (_) => {
 	t(_, /^hel/, 'hello', true);
 	t(_, /^hel/, 'world', false);
 
 	start();
 });
 
-asyncTest("and", 2, function(_) {
+asyncTest("and", 2, (_) => {
 	t(_, {
 		$and: [2, 5],
 	}, 5, false);
@@ -141,7 +141,7 @@ asyncTest("and", 2, function(_) {
 	start();
 });
 
-asyncTest("empty and", 2, function(_) {
+asyncTest("empty and", 2, (_) => {
 	t(_, {}, {}, true);
 
 	t(_, {}, {
@@ -151,7 +151,7 @@ asyncTest("empty and", 2, function(_) {
 	start();
 });
 
-asyncTest("or", 2, function(_) {
+asyncTest("or", 2, (_) => {
 	t(_, {
 		$or: [2, 5],
 	}, 5, true);
@@ -163,7 +163,7 @@ asyncTest("or", 2, function(_) {
 	start();
 });
 
-asyncTest("empty or", 2, function(_) {
+asyncTest("empty or", 2, (_) => {
 	t(_, {
 		$or: []
 	}, {}, false);
@@ -177,7 +177,7 @@ asyncTest("empty or", 2, function(_) {
 	start();
 });
 
-asyncTest("nor", 2, function(_) {
+asyncTest("nor", 2, (_) => {
 	t(_, {
 		$nor: [2, 5],
 	}, 5, false);
@@ -189,7 +189,7 @@ asyncTest("nor", 2, function(_) {
 	start();
 });
 
-asyncTest("not", 2, function(_) {
+asyncTest("not", 2, (_) => {
 	t(_, {
 		$not: {
 			$gt: 2
@@ -205,7 +205,7 @@ asyncTest("not", 2, function(_) {
 	start();
 });
 
-asyncTest("in", 3, function(_) {
+asyncTest("in", 3, (_) => {
 	t(_, {
 		$in: [2, 3, 5]
 	}, 3, true);
@@ -221,7 +221,7 @@ asyncTest("in", 3, function(_) {
 	start();
 });
 
-asyncTest("not in", 3, function(_) {
+asyncTest("not in", 3, (_) => {
 	t(_, {
 		$nin: [2, 3, 5]
 	}, 3, false);
@@ -237,7 +237,7 @@ asyncTest("not in", 3, function(_) {
 	start();
 });
 
-asyncTest("exists", 3, function(_) {
+asyncTest("exists", 3, (_) => {
 	t(_, {
 		$exists: "a"
 	}, {
@@ -259,7 +259,7 @@ asyncTest("exists", 3, function(_) {
 	start();
 });
 
-asyncTest("type", 3, function(_) {
+asyncTest("type", 3, (_) => {
 	t(_, {
 		$type: "number"
 	}, 5, true);
@@ -275,7 +275,7 @@ asyncTest("type", 3, function(_) {
 	start();
 });
 
-asyncTest("mod", 2, function(_) {
+asyncTest("mod", 2, (_) => {
 	t(_, {
 		$mod: [3, 2]
 	}, 5, true);
@@ -287,7 +287,7 @@ asyncTest("mod", 2, function(_) {
 	start();
 });
 
-asyncTest("regex", 4, function(_) {
+asyncTest("regex", 4, (_) => {
 	t(_, {
 		$regex: "^hel",
 	}, "hello", true);
@@ -308,7 +308,7 @@ asyncTest("regex", 4, function(_) {
 	start();
 });
 
-asyncTest("where", 4, function(_) {
+asyncTest("where", 4, (_) => {
 	t(_, {
 		$where: "this.a === this.b",
 	}, {
@@ -344,7 +344,7 @@ asyncTest("where", 4, function(_) {
 	start();
 });
 
-asyncTest("elemMatch", 2, function(_) {
+asyncTest("elemMatch", 2, (_) => {
 	t(_, {
 		$elemMatch: {
 			$gte: 2,
@@ -362,7 +362,7 @@ asyncTest("elemMatch", 2, function(_) {
 	start();
 });
 
-asyncTest("all", 6, function(_) {
+asyncTest("all", 6, (_) => {
 	t(_, {
 		$all: [2, 4],
 	}, [1, 2, 3, 4, 5], true);
@@ -387,7 +387,7 @@ asyncTest("all", 6, function(_) {
 		tags: ["school", "bag", "headphone", "appliance"],
 	}, false);
 
-	var cond = {
+	const cond = {
 		items: {
 			$all: [{
 				$elemMatch: {
@@ -438,7 +438,7 @@ asyncTest("all", 6, function(_) {
 	start();
 });
 
-asyncTest("size", 2, function(_) {
+asyncTest("size", 2, (_) => {
 	t(_, {
 		$size: 2,
 	}, [1, 2], true);
@@ -450,7 +450,7 @@ asyncTest("size", 2, function(_) {
 	start();
 });
 
-asyncTest("single property", 2, function(_) {
+asyncTest("single property", 2, (_) => {
 	t(_, {
 		a: 5,
 	}, {
@@ -467,7 +467,7 @@ asyncTest("single property", 2, function(_) {
 	start();
 });
 
-asyncTest("implicit and (multiple properties)", 2, function(_) {
+asyncTest("implicit and (multiple properties)", 2, (_) => {
 	t(_, {
 		a: 5,
 		b: 3,
@@ -486,7 +486,7 @@ asyncTest("implicit and (multiple properties)", 2, function(_) {
 	start();
 });
 
-asyncTest("walk", 5, function(_) {
+asyncTest("walk", 5, (_) => {
 	t(_, {
 		'a.b': /^hel/,
 	}, {

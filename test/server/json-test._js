@@ -1,16 +1,15 @@
 "use strict";
 QUnit.module(module.id);
-var ez = require('../..');
-var file = ez.devices.file;
-var jsonTrans = ez.transforms.json;
+const ez = require('../..');
+const file = ez.devices.file;
+const jsonTrans = ez.transforms.json;
 
-var inputFile = require('os').tmpdir() + '/jsonInput.json';
-var outputFile = require('os').tmpdir() + '/jsonOutput.json';
-var fs = require('fs');
-var ez = require("../..");
-var string = ez.devices.string;
+const inputFile = require('os').tmpdir() + '/jsonInput.json';
+const outputFile = require('os').tmpdir() + '/jsonOutput.json';
+const fs = require('fs');
+const string = ez.devices.string;
 
-var mixedData = '[' + //
+const mixedData = '[' + //
 '{ "firstName": "Jimy", "lastName": "Hendrix" },' + //
 '\n { "firstName": "Jim", "lastName": "Morrison" },' + //
 '\n"\\\"escape\\ttest",' + //
@@ -26,46 +25,46 @@ function nodeStream(_, text) {
 	return file.text.reader(inputFile);
 }
 
-asyncTest("empty", 1, function(_) {
-	var stream = nodeStream(_, '[]').transform(jsonTrans.parser());
+asyncTest("empty", 1, (_) => {
+	const stream = nodeStream(_, '[]').transform(jsonTrans.parser());
 	strictEqual(stream.read(_), undefined, "undefined");
 	start();
 });
 
-asyncTest("mixed data with node node stream", 9, function(_) {
-	var stream = nodeStream(_, mixedData);
-	var expected = JSON.parse(mixedData);
+asyncTest("mixed data with node node stream", 9, (_) => {
+	const stream = nodeStream(_, mixedData);
+	const expected = JSON.parse(mixedData);
 	stream.transform(jsonTrans.parser()).forEach(_, function(_, elt, i) {
 		deepEqual(elt, expected[i], expected[i]);
 	});
 	start();
 });
 
-asyncTest("fragmented read", 9, function(_) {
-	var stream = string.reader(mixedData, 2).transform(jsonTrans.parser());
-	var expected = JSON.parse(mixedData);
+asyncTest("fragmented read", 9, (_) => {
+	const stream = string.reader(mixedData, 2).transform(jsonTrans.parser());
+	const expected = JSON.parse(mixedData);
 	stream.forEach(_, function(_, elt, i) {
 		deepEqual(elt, expected[i], expected[i]);
 	});
 	start();
 });
 
-asyncTest("binary input", 9, function(_) {
-	var stream = ez.devices.buffer.reader(new Buffer(mixedData, 'utf8')).transform(jsonTrans.parser());
-	var expected = JSON.parse(mixedData);
+asyncTest("binary input", 9, (_) => {
+	const stream = ez.devices.buffer.reader(new Buffer(mixedData, 'utf8')).transform(jsonTrans.parser());
+	const expected = JSON.parse(mixedData);
 	stream.forEach(_, function(_, elt, i) {
 		deepEqual(elt, expected[i], expected[i]);
 	});
 	start();
 });
 
-asyncTest("roundtrip", 11, function(_) {
-	var writer = string.writer();
+asyncTest("roundtrip", 11, (_) => {
+	const writer = string.writer();
 	nodeStream(_, mixedData).transform(jsonTrans.parser()).map(function(_, elt) {
 		return (elt && elt.lastName) ? elt.lastName : elt;
 	}).transform(jsonTrans.formatter()).pipe(_, writer);
-	var result = JSON.parse(writer.toString());
-	var expected = JSON.parse(mixedData).map(function(elt) {
+	const result = JSON.parse(writer.toString());
+	const expected = JSON.parse(mixedData).map(function(elt) {
 		return (elt && elt.lastName) ? elt.lastName : elt;
 	});
 	ok(Array.isArray(result), "isArray");
