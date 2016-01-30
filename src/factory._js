@@ -13,30 +13,33 @@ const factories = (glob[secret] = (glob[secret] || {
 }));
 
 function scanDirs(dir) {
+    const tryPackage = (pkgPath, fromDir) => {
+        if (!fs.existsSync(pkgPath)) return;
+        try {
+            // add factories from package.json
+            ((require(pkgPath).ez || {}).factories || []).reduce((prev, crt) => {
+                if (crt.protocol && crt.module) {
+                    try {
+                        prev[crt.protocol] = fromDir ? crt.module.replace(/^.*([\\\/])/, fromDir + '$1') : crt.module;
+                    } catch(e) {
+                        console.error(e.message);
+                    }
+                }
+                return prev;
+            }, factories);
+        } catch(e) {
+            console.error(e.message);
+        }
+    };
     const ndir = path.join(dir, "../node_modules");
     if (fs.existsSync(ndir)) {
         fs.readdirSync(ndir).forEach((pkg) => {
-            const pkgPath = path.join(ndir, pkg, "package.json");
-            if (fs.existsSync(pkgPath)) {
-                try {
-                    // add factories from package.json
-                    ((require(pkgPath).ez || {}).factories || []).reduce((prev, crt) => {
-                        if (crt.protocol && crt.module) {
-                            try {
-                                prev[crt.protocol] = crt.module;
-                            } catch(e) {
-                                console.error(e.message);
-                            }
-                        }
-                        return prev;
-                    }, factories);
-                } catch(e) {
-                    console.error(e.message);
-                }
-            }
+            tryPackage(path.join(ndir, pkg, "package.json"));
         });
     }
     const d = path.join(dir, '..');
+    // try also package.json inside parent directory - for travis-ci
+    tryPackage(path.join(d, "package.json"), d);
     if (d.length < dir.length) scanDirs(d);
 }
 
