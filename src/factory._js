@@ -17,16 +17,14 @@ function scanDirs(dir) {
         if (!fs.existsSync(pkgPath)) return;
         try {
             // add factories from package.json
-            ((require(pkgPath).ez || {}).factories || []).reduce((prev, crt) => {
-                if (crt.protocol && crt.module) {
-                    try {
-                        prev[crt.protocol] = fromDir ? crt.module.replace(/^.*([\\\/])/, fromDir + '$1') : crt.module;
-                    } catch(e) {
-                        console.error(e.message);
+            var pk = require(pkgPath);
+            if (pk && pk.ez && pk.ez.factories) {
+                pk.ez.factories.forEach((crt) => {
+                    if (crt.protocol && crt.module) {
+                        factories[crt.protocol] = fromDir ? crt.module.replace(/^.*([\\\/])/, fromDir + '$1') : crt.module;
                     }
-                }
-                return prev;
-            }, factories);
+                });    
+            }
         } catch(e) {
             console.error(e.message);
         }
