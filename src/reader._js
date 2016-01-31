@@ -32,6 +32,7 @@ const streams = require('./node-wrappers');
 const flows = require('streamline-runtime').flows;
 const predicate = require('./predicate').convert;
 const stopException = require('./stop-exception');
+const nextTick = require('./util').nextTick;
 
 var generic;
 
@@ -510,12 +511,12 @@ exports.decorate = function(proto) {
 				pending = false;
 				if (err) return stream.emit('error', err);
 				if (result === undefined) {
-					if (sync) setImmediate(end);
+					if (sync) nextTick(end);
 					else end();
 					return;
 				}
 				if (stream.push(result)) {
-					if (sync) setImmediate(more);
+					if (sync) nextTick(more);
 					else more();
 				}
 			});

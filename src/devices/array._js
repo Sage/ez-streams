@@ -2,6 +2,7 @@
 
 const readerApi = require('../reader');
 const writerApi = require('../writer');
+const nextTick = require('../util').nextTick;
 
 module.exports = {
 	/// !doc
@@ -18,7 +19,7 @@ module.exports = {
 		const values = array.slice(0);
 		return readerApi.decorate({
 			read: function(_) {
-				if (!options.sync) setImmediate(_);
+				if (!options.sync) nextTick(_);
 				return values.shift();
 			}
 		});
@@ -34,7 +35,7 @@ module.exports = {
 		const values = [];
 		return writerApi.decorate({
 			write: function(_, value) {
-				if (!options.sync) setImmediate(_);
+				if (!options.sync) nextTick(_);
 				if (value !== undefined) values.push(value);
 			},
 			toArray: function() {

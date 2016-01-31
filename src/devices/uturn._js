@@ -2,6 +2,7 @@
 
 const generic = require('./generic');
 const stopException = require('../stop-exception');
+const nextTick = require('../util').nextTick;
 
 var lastId = 0;
 var tracer; // = console.error;
@@ -28,7 +29,7 @@ module.exports = {
 
 		return {
 			reader: generic.reader(function read(cb) {
-				setImmediate(() => {
+				nextTick(() => {
 					tracer && tracer(id, "READ", state, pendingData);
 					const st = state;
 					switch (st) {
@@ -64,7 +65,7 @@ module.exports = {
 					}
 				});
 			}, function stop(cb, arg) {
-				setImmediate(() => {
+				nextTick(() => {
 					error = error || stopException.make(arg);
 					tracer && tracer(id, "STOP READER", state, arg);
 					const st = state;
@@ -99,7 +100,7 @@ module.exports = {
 				});
 			}),
 			writer: generic.writer(function write(cb, data) {
-				setImmediate(() => {
+				nextTick(() => {
 					tracer && tracer(id, "WRITE", state, data);
 					const st = state;
 					switch (st) {
@@ -133,7 +134,7 @@ module.exports = {
 					}
 				});
 			}, function stop(cb, arg) {
-				setImmediate(() => {
+				nextTick(() => {
 					tracer && tracer(id, "STOP WRITER", state, arg);
 					error = error || stopException.make(arg);
 					const st = state;
@@ -161,7 +162,7 @@ module.exports = {
 				});
 			}),
 			end: function(err) {
-				setImmediate(() => {
+				nextTick(() => {
 					tracer && tracer(id, "END", state, err);
 					err = stopException.unwrap(err);
 					error = error || err;

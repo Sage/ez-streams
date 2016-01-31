@@ -2,6 +2,7 @@
 
 const readerApi = require('../reader');
 const writerApi = require('../writer');
+const nextTick = require('../util').nextTick;
 
 module.exports = {
 	/// !doc
@@ -24,7 +25,7 @@ module.exports = {
 		var pos = 0;
 		return readerApi.decorate({
 			read: function(_) {
-				if (!options.sync) setImmediate(_);
+				if (!options.sync) nextTick(_);
 				if (pos >= text.length) return;
 				const len = typeof chunkSize === "function" ? chunkSize() : chunkSize;
 				const s = text.substring(pos, pos + len);
@@ -44,7 +45,7 @@ module.exports = {
 		var buf = "";
 		return writerApi.decorate({
 			write: function(_, data) {
-				if (!options.sync) setImmediate(_);
+				if (!options.sync) nextTick(_);
 				if (data === undefined) return;
 				buf += data;
 			},

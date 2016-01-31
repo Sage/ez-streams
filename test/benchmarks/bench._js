@@ -59,10 +59,30 @@ const benches = {
 		},
 		time: 24
 	},
+	'callbacks loop setImmediate': {
+		fn: function(cb, max) {
+			var i = 0;
+
+			function next() {
+				if (++i < max) setImmediate(next);
+				else dummy(cb, i - 1);
+			}
+			next();
+		},
+		time: 24
+	},
 	'streamline loop nextTick': {
 		fn: function(_, max) {
 			var i = 0;
 			for (i = 0; i < max; i++) process.nextTick(_);
+			return dummy(_, i - 1);
+		},
+		time: 681
+	},
+	'streamline loop setImmediate': {
+		fn: function(_, max) {
+			var i = 0;
+			for (i = 0; i < max; i++) setImmediate(_);
 			return dummy(_, i - 1);
 		},
 		time: 681
