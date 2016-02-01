@@ -20,11 +20,12 @@
     "babel-core": "^6.3.17",
     "babel-plugin-streamline": "^2.0.6",
     "babel-preset-es2015": "^6.3.13",
+    "codecov": "^1.0.1",
     "streamline-helpers": "^2.0.4"
   },
   "scripts": {
     "prepublish": "node build.js || nodejs build.js",
-    "test": "node test-callbacks && node test-fibers"
+    "test": "node test-callbacks && node test-fibers && ./node_modules/.bin/codecov"
   },
   "main": "index.js",
   "readmeFilename": "README.md",
