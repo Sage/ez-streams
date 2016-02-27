@@ -129,7 +129,7 @@ function Wrapper(emitter) {
 	///    unwraps and returns the underlying emitter.  
 	///    The wrapper should not be used after this call.
 	self.unwrap = function() {
-		emitter.removeAllListeners();
+		if (emitter) emitter.removeAllListeners();
 		closed = true;
 		const em = emitter;
 		emitter = null;
