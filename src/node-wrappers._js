@@ -243,29 +243,26 @@ function ReadableStream(emitter, options) {
 	///   Reads till the end if `len` is negative.  
 	///   Without `len`, the read calls returns the data chunks as they have been emitted by the underlying stream.  
 	///   Once the end of stream has been reached, the `read` call returns `null`.
-	self.read = function(_, len, withTimeout) {
-		function _read(_) {
-			if (self.closed && !_chunks.length) return undefined;
-			if (len == null) return self.reader.read(_);
-			if (len < 0) len = Infinity;
-			if (len == 0) return _encoding ? "" : new Buffer(0);
-			const chunks = [];
-			var total = 0;
-			while (total < len) {
-				var chunk = self.reader.read(_);
-				if (!chunk) return chunks.length == 0 ? undefined : concat(chunks, total);
-				if (total + chunk.length <= len) {
-					chunks.push(chunk);
-					total += chunk.length;
-				} else {
-					chunks.push(chunk.slice(0, len - total));
-					self.unread(chunk.slice(len - total));
-					total = len;
-				}
+	self.read = function(_, len) {
+		if (self.closed && !_chunks.length) return undefined;
+		if (len == null) return self.reader.read(_);
+		if (len < 0) len = Infinity;
+		if (len == 0) return _encoding ? "" : new Buffer(0);
+		const chunks = [];
+		var total = 0;
+		while (total < len) {
+			var chunk = self.reader.read(_);
+			if (!chunk) return chunks.length == 0 ? undefined : concat(chunks, total);
+			if (total + chunk.length <= len) {
+				chunks.push(chunk);
+				total += chunk.length;
+			} else {
+				chunks.push(chunk.slice(0, len - total));
+				self.unread(chunk.slice(len - total));
+				total = len;
 			}
-			return concat(chunks, total);
 		}
-		return withTimeout && options.timeout ? flows.callWithTimeout(_, _read, options.timeout) : _read(_);
+		return concat(chunks, total);
 	};
 	/// * `data = stream.readAll(_)`  
 	///   reads till the end of stream.  
