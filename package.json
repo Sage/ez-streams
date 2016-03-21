@@ -1,7 +1,7 @@
 {
   "name": "ez-streams",
   "description": "EZ streams for node.js",
-  "version": "3.0.8",
+  "version": "3.0.9",
   "license": "MIT",
   "author": {
     "name": "Bruno Jouhier"
