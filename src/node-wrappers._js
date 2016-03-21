@@ -97,6 +97,7 @@ function Wrapper(emitter) {
 	var _onClose = trackClose;
 
 	self.close = function(callback) {
+			if (typeof callback !== 'function') throw new TypeError("bad callback parameter: " + typeof callback);
 			if (closed) return callback();
 			const close = emitter.end || emitter.close || emitter.destroySoon;
 			if (typeof close !== "function") return callback();
@@ -525,6 +526,7 @@ wrapProperties(HttpServerResponse, true, ["statusCode"]);
 function _fixHttpServerOptions(options) {
 	options = options || {};
 	options.createServer = function(callback) {
+		if (typeof callback !== 'function') throw new TypeError("bad callback parameter: " + typeof callback);
 		return options.secure ? require("https").createServer(options, callback) : require("http").createServer(callback);
 	};
 	return options;
@@ -536,6 +538,7 @@ function Server(emitter) {
 	Wrapper.call(self, emitter);
 
 	self.listen = function(callback, args) {
+		if (typeof callback !== 'function') throw new TypeError("bad callback parameter: " + typeof callback);
 		if (self.closed) throw new Error("cannot listen: server is closed");
 		args = Array.prototype.slice.call(arguments, 1);
 			function reply(err, result) {
@@ -771,13 +774,14 @@ function HttpClientRequest(options) {
 		/// * `response = request.response(_)`  
 		///    returns the response. 
 		self.response = function(callback) {
+			if (typeof callback !== 'function') throw new TypeError("bad callback parameter: " + typeof callback);
 				if (_done) return callback(_error, _response);
-				else _onResponse = function(err, resp) {
-					_done = true;
-					callback(err, resp);
-					callback = null;
-				};
+			else _onResponse = function(err, resp) {
+				_done = true;
+				if (callback) callback(err, resp);
+				callback = null;
 			};
+		};
 	}
 	
 	if (!options.proxyAuthenticate && !options.isHttps) _init();
@@ -910,6 +914,7 @@ function NetClient(options, args) {
 	/// * `stream = client.connect(_)`  
 	///    connects the client and returns a network stream.
 	self.connect = function(callback) {
+			if (typeof callback !== 'function') throw new TypeError("bad callback parameter: " + typeof callback);
 			if (_done) return callback(_error, new NetStream(_connection, options));
 			else _onConnect = function(err) {
 				_done = true;
