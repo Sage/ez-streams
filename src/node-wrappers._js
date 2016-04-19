@@ -150,9 +150,6 @@ function ReadableStream(emitter, options) {
 	const self = this;
 	Wrapper.call(self, emitter);
 	options = options || {};
-	const _low = Math.max(options.lowMark || 0, 0);
-	const _high = Math.max(options.highMark || 0, _low);
-	var _paused = false;
 	var _current = 0;
 	const _chunks = [];
 	var _error;
@@ -164,10 +161,6 @@ function ReadableStream(emitter, options) {
 		else if (chunk) {
 			_chunks.push(chunk);
 			_current += chunk.length;
-			if (_current > _high && !_paused && !_done && !_error && !self.closed) {
-				emitter.pause();
-				_paused = true;
-			}
 		} else _done = true;
 	};
 
@@ -178,11 +171,10 @@ function ReadableStream(emitter, options) {
 	emitter.on('error', function(err) {
 		_onData(err);
 	});
-	emitter.on('data', function(chunk) {
+	// no need to trap `end` events - `readable` will be fired and `read()` will return `null` at end of stream.
+	emitter.on('readable', function() {
+		var chunk = this.emitter.read();
 		_onData(null, chunk);
-	});
-	emitter.on('end', function() {
-		_onData(null, null);
 	});
 
 	self.autoClosed.push(function() {
@@ -193,21 +185,10 @@ function ReadableStream(emitter, options) {
 		if (_chunks.length > 0) {
 			const chunk = _chunks.splice(0, 1)[0];
 			_current -= chunk.length;
-			if (_current <= _low && _paused && !_done && !_error && !self.closed) {
-				emitter.resume();
-				_paused = false;
-			}
 			return callback(null, chunk);
 		} else if (_done) {
-			if (_paused) { // resume it for keep-alive
-				try {
-					!self.closed && emitter.resume();
-					_paused = false;
-				} catch (e) { // socket may be closed
-				}
-			}
 			return callback(null);
-		} else if (_error) { // should we resume if paused?
+		} else if (_error) {
 			return callback(_error);
 		} else _onData = function(err, chunk) {
 			if (err) _error = err;
@@ -466,8 +447,7 @@ function _getEncoding(headers, options) {
 /// 
 /// * `request = new streams.HttpServerRequest(req[, options])`  
 ///    returns a wrapper around `req`, an `http.ServerRequest` object.   
-///    The `options` parameter can be used to pass `lowMark` and `highMark` values, or
-///    to control encoding detection (see section below).
+///    The `options` parameter can be used to control encoding detection (see section below).
 
 function HttpServerRequest(req, options) {
 	const self = this;
@@ -740,8 +720,6 @@ function _fixHttpClientOptions(options) {
 ///    * `headers`: the HTTP headers.
 ///    * `url`: the requested URL (with query string if necessary).
 ///    * `proxy.url`: the proxy URL.
-///    * `lowMark` and `highMark`: low and high water mark values for buffering (in bytes or characters depending
-///      on encoding).  
 ///      Note that these values are only hints as the data is received in chunks.
 
 function HttpClientRequest(options) {
@@ -874,7 +852,7 @@ var net; // lazy require
 ///    returns a TCP connection client.
 /// * `client = streams.socketClient(path[, options])`  
 ///    returns a socket client.  
-///    The `options` parameter of the constructor provide options for the stream (`lowMark` and `highMark`). 
+///    The `options` parameter of the constructor provide options for the stream. 
 ///    If you want different options for `read` and `write` operations, you can specify them by creating `options.read` and `options.write` sub-objects inside `options`.
 exports.tcpClient = function(port, host, options) {
 	host = host || "localhost";
