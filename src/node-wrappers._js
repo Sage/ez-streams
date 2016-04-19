@@ -171,10 +171,12 @@ function ReadableStream(emitter, options) {
 	emitter.on('error', function(err) {
 		_onData(err);
 	});
-	// no need to trap `end` events - `readable` will be fired and `read()` will return `null` at end of stream.
 	emitter.on('readable', function() {
-		var chunk = this.emitter ? this.emitter.read() : null;
+		var chunk = emitter ? emitter.read() : null;
 		_onData(null, chunk);
+	});
+	emitter.on('end', function() {
+		_onData(null, null);
 	});
 
 	self.autoClosed.push(function() {

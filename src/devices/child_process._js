@@ -5,6 +5,33 @@ const generic = require('./generic');
 const lineParser = require('../transforms/lines').parser();
 const stringify = require('../mappers/convert').stringify();
 
+const EventEmitter = require('events');
+
+// Child process stdout and stderr don't implement the streams2 API correctly. Their read() method always retuns null!
+// So, I handle them in flowing mode (streams1) and I create a small wrapper which re-exposes them as streams2.
+function stream2Wrapper(stream1) {
+	var chunks = [];
+	var stream2 = new EventEmitter();
+	stream1.on('data', chunk => {
+		chunks.push(chunk);
+		stream1.pause();
+		stream2.emit('readable');
+	});
+	stream1.on('end', () => {
+		chunks.push(null);
+		stream2.emit('readable');
+	});
+	stream1.on('error', err => {
+		stream2.emit('error', err);
+	});
+	stream2.read = function() {
+		var data = chunks.shift();
+		if (chunks.length === 0) stream1.resume();
+		return data;
+	}
+	return stream2;
+}
+
 module.exports = {
 	/// !doc
 	/// ## EZ Stream wrappers for node child processes
@@ -35,8 +62,8 @@ module.exports = {
 		proc.on('error', (e) => {
 			err = err || e;
 		});
-		var stdout = node.reader(proc.stdout, options);
-		var stderr = node.reader(proc.stderr, options);
+		var stdout = node.reader(stream2Wrapper(proc.stdout), options);
+		var stderr = node.reader(stream2Wrapper(proc.stderr), options);
 		// node does not send close event if we remove all listeners on stdin and stdout
 		// so we disable the stop methods and we call stop explicitly after the close.
 		const stops = [stdout.stop.bind(stdout), stderr.stop.bind(stderr)];
