@@ -290,6 +290,35 @@ exports.ReadableStream = ReadableStream;
 ReadableStream.prototype = Object.create(Wrapper.prototype);
 wrapEvents(ReadableStream, ["error", "data", "end", "close"]);
 
+// Some node streams (child process stdout and stderr for ex) don't implement the streams2 API correctly. 
+// Their read() method always retuns null!
+// So, wehandle them in flowing mode (streams1) and we create a small wrapper which re-exposes them as streams2.
+const EventEmitter = require('events');
+
+exports.stream2Wrapper = function(stream1) {
+	var chunks = [];
+	var stream2 = new EventEmitter();
+	stream1.on('data', chunk => {
+		chunks.push(chunk);
+		stream1.pause();
+		stream2.emit('readable');
+	});
+	stream1.on('end', () => {
+		chunks.push(null);
+		stream2.emit('readable');
+	});
+	stream1.on('error', err => {
+		stream2.emit('error', err);
+	});
+	stream2.read = function() {
+		var data = chunks.shift();
+		if (chunks.length === 0) stream1.resume();
+		return data;
+	}
+	stream2.setEncoding = stream1.setEncoding.bind(stream1);
+	return stream2;
+}
+
 /// 
 /// ## WritableStream
 /// 

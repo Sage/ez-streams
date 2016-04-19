@@ -12,9 +12,9 @@ const streams = require('../node-wrappers');
 /// * `writer = ez.devices.std.err(encoding)`  
 module.exports = {
 	in : (encoding) => {
-		const st = new streams.ReadableStream(process.stdin, {});
+		const st = new streams.ReadableStream(streams.stream2Wrapper(process.stdin), {});
 		st.setEncoding(encoding);
-		process.stdin.resume();
+		//process.stdin.resume();
 		return st;
 	},
 	out: (encoding) => new streams.WritableStream(process.stdout, {

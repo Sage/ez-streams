@@ -4,33 +4,7 @@ const node = require('./node');
 const generic = require('./generic');
 const lineParser = require('../transforms/lines').parser();
 const stringify = require('../mappers/convert').stringify();
-
-const EventEmitter = require('events');
-
-// Child process stdout and stderr don't implement the streams2 API correctly. Their read() method always retuns null!
-// So, I handle them in flowing mode (streams1) and I create a small wrapper which re-exposes them as streams2.
-function stream2Wrapper(stream1) {
-	var chunks = [];
-	var stream2 = new EventEmitter();
-	stream1.on('data', chunk => {
-		chunks.push(chunk);
-		stream1.pause();
-		stream2.emit('readable');
-	});
-	stream1.on('end', () => {
-		chunks.push(null);
-		stream2.emit('readable');
-	});
-	stream1.on('error', err => {
-		stream2.emit('error', err);
-	});
-	stream2.read = function() {
-		var data = chunks.shift();
-		if (chunks.length === 0) stream1.resume();
-		return data;
-	}
-	return stream2;
-}
+const stream2Wrapper = require('../node-wrappers').stream2Wrapper;
 
 module.exports = {
 	/// !doc
