@@ -173,7 +173,7 @@ function ReadableStream(emitter, options) {
 	});
 	// no need to trap `end` events - `readable` will be fired and `read()` will return `null` at end of stream.
 	emitter.on('readable', function() {
-		var chunk = this.emitter.read();
+		var chunk = this.emitter ? this.emitter.read() : null;
 		_onData(null, chunk);
 	});
 
