@@ -48,10 +48,17 @@ module.exports = {
 	///    Use reader for a GET request, writer for POST request
     factory: (url) => ({
         /// * `reader = factory.reader(_)`  
-        reader: (_) => module.exports.client({
-            url: url,
-            method: "GET"
-        }).end().response(_),
+        reader: (_) => {
+            var response = module.exports.client({
+                url: url,
+                method: "GET"
+            }).end().response(_);
+            if (response.statusCode !== 200) {
+                var payload = response.readAll(_);
+                throw new Error("Error reading '" + url + "'; Status " + response.statusCode + ": " + payload);
+            }
+            return response;
+        },
         /// * `writer = factory.writer(_)`  
         writer: (_) => {
             var client;
