@@ -41,7 +41,7 @@ asyncTest("Echo service test", 6, (_) => {
         const nf_reader = ez.factory("http://localhost:3004?status=404").reader(_);
         ok(false, "Reader supposed to throw");
     } catch(ex) {
-        ok(/.*Status 404.*/.test(ex.message), "Reader throws ok");
+        ok(/Status 404/.test(ex.message), "Reader throws ok");
     }
  
     start();
