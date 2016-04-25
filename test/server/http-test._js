@@ -5,7 +5,7 @@ QUnit.module(module.id);
 const ez = require("../..");
 
 var server;
-asyncTest("Echo service test", 5, (_) => {
+asyncTest("Echo service test", 6, (_) => {
     function _test(_, type, message) {
         const writer = ez.factory("http://localhost:3004").writer(_);
         writer.write(_, message);
@@ -18,6 +18,13 @@ asyncTest("Echo service test", 5, (_) => {
             res.end(req.headers["content-type"] + text);
         }
         if (req.method === "GET") {
+            // query parameters
+            var query = (req.url.split("?")[1] || "").split("&").reduce(function(prev, crt) {
+                var parts = crt.split("=");
+                if (parts[0]) prev[parts[0]] = parts[1];
+                return prev;
+            }, {});
+            res.writeHead(query.status || 200, {});
             res.end("reply for GET");
         }
     });
@@ -29,6 +36,13 @@ asyncTest("Echo service test", 5, (_) => {
     //
     const reader = ez.factory("http://localhost:3004").reader(_);
     strictEqual(reader.read(_), "reply for GET", "Get test: reader ok");
+    // try not found reader
+    try {
+        const nf_reader = ez.factory("http://localhost:3004?status=404").reader(_);
+        ok(false, "Reader supposed to throw");
+    } catch(ex) {
+        ok(/Status 404/.test(ex.message), "Reader throws ok");
+    }
  
     start();
 });
