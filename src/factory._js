@@ -9,6 +9,7 @@ const factories = (glob[secret] = (glob[secret] || {
     // standard factories
     "console": "./devices/console",
     "http": "./devices/http",
+    "https": "./devices/http",
     "file": "./devices/file"
 }));
 
