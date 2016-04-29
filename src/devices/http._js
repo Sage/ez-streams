@@ -3,16 +3,18 @@
 const streams = require('../node-wrappers');
 const fixOptions = require('./node').fixOptions;
 
-function _end(_, client) {
+function endWrite(_, client) {
     const resp = client.end().response(_);
     if (resp.statusCode != 201) throw new Error("Request return status code: " + resp.statusCode); // TODO: better manage errors
-    return resp.readAll(_);
+    const data = resp.readAll(_);
+    return (typeof data === 'string' && /^application\/json/.test(resp.headers['content-type'])) ? JSON.parse(data) : data;
 }
 
-function _deduceType(data) {
+function guessType(data) {
     if (!data) return;
     if (Buffer.isBuffer(data)) return "application/octet-stream";
     if (typeof data === "object") return "application/json";
+    if (typeof data !== "string") throw new TypeError("invalid data type: " + typeof data);
     const text = data;
     if (text[0] === "<") {
         if (text.slice(0, 9).toLowerCase() === "<!doctype") return "text/html";
@@ -64,19 +66,19 @@ module.exports = {
             var client;
             var type;
             return {
-                write: function(_, data) {
+                write(_, data) {
                     const opt = {
                         url: url,
                         method: "POST",
                         headers: {}
                     };
                     if (!client) {
-                        type = _deduceType(data);
+                        type = guessType(data);
                         if (type) opt.headers["content-type"] = type;
                         client = module.exports.client(opt);
                     }
-                    if (data === undefined) return _end(_, client);
-                    else return client.write(_, (type === "application/json") ? JSON.stringify(data) : data);
+                    if (data === undefined) return this.result = endWrite(_, client);
+                    else return client.write(_, type === "application/json" ? JSON.stringify(data) : data);
                 }
             }
         }

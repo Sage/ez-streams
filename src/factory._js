@@ -10,7 +10,8 @@ const factories = (glob[secret] = (glob[secret] || {
     "console": "./devices/console",
     "http": "./devices/http",
     "https": "./devices/http",
-    "file": "./devices/file"
+    "file": "./devices/file",
+    "string": "./devices/string",
 }));
 
 function scanDirs(dir) {
@@ -45,7 +46,9 @@ function scanDirs(dir) {
 scanDirs(__dirname);
 
 module.exports = function(url) {
-    const pp = (url || "").split(":")[0];
+    const parts = (url || "").split(":");
+    if (parts.length < 2) throw new Error("invalid URL: " + url);
+    const pp = parts[0];
     if (!pp) throw new Error("Missing protocol in url: " + url);
     if (!factories[pp]) throw new Error("Missing factory for protocol " + pp);
     //

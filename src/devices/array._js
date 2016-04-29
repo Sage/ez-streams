@@ -34,13 +34,16 @@ module.exports = {
 		if (!options) options = {};
 		const values = [];
 		return writerApi.decorate({
-			write: function(_, value) {
+			write(_, value) {
 				if (!options.sync) nextTick(_);
 				if (value !== undefined) values.push(value);
 			},
-			toArray: function() {
+			toArray() {
 				return values;
 			},
+			get result() {
+				return values;
+			}
 		});
 	},
 };

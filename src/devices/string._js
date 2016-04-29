@@ -24,7 +24,7 @@ module.exports = {
 		const chunkSize = options.chunkSize || 1024;
 		var pos = 0;
 		return readerApi.decorate({
-			read: function(_) {
+			read(_) {
 				if (!options.sync) nextTick(_);
 				if (pos >= text.length) return;
 				const len = typeof chunkSize === "function" ? chunkSize() : chunkSize;
@@ -44,14 +44,28 @@ module.exports = {
 		options = options || {};
 		var buf = "";
 		return writerApi.decorate({
-			write: function(_, data) {
+			write(_, data) {
 				if (!options.sync) nextTick(_);
 				if (data === undefined) return;
 				buf += data;
 			},
-			toString: function() {
+			toString() {
+				return buf;
+			},
+			get result() {
 				return buf;
 			},
 		});
 	},
+
+    factory: (url) => ({
+        /// * `reader = factory.reader(_)`  
+        reader: (_) => {
+        	return module.exports.reader(url.substring(url.indexOf(':') + 1));
+        },
+        /// * `writer = factory.writer(_)`  
+        writer: (_) => {
+        	return module.exports.writer();
+        },
+    }),
 };

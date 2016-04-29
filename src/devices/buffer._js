@@ -24,7 +24,7 @@ module.exports = {
 		const chunkSize = options.chunkSize || 1024;
 		var pos = 0;
 		return readerApi.decorate({
-			read: function(_) {
+			read(_) {
 				if (!options.sync) nextTick(_);
 				if (pos >= buffer.length) return;
 				const len = typeof chunkSize === "function" ? chunkSize() : chunkSize;
@@ -44,12 +44,15 @@ module.exports = {
 		options = options || {};
 		const chunks = [];
 		return writerApi.decorate({
-			write: function(_, data) {
+			write(_, data) {
 				if (!options.sync) nextTick(_);
 				if (data !== undefined) chunks.push(data);
 			},
-			toBuffer: function() {
+			toBuffer() {
 				return Buffer.concat(chunks);
+			},
+			get result() {
+				return this.toBuffer();
 			},
 		});
 	},
