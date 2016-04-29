@@ -2,6 +2,11 @@
 const fs = require('fs');
 const fsp = require('path');
 
+const extend = Object.assign || function(dst, src) { // we don't need complete babel polyfill, only this one
+	Object.keys(src).forEach(k => dst[k] = src[k]);
+	return dst;
+}
+
 function requireDir(dir) {
 	return fs.readdirSync(dir).reduce((r, name) => {
 		const path = fsp.join(dir, name);
@@ -20,7 +25,7 @@ const api = requireDir(__dirname);
 const ez = function(arg) {
 	return ez.reader(arg);
 };
-Object.assign(ez, api);
+extend(ez, api);
 
 ez.reader = function(arg) {
 	if (typeof arg === 'string') {
@@ -41,7 +46,7 @@ ez.reader = function(arg) {
 		throw new Error(`invalid argument ${ arg && typeof arg }`);
 	}
 }
-Object.assign(ez.reader, api.reader);
+extend(ez.reader, api.reader);
 
 ez.writer = function(arg) {
 	if (typeof arg === 'string') {
@@ -66,6 +71,6 @@ ez.writer = function(arg) {
 		throw new Error(`invalid argument ${ arg && typeof arg }`);
 	}	
 }
-Object.assign(ez.writer, api.writer);
+extend(ez.writer, api.writer);
 
 module.exports = ez;
