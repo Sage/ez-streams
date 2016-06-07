@@ -18,8 +18,11 @@
   },
   "devDependencies": {
     "babel-core": "^6.3.17",
+    "babel-plugin-flow-comments": "^6.3.19",
     "babel-plugin-streamline": "^2.0.6",
+    "babel-plugin-transform-class-properties": "^6.9.1",
     "babel-preset-es2015": "^6.3.13",
+    "streamline-node": "^1.0.2",
     "streamline-helpers": "^2.0.4"
   },
   "scripts": {

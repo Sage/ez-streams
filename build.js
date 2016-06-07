@@ -1,12 +1,11 @@
 "use strict";
 
 // This script rebuilds the lib/builtins-*.js files
-"use strict";
 var fsp = require('path');
 var compile = require('streamline-helpers').compileSync;
 function options(runtime) {
 	return {
-		plugins: ['streamline'],
+		plugins: ['flow-comments', 'transform-class-properties', 'streamline'],
 		runtime: runtime,
 	};
 }
