@@ -13,7 +13,7 @@ function requireDir(dir) {
 		if (fs.statSync(path).isDirectory()) {
 			r[name] = requireDir(path);
 		} else {
-			const match = /^(.*)\._?js$/.exec(name);
+			const match = /^(.*)\._?[jt]s$/.exec(name);
 			if (match) r[match[1]] = require(fsp.join(dir, match[1]));
 		}
 		return r;
