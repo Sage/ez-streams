@@ -3,15 +3,22 @@
 /// ## Transform to cut string and binary streams
 /// 
 /// `const ez = require("ez-streams")`  
+import { _ } from "streamline-runtime";
+import { Reader } from "../reader";
+import { Writer } from "../writer";
 /// 
 /// * `transform = ez.transforms.cut(options)`  
 ///   cuts a string or binary stream in chunks of equal size  
-module.exports = (options) => {
+export interface Options {
+	size?: number;
+}
+
+export default function<T>(options?: Options) {
 	options = options || {};
 	const size = typeof options === 'number' ? options : options.size;
-	return (_, reader, writer) => {
+	return (_: _, reader: Reader<T>, writer: Writer<T>) => {
 		if (!size) return reader.pipe(_, writer);
-		var data = reader.read(_);
+		var data: any = reader.read(_);
 		while (data !== undefined) {
 			if (data.length < size) {
 				var d = reader.read(_);
@@ -30,4 +37,8 @@ module.exports = (options) => {
 			}
 		}
 	};
-};
+}
+
+// rewire for compat
+module.exports = exports.default;
+module.exports.default = exports.default;

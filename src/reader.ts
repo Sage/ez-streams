@@ -63,6 +63,7 @@ export class Reader<T> {
 	read: (_: _) => T;
 	_stop: (_: _, arg?: any) => void;
 	stopped: boolean;
+	headers: { [name: string]: string }; // experimental
 	constructor(read: (_: _) => T, stop?: (_: _, arg: any) => void, parent?: Stoppable) {
 		if (typeof read !== 'function') throw new Error("invalid reader.read: " + (read && typeof read));
 		this.parent = parent;
@@ -299,7 +300,7 @@ export class Reader<T> {
 	///   where `reader` is the `stream` to which `transform` is applied,
 	///   and writer is a writer which is piped into the next element of the chain.  
 	///   Returns another reader on which other operations may be chained.
-	transform<U>(fn: (_: _, reader: Reader<T>, writer: Writer<U>) => Reader<U>, thisObj?: any) {
+	transform<U>(fn: (_: _, reader: Reader<T>, writer: Writer<U>) => void, thisObj?: any): Reader<U> {
 		thisObj = thisObj !== undefined ? thisObj : this;
 		const parent = this;
 		const uturn = require('./devices/uturn').create();
@@ -575,7 +576,7 @@ export class Reader<T> {
 }
 
 
-class PeekableReader<T> extends Reader<T> {
+export class PeekableReader<T> extends Reader<T> {
 	buffered: T[];
 	constructor(parent: Reader<T>) {
 		super((_: _) => {
