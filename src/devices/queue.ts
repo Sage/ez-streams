@@ -1,7 +1,7 @@
-"use strict";
-
-const generic = require('./generic');
-const flows = require('streamline-runtime').flows;
+import { _ } from 'streamline-runtime';
+import { Reader } from '../reader';
+import { Writer } from '../writer';
+import * as generic from './generic';
 
 /// !doc
 /// ## Queue device
@@ -22,10 +22,20 @@ const flows = require('streamline-runtime').flows;
 ///   You can pass a `max` option through the `options` parameter when creating the queue. 
 ///   If you pass this option, `queue.put(data)` will return true if the data has been queued and false if 
 ///   the data has been discarded because the queue is full. 
-///   Note that `queue.writer will not discard the data but instead will wait for the queue to become available. 
-module.exports = (options) => {
-	const queue = flows.queue(options);
-	queue.reader = generic.reader(queue.read.bind(queue),  function(_) { queue.end.call(queue); });
-	queue.writer = generic.writer(queue.write.bind(queue));
+///   Note that `queue.writer will not discard the data but instead will wait for the queue to become available.
+
+interface Duplex<T> {
+	reader: Reader<T>;
+	writer: Writer<T>;
+}
+
+// any and type intersection to the rescuse because queue is not an ES2015 class
+export default function<T>(max: number) : Streamline.Queue<T> & Duplex<T> {
+	const queue: any = _.queue(max);
+	queue.reader = generic.reader(queue.read.bind(queue),  function(_) { queue.end.call(queue); })
+	queue.writer = generic.writer(queue.write.bind(queue))
 	return queue;
-};
+}
+// rewire for compat - this API is a compat challenge.
+module.exports = exports.default;
+module.exports.default = exports.default;
