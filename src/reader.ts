@@ -29,15 +29,12 @@
 /// 
 import { _ } from "streamline-runtime";
 import { convert as predicate } from "./predicate";
+import { Writer } from './writer';
 import * as stopException from './stop-exception';
 import * as nodeStream from "stream";
 
 
 const nextTick = require('./util').nextTick;
-interface Writer<U> {
-	write(_: _, value: U): void;
-	stop(_: _, arg: any) : void;
-} // for now
 
 function tryCatch<R>(_: _, that: any, f: (_: _) => R) {
 	try {
@@ -67,6 +64,7 @@ export class Reader<T> {
 	_stop: (_: _, arg?: any) => void;
 	stopped: boolean;
 	constructor(read: (_: _) => T, stop?: (_: _, arg: any) => void, parent?: Stoppable) {
+		if (typeof read !== 'function') throw new Error("invalid reader.read: " + (read && typeof read));
 		this.parent = parent;
 		this.read = read;
 		this.stopped = false;
@@ -606,7 +604,7 @@ class PeekableReader<T> extends Reader<T> {
 exports.decorate = function(proto: any) {
 	const readerProto: any = Reader.prototype;
 	Object.getOwnPropertyNames(Reader.prototype).forEach(k => {
-		proto[k] = readerProto[k];
+		if (k !== 'constructor') proto[k] = readerProto[k];
 	});
 	return proto;
 }
