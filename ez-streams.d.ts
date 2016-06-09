@@ -353,7 +353,7 @@ declare module 'ez-streams/reader' {
         parallel(options: ParallelOptions | number, consumer: (source: any) => Reader<T>): Reader<{}>;
         peekable(): PeekableReader<T>;
         buffer(max: number): Reader<{}>;
-        join(streams: Reader<T>[], thisObj?: any): Reader<{}>;
+        join(streams: Reader<T>[] | Reader<T>, thisObj?: any): Reader<{}>;
         nodify(): any;
         nodeTransform(duplex: nodeStream.Duplex): any;
         compare(_: _, other: Reader<T>, options: CompareOptions<T>): number;

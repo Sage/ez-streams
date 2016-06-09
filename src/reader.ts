@@ -505,9 +505,10 @@ export class Reader<T> {
 		}), null, parent);
 	}
 
-	join(streams: Reader<T>[], thisObj?: any) {
+	join(streams: Reader<T>[] | Reader<T>, thisObj?: any) {
 		const that: Reader<T> = this;
-		return new StreamGroup([that].concat(streams)).dequeue();
+		const sts = Array.isArray(streams) ? streams : [streams];
+		return new StreamGroup([that].concat(sts)).dequeue();
 	}
 
 	/// * `stream = reader.nodify()`  
