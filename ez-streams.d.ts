@@ -7,33 +7,40 @@
 declare module 'ez-streams' {
     import * as DevArray from 'ez-streams/devices/array';
     import * as DevBuffer from 'ez-streams/devices/buffer';
+    import * as DevChildProcess from 'ez-streams/devices/child_process';
     import * as DevConsole from 'ez-streams/devices/console';
     import * as DevFile from 'ez-streams/devices/file';
     import * as DevGeneric from 'ez-streams/devices/generic';
     import * as DevQueue from 'ez-streams/devices/queue';
+    import * as DevNet from 'ez-streams/devices/net';
+    import * as DevNode from 'ez-streams/devices/node';
+    import * as DevStd from 'ez-streams/devices/std';
     import * as DevString from 'ez-streams/devices/string';
+    import * as DevUturn from 'ez-streams/devices/uturn';
     export const devices: {
         array: typeof DevArray;
         buffer: typeof DevBuffer;
-        child_process: any;
+        child_process: typeof DevChildProcess;
         console: typeof DevConsole;
         file: typeof DevFile;
         generic: typeof DevGeneric;
         http: any;
-        net: any;
-        node: any;
+        net: typeof DevNet;
+        node: typeof DevNode;
         queue: typeof DevQueue;
-        std: any;
+        std: typeof DevStd;
         string: typeof DevString;
-        uturn: any;
+        uturn: typeof DevUturn;
     };
     import * as HelpBinary from 'ez-streams/helpers/binary';
     export const helpers: {
         binary: typeof HelpBinary;
     };
+    import * as MapConvert from 'ez-streams/mappers/convert';
+    import * as MapJson from 'ez-streams/mappers/json';
     export const mappers: {
-        convert: any;
-        json: any;
+        convert: typeof MapConvert;
+        json: typeof MapJson;
     };
     import * as TransCsv from 'ez-streams/transforms/csv';
     import * as TransCut from 'ez-streams/transforms/cut';
@@ -95,6 +102,21 @@ declare module 'ez-streams/devices/buffer' {
     export function writer(options?: Options): BufferWriter;
 }
 
+declare module 'ez-streams/devices/child_process' {
+    import { Reader } from 'ez-streams/reader';
+    import * as node from 'ez-streams/devices/node';
+    export interface ReaderOptions {
+        acceptCode?: (code: number) => boolean;
+        encoding?: string;
+        dataHandler?: (reader: Reader<string | Buffer>) => Reader<string | Buffer>;
+        errorHandler?: (reader: Reader<string | Buffer>) => Reader<string | Buffer>;
+        errorPrefix?: string;
+        errorThrow?: boolean;
+    }
+    export function reader(proc: NodeJS.Process, options?: ReaderOptions): Reader<{}>;
+    export function writer(proc: NodeJS.Process, options: node.NodeWriterOptions): any;
+}
+
 declare module 'ez-streams/devices/console' {
     import { Writer } from "ez-streams/writer";
     export const log: Writer<string>;
@@ -151,6 +173,51 @@ declare module 'ez-streams/devices/queue' {
     export function create<T>(max?: number): Streamline.Queue<T> & Duplex<T>;
 }
 
+declare module 'ez-streams/devices/net' {
+    import { _ } from 'streamline-runtime';
+    export interface ServerOptions {
+    }
+    export interface TcpStreamOptions {
+    }
+    export interface TcpStream {
+    }
+    export function server(listener?: (stream: TcpStream, _: _) => void, streamOptions?: TcpStreamOptions, serverOptions?: ServerOptions): any;
+    export interface TcpClientOptions {
+    }
+    export function tcpClient(port: number, host?: string, options?: TcpClientOptions): any;
+    export interface TcpSocketOptions {
+    }
+    export function socketClient(path: string, options: TcpSocketOptions): any;
+}
+
+declare module 'ez-streams/devices/node' {
+    import { Reader } from 'ez-streams/reader';
+    export interface NodeReaderOptions {
+        encoding?: string;
+    }
+    export function fixOptions(options: NodeReaderOptions | string): NodeReaderOptions;
+    export function reader(emitter: NodeJS.EventEmitter, options?: NodeReaderOptions | string): Reader<any>;
+    export interface NodeWriterOptions {
+    }
+    export function writer(emitter: NodeJS.EventEmitter, options?: NodeWriterOptions): any;
+}
+
+declare module 'ez-streams/devices/std' {
+    import { Reader } from 'ez-streams/reader';
+    import { Writer } from 'ez-streams/writer';
+    export const input: Input;
+    export const output: Output;
+    export const error: Output;
+    export interface Input {
+        (encoding: string): Reader<string>;
+        (): Reader<Buffer>;
+    }
+    export interface Output {
+        (encoding: string): Writer<string>;
+        (): Writer<Buffer>;
+    }
+}
+
 declare module 'ez-streams/devices/string' {
     import { Reader } from 'ez-streams/reader';
     import { Writer } from 'ez-streams/writer';
@@ -170,6 +237,18 @@ declare module 'ez-streams/devices/string' {
         reader: (_: Streamline._) => any;
         writer: (_: Streamline._) => any;
     };
+}
+
+declare module 'ez-streams/devices/uturn' {
+    import { _ } from 'streamline-runtime';
+    import { Reader } from 'ez-streams/reader';
+    import { Writer } from 'ez-streams/writer';
+    export interface Uturn<T> {
+        reader: Reader<T>;
+        writer: Writer<T>;
+        end: (_: _) => void;
+    }
+    export function create<T>(): Uturn<T>;
 }
 
 declare module 'ez-streams/helpers/binary' {
@@ -206,6 +285,25 @@ declare module 'ez-streams/helpers/binary' {
     }
     export function reader(reader: BaseReader<Buffer>, options?: ReaderOptions): Reader;
     export function writer(writer: BaseWriter<Buffer>, options?: WriterOptions): Writer;
+}
+
+declare module 'ez-streams/mappers/convert' {
+    export function stringify(encoding?: string): (_: Streamline._, data: Buffer) => string;
+    export function bufferify(encoding?: string): (_: Streamline._, data: string) => Buffer;
+}
+
+declare module 'ez-streams/mappers/json' {
+    export interface ParseOptions {
+        sep?: string;
+        encoding?: string;
+    }
+    export function parse(options?: ParseOptions): (_: Streamline._, data: string | Buffer) => any;
+    export interface FormatterOptions {
+        sep?: string;
+        replacer?: (key: string, value: any) => any;
+        space?: string;
+    }
+    export function stringify(options?: FormatterOptions): (_: Streamline._, data: any) => string;
 }
 
 declare module 'ez-streams/transforms/csv' {

@@ -1,25 +1,30 @@
 import * as DevArray from './devices/array';
 import * as DevBuffer from './devices/buffer';
+import * as DevChildProcess from './devices/child_process';
 import * as DevConsole from './devices/console';
 import * as DevFile from './devices/file';
 import * as DevGeneric from './devices/generic';
 import * as DevQueue from './devices/queue';
+import * as DevNet from './devices/net';
+import * as DevNode from './devices/node';
+import * as DevStd from './devices/std';
 import * as DevString from './devices/string';
+import * as DevUturn from './devices/uturn';
 
 export const devices = {
 	array: DevArray,
 	buffer: DevBuffer,
-	child_process: require('./devices/child_process'),
+	child_process: DevChildProcess,
 	console: DevConsole,
 	file: DevFile,
 	generic: DevGeneric,
 	http: require('./devices/http'),
-	net: require('./devices/net'),
-	node: require('./devices/node'),
+	net: DevNet,
+	node: DevNode,
 	queue: DevQueue,
-	std: require('./devices/std'),
+	std: DevStd,
 	string: DevString,
-	uturn: require('./devices/uturn'),
+	uturn: DevUturn,
 };
 
 import * as HelpBinary from './helpers/binary';
@@ -28,9 +33,12 @@ export const helpers = {
 	binary: HelpBinary,
 }
 
+import * as MapConvert from './mappers/convert';
+import * as MapJson from './mappers/json';
+
 export const mappers = {
-	convert: require('./mappers/convert'),
-	json: require('./mappers/json'),
+	convert: MapConvert,
+	json: MapJson,
 }
 
 import * as TransCsv from './transforms/csv';
