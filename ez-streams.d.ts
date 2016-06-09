@@ -120,7 +120,7 @@ declare module 'ez-streams/devices/queue' {
         reader: Reader<T>;
         writer: Writer<T>;
     }
-    export default function <T>(max?: number): Streamline.Queue<T> & Duplex<T>;
+    export function create<T>(max?: number): Streamline.Queue<T> & Duplex<T>;
 }
 
 declare module 'ez-streams/devices/string' {
