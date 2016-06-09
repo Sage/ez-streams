@@ -13,7 +13,7 @@ export interface Options {
 	size?: number;
 }
 
-export default function<T>(options?: Options) {
+export function transform<T>(options?: Options) {
 	options = options || {};
 	const size = typeof options === 'number' ? options : options.size;
 	return (_: _, reader: Reader<T>, writer: Writer<T>) => {
@@ -38,7 +38,3 @@ export default function<T>(options?: Options) {
 		}
 	};
 }
-
-// rewire for compat
-module.exports = exports.default;
-module.exports.default = exports.default;

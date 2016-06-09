@@ -1,33 +1,3 @@
-"use strict";
-/*
-const fs = require('fs');
-const fsp = require('path');
-
-const extend = Object.assign || function(dst, src) { // we don't need complete babel polyfill, only this one
-	Object.keys(src).forEach(k => dst[k] = src[k]);
-	return dst;
-}
-
-function requireDir(dir) {
-	return fs.readdirSync(dir).reduce((r, name) => {
-		const path = fsp.join(dir, name);
-		if (fs.statSync(path).isDirectory()) {
-			r[name] = requireDir(path);
-		} else {
-			const match = /^(.*)\._?[jt]s$/.exec(name);
-			if (match) r[match[1]] = require(fsp.join(dir, match[1]));
-		}
-		return r;
-	}, {});
-}
-
-const api = requireDir(__dirname);
-
-const ez = function(arg) {
-	return ez.reader(arg);
-};
-extend(ez, api);
-*/
 import * as DevArray from './devices/array';
 import * as DevBuffer from './devices/buffer';
 import * as DevConsole from './devices/console';
@@ -84,14 +54,18 @@ import * as EzStopException from './stop-exception';
 import * as EzWriter from './writer';
 
 export const predicate = EzPredicate;
-export const reader = EzReader;
-export const writer = EzWriter;
-/*
-ez.reader = function(arg) {
+export const factory = require('./factory');
+
+export type Reader<T> = EzReader.Reader<T>;
+export type CompareOptions<T> = EzReader.CompareOptions<T>;
+export type ParallelOptions = EzReader.ParallelOptions;
+export type Writer<T> = EzWriter.Writer<T>;
+
+export function reader(arg: string | any[] | Buffer) : Reader<any> {
 	if (typeof arg === 'string') {
-		const f = api.factory(arg);
-		let reader;
-		return api.devices.generic.reader(function read(_) {
+		const f = factory(arg);
+		let reader: Reader<any>;
+		return devices.generic.reader(function read(_) {
 			if (!reader) reader = f.reader(_);
 			return reader.read(_);
 		}, function stop(_, arg) {
@@ -99,20 +73,18 @@ ez.reader = function(arg) {
 			return reader.stop(_, arg);
 		})
 	} else if (Array.isArray(arg)) {
-		return api.devices.array.reader(arg);
+		return devices.array.reader(arg);
 	} else if (Buffer.isBuffer(arg)) {
-		return api.devices.buffer.reader(arg);
+		return devices.buffer.reader(arg);
 	} else {
 		throw new Error(`invalid argument ${ arg && typeof arg }`);
 	}
 }
-extend(ez.reader, api.reader);
-
-ez.writer = function(arg) {
+export function writer(arg: string | any[] | Buffer) : Writer<any> {
 	if (typeof arg === 'string') {
-		const f = api.factory(arg);
-		let writer;
-		const wrapper = api.devices.generic.writer(function write(_, val) {
+		const f = factory(arg);
+		let writer: Writer<any>;
+		const wrapper = devices.generic.writer(function write(_, val) {
 			if (!writer) writer = f.writer(_);
 			return writer.write(_, val);
 		}, function stop(_, arg) {
@@ -120,18 +92,32 @@ ez.writer = function(arg) {
 			return writer.stop(_, arg);
 		});
 		Object.defineProperty(wrapper, 'result', {
-			get: () => writer.result,
+			get: () => {
+				const anyWriter: any = writer;
+				return anyWriter.result;
+			}
 		});
 		return wrapper;
 	} else if (Array.isArray(arg)) {
-		return api.devices.array.writer(arg);
+		return devices.array.writer(arg);
 	} else if (Buffer.isBuffer(arg)) {
-		return api.devices.buffer.writer(arg);
+		return devices.buffer.writer(arg);
 	} else {
 		throw new Error(`invalid argument ${ arg && typeof arg }`);
 	}	
 }
-extend(ez.writer, api.writer);
 
-module.exports = ez;
-*/
+// compatibility hacks
+var readerHack: any = reader;
+readerHack.create = EzReader.create;
+
+var writerHack: any = writer;
+writerHack.create = EzWriter.create;
+
+var transformHack: any = transforms.cut.transform;
+transforms.cut = transformHack;
+transforms.cut.transform = transformHack;
+
+var queueHack: any = devices.queue.create;
+devices.queue = queueHack;
+devices.queue.create = queueHack;

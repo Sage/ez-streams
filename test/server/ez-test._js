@@ -38,11 +38,11 @@ asyncTest("start echo server", 1, (_) => {
 });
 
 asyncTest("http test", 2, (_) => {
-    const reply = ez("http://localhost:3005").readAll(_);
+    const reply = ez.reader("http://localhost:3005").readAll(_);
     strictEqual(reply, "reply for GET", "Get test: reader ok");
     // try not found reader
     try {
-        const reply404 = ez("http://localhost:3005?status=404").readAll(_);
+        const reply404 = ez.reader("http://localhost:3005?status=404").readAll(_);
         ok(false, "Reader supposed to throw");
     } catch(ex) {
         ok(/Status 404/.test(ex.message), "Reader throws ok");
@@ -65,7 +65,7 @@ asyncTest("http JSON", 1, (_) => {
 });
 
 asyncTest("array test", 1, (_) => {
-    const reply = ez([2, 3, 4]).readAll(_);
+    const reply = ez.reader([2, 3, 4]).readAll(_);
     deepEqual(reply, [2, 3, 4]);
     start();
 });
@@ -78,7 +78,7 @@ asyncTest("array readers and writers", 1, (_) => {
 });
 
 asyncTest("string test", 1, (_) => {
-    const reply = ez("string:hello world").readAll(_);
+    const reply = ez.reader("string:hello world").readAll(_);
     deepEqual(reply, "hello world");
     start();
 });
@@ -92,7 +92,7 @@ asyncTest("string readers and writers", 1, (_) => {
 
 asyncTest("buffer test", 1, (_) => {
     const buf = new Buffer('hello world', 'utf8');
-    const reply = ez(buf).transform(ez.transforms.cut(2)).readAll(_);
+    const reply = ez.reader(buf).transform(ez.transforms.cut(2)).readAll(_);
     deepEqual(reply.toString('utf8'), buf.toString('utf8'));
     start();
 });

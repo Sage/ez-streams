@@ -11,7 +11,7 @@ import * as generic from './generic';
 /// 
 /// `const ez = require('ez-streams');`
 /// 
-/// * `queue = ez.devices.queue(options)`  
+/// * `queue = ez.devices.queue.create(options)`  
 ///   creates a queue device.  
 ///   The queue device has two properties:  
 ///   `queue.reader`: a reader from which you can read the data which has been queued.  
@@ -30,12 +30,9 @@ export interface Duplex<T> {
 }
 
 // any and type intersection to the rescuse because queue is not an ES2015 class
-export default function<T>(max?: number) : Streamline.Queue<T> & Duplex<T> {
+export function create<T>(max?: number) : Streamline.Queue<T> & Duplex<T> {
 	const queue: any = _.queue(max);
 	queue.reader = generic.reader(queue.read.bind(queue),  function(_) { queue.end.call(queue); })
 	queue.writer = generic.writer(queue.write.bind(queue))
 	return queue;
 }
-// rewire for compat - this API is a compat challenge.
-module.exports = exports.default;
-module.exports.default = exports.default;

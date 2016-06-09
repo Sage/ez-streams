@@ -23,6 +23,8 @@
     "babel-plugin-transform-class-properties": "^6.9.1",
     "babel-preset-es2015": "^6.3.13",
     "dts-bundle": "^0.4.3",
+    "retyped-qunit-tsd-ambient": "^1.16.0-0",
+    "streamline": "^2.0.8",
     "streamline-helpers": "^2.0.4",
     "streamline-node": "^1.0.2",
     "typescript": "^1.8.10"

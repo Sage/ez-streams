@@ -51,8 +51,13 @@ declare module 'ez-streams' {
     import * as EzReader from 'ez-streams/reader';
     import * as EzWriter from 'ez-streams/writer';
     export const predicate: typeof EzPredicate;
-    export const reader: typeof EzReader;
-    export const writer: typeof EzWriter;
+    export const factory: any;
+    export type Reader<T> = EzReader.Reader<T>;
+    export type CompareOptions<T> = EzReader.CompareOptions<T>;
+    export type ParallelOptions = EzReader.ParallelOptions;
+    export type Writer<T> = EzWriter.Writer<T>;
+    export function reader(arg: string | any[] | Buffer): Reader<any>;
+    export function writer(arg: string | any[] | Buffer): Writer<any>;
 }
 
 declare module 'ez-streams/devices/array' {
@@ -196,7 +201,7 @@ declare module 'ez-streams/transforms/cut' {
     export interface Options {
         size?: number;
     }
-    export default function <T>(options?: Options): (_: Streamline._, reader: Reader<T>, writer: Writer<T>) => any;
+    export function transform<T>(options?: Options): (_: Streamline._, reader: Reader<T>, writer: Writer<T>) => any;
 }
 
 declare module 'ez-streams/transforms/json' {
