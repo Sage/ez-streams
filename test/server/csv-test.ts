@@ -1,6 +1,11 @@
-"use strict";
+// <reference path="../../node_modules/retyped-qunit-tsd-ambient/qunit.d.ts" />
+declare function asyncTest(name: string, expected: number, test: (_: _) => any): any;
+
+import { _ } from "streamline-runtime";
+import * as ez from "../../src/ez";
+
+import { Reader } from "../../src/reader";
 QUnit.module(module.id);
-const ez = require("../..");
 const csv = ez.transforms.csv;
 const string = ez.devices.string;
 

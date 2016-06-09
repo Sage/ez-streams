@@ -30,7 +30,7 @@ function parseContentType(contentType: string) {
 ///   Creates a parser transform.
 ///   The content type, which includes the boundary,
 ///   is passed via `options['content-type']`.
-type ParserOptions = {
+export type ParserOptions = {
 	[name: string]: string;
 }
 
@@ -96,7 +96,7 @@ export function parser(options: ParserOptions) {
 ///   Creates a formatter transform.
 ///   The content type, which includes the boundary,
 ///   is passed via `options['content-type']`.
-interface FormatterOptions {
+export interface FormatterOptions {
 	[name: string]: string;
 }
 

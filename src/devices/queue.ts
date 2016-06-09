@@ -24,13 +24,13 @@ import * as generic from './generic';
 ///   the data has been discarded because the queue is full. 
 ///   Note that `queue.writer will not discard the data but instead will wait for the queue to become available.
 
-interface Duplex<T> {
+export interface Duplex<T> {
 	reader: Reader<T>;
 	writer: Writer<T>;
 }
 
 // any and type intersection to the rescuse because queue is not an ES2015 class
-export default function<T>(max: number) : Streamline.Queue<T> & Duplex<T> {
+export default function<T>(max?: number) : Streamline.Queue<T> & Duplex<T> {
 	const queue: any = _.queue(max);
 	queue.reader = generic.reader(queue.read.bind(queue),  function(_) { queue.end.call(queue); })
 	queue.writer = generic.writer(queue.write.bind(queue))

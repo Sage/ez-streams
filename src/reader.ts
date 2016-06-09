@@ -45,17 +45,23 @@ function tryCatch<R>(_: _, that: any, f: (_: _) => R) {
 	}
 }
 
-interface ParallelOptions {
+export interface ParallelOptions {
 	count?: number;
 	shuffle?: boolean;
 }
 
-interface CompareOptions<T> {
+export interface CompareOptions<T> {
 	compare?: (v1: T, v2: T) => number;
 }
 
-interface Stoppable {
+export interface Stoppable {
 	stop: (_: _, arg?: any) => void;
+}
+
+function resolvePredicate<T>(fn: ((_: _, value: T) => boolean) | {}): (_: _, value: T) => boolean {
+	const f: any = fn;
+	if (typeof fn !== 'function') return predicate(fn);
+	else return f;
 }
 
 export class Reader<T> {
@@ -106,14 +112,14 @@ export class Reader<T> {
 	///   The `fn` function is called as `fn(_, elt)`.  
 	///   Returns true at the end of stream if `fn` returned true on every entry.  
 	///   Stops streaming and returns false as soon as `fn` returns false on an entry.
-	every(_: _, fn: (_: _, value: T) => boolean, thisObj?: any) {
+	every(_: _, fn: ((_: _, value: T) => boolean) | {}, thisObj?: any) {
 		thisObj = thisObj !== undefined ? thisObj : this;
-		if (typeof fn !== 'function') fn = predicate(fn);
+		const f = resolvePredicate(fn);
 		return tryCatch(_, this, (_) => {
 			while (true) {
 				var val = this.read(_);
 				if (val === undefined) return true;
-				if (!fn.call(thisObj, _, val)) {
+				if (!f.call(thisObj, _, val)) {
 					this.stop(_);
 					return false;
 				};
@@ -126,14 +132,14 @@ export class Reader<T> {
 	///   The `fn` function is called as `fn(_, elt)`.  
 	///   Returns false at the end of stream if `fn` returned false on every entry.  
 	///   Stops streaming and returns true as soon as `fn` returns true on an entry.
-	some(_:_, fn: (_: _, value: T) => boolean, thisObj?: any) {
+	some(_:_, fn: ((_: _, value: T) => boolean) | {}, thisObj?: any) {
 		thisObj = thisObj !== undefined ? thisObj : this;
-		if (typeof fn !== 'function') fn = predicate(fn);
+		const f = resolvePredicate(fn);
 		return tryCatch(_, this, (_) => {
 			while (true) {
 				var val = this.read(_);
 				if (val === undefined) return false;
-				if (fn.call(thisObj, _, val)) {
+				if (f.call(thisObj, _, val)) {
 					this.stop(_);
 					return true;
 				}
@@ -160,7 +166,10 @@ export class Reader<T> {
 	/// * `writer = reader.pipe(_, writer)`  
 	///   Pipes from `stream` to `writer`.
 	///   Returns the writer for chaining.
-	pipe(_: _, writer: Writer<T>) {
+	// should be pipe<R extends Writer<T>>(_: _, writer: R) 
+	// but flow-comments plugin does not understand this syntax
+	// so I relax the return type.
+	pipe(_: _, writer: Writer<T>) : any {
 		tryCatch(_, this, (_) => {
 			do {
 				var val = this.read(_);
@@ -255,7 +264,7 @@ export class Reader<T> {
 	/// * `reader = reader.concat(reader1, reader2)`  
 	///   Concatenates reader with one or more readers.  
 	///   Works like array.concat: you can pass the readers as separate arguments, or pass an array of readers.  
-	concat(...readers: Reader<T>[]) {
+	concat(...readers: (Reader<T> | Reader<T>[])[]) {
 		const streams: Reader<T>[] = Array.prototype.concat.apply([], arguments);
 		var stream: Reader<T> = this;
 		return new Reader(function read(_) {
@@ -317,16 +326,16 @@ export class Reader<T> {
 	///   Similar to `filter` on arrays.  
 	///   The `fn` function is called as `fn(_, elt, i)`.  
 	///   Returns another reader on which other operations may be chained.
-	filter(fn: (_: _, value: T, index: number) => boolean, thisObj?: any) {
+	filter(fn: ((_: _, value: T, index: number) => boolean) | {}, thisObj?: any) {
 		thisObj = thisObj !== undefined ? thisObj : this;
-		if (typeof fn !== 'function') fn = predicate(fn);
+		const f = resolvePredicate(fn);
 		const parent = this;
 		var i = 0, done = false;
 		return new Reader(function(_) {
 			while (!done) {
 				var val = parent.read(_);
 				done = val === undefined;
-				if (done || fn.call(thisObj, _, val, i++)) return val;
+				if (done || f.call(thisObj, _, val, i++)) return val;
 			}
 		}, null, parent);
 	}
@@ -336,15 +345,15 @@ export class Reader<T> {
 	///   The `fn` function is called as `fn(_, elt, i)`.  
 	///   `stopArg` is an optional argument which is passed to `stop` when `fn` becomes true.  
 	///   Returns another reader on which other operations may be chained.
-	until(fn: (_: _, value: T, index: number) => boolean, thisObj?: any, stopArg?: any) {
+	until(fn: ((_: _, value: T, index: number) => boolean) | {}, thisObj?: any, stopArg?: any) {
 		thisObj = thisObj !== undefined ? thisObj : this;
-		if (typeof fn !== 'function') fn = predicate(fn);
+		const f = resolvePredicate(fn);
 		const parent = this;
 		var i = 0;
 		return new Reader(function(_) {
 			var val = parent.read(_);
 			if (val === undefined) return undefined;
-			if (!fn.call(thisObj, _, val, i++)) return val;
+			if (!f.call(thisObj, _, val, i++)) return val;
 			parent.stop(_, stopArg);
 		}, null, parent);
 	}
@@ -356,9 +365,9 @@ export class Reader<T> {
 	///   The `fn` function is called as `fn(_, elt, i)`.  
 	///   `stopArg` is an optional argument which is passed to `stop` when `fn` becomes false.  
 	///   Returns another reader on which other operations may be chained.
-	while(fn: (_: _, value: T, index: number) => boolean, thisObj?: any, stopArg?: any) {
-		if (typeof fn !== 'function') fn = predicate(fn);
-		return this.until((_, val, i) => !fn.call(thisObj, _, val, i), thisObj, stopArg);
+	while(fn: ((_: _, value: T, index: number) => boolean) | {}, thisObj?: any, stopArg?: any) {
+		const f = resolvePredicate(fn);
+		return this.until((_, val, i) => !f.call(thisObj, _, val, i), thisObj, stopArg);
 	}
 
 	/// * `result = reader.limit(count, stopArg)`  
@@ -447,7 +456,8 @@ export class Reader<T> {
 	///   - `reader.peek(_)`: same as `read(_)` but does not consume the item. 
 	///   - `reader.unread(val)`: pushes `val` back so that it will be returned by the next `read(_)`
 	peekable() : PeekableReader<T> {
-		return new PeekableReader(this);
+		const that: Reader<T> = this;
+		return new PeekableReader(that);
 	}
 
 	/// * `reader = reader.buffer(max)`  
@@ -616,7 +626,7 @@ export function create<T>(read: (_: _) => T, stop?: (_: _, arg: any) => void) {
 
 /// ## StreamGroup API
 
-class StreamGroup<T> implements Stoppable {
+export class StreamGroup<T> implements Stoppable {
 	readers: Reader<T>[];
 	constructor(readers: Reader<T>[]) {
 		this.readers = readers;

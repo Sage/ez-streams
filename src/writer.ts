@@ -146,7 +146,7 @@ function createUturn() {
 
 }
 
-class Pre<T> {
+export class Pre<T> {
 	writer: Writer<T>;
 	constructor(writer: Writer<T>) {
 		if (typeof writer.write !== 'function') throw new Error("invalid pre writer: " + require('sys').inspect(writer));

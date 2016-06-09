@@ -40,7 +40,7 @@ export class BufferWriter extends Writer<Buffer> {
 ///   You can force synchronous delivery by setting `options.sync` to `true`.
 ///   The default chunk size is 1024. You can override it by passing 
 ///   a `chunkSize` option.
-export function reader(buffer: Buffer, options: Options | number) {
+export function reader(buffer: Buffer, options?: Options | number) {
 	var opts: Options;
 	if (typeof options === "number") {
 		opts = {
@@ -65,6 +65,6 @@ export function reader(buffer: Buffer, options: Options | number) {
 ///   You can force synchronous write by setting `options.sync` to `true`.
 ///   `writer.toBuffer()` returns the internal buffer into which the 
 ///   chunks have been collected.
-export function writer(options: Options) {
+export function writer(options?: Options) {
 	return new BufferWriter(options || {});
 }

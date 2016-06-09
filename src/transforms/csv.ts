@@ -12,18 +12,18 @@ import * as lines from './lines';
 /// * `transform = ez.transforms.csv.parser(options)`  
 ///   creates a parser transform. The following options can be set:  
 ///   - `sep`: the field separator, comma by default 
-interface ParserOptions {
+export interface ParserOptions {
 	sep?: string;
 	encoding?: string;
 }
 
-export function parser(options: ParserOptions) {
+export function parser(options?: ParserOptions) {
 	options = options || {};
 	options.sep = options.sep || ',';
-	return (_: _, reader: Reader<string>, writer: Writer<any>) => {
-		reader = reader.transform(lines.parser());
-		const keys = reader.read(_).split(options.sep);
-		reader.forEach(_, (_, line) => {
+	return (_: _, reader: Reader<string | Buffer>, writer: Writer<any>) => {
+		const rd = reader.transform(lines.parser());
+		const keys = rd.read(_).split(options.sep);
+		rd.forEach(_, (_, line) => {
 			// ignore empty line (we get one at the end if file is terminated by newline)
 			if (line.length === 0) return;
 			const values = line.split(options.sep);
@@ -39,11 +39,11 @@ export function parser(options: ParserOptions) {
 ///   creates a formatter transform. The following options can be set:  
 ///   - `sep`: the field separator, comma by default 
 ///   - `eol`: the end of line marker (`\n`  or `\r\n`)  
-interface FormatterOptions {
+export interface FormatterOptions {
 	sep?: string;
 	eol?: string;
 }
-export function formatter(options: FormatterOptions) {
+export function formatter(options?: FormatterOptions) {
 	options = options || {};
 	options.sep = options.sep || ',';
 	options.eol = options.eol || '\n';

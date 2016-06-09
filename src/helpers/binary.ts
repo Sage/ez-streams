@@ -19,10 +19,10 @@ const NUMBERS: [string, number][] = [//
 ///   Wraps a raw buffer reader and returns a reader with additional API to handle binary streams.  
 ///   By default the reader is configured as big endian.  
 ///   You can configure it as little endian by setting the `endian` option to `"little"`.
-interface ReaderOptions {
+export interface ReaderOptions {
 	endian?: 'big' | 'little';
 }
-class Reader extends BaseReader<Buffer> {
+export class Reader extends BaseReader<Buffer> {
 	reader: BaseReader<Buffer>;
 	options: ReaderOptions;
 	pos: number;
@@ -151,12 +151,12 @@ function numberUnreader(len: number) {
 ///   By default the writer is configured as big endian.  
 ///   You can configure it as little endian by setting the `endian` option to `"little"`.  
 ///   The `bufSize` option controls the size of the intermediate buffer.
-interface WriterOptions {
+export interface WriterOptions {
 	endian?: 'big' | 'little';
 	bufSize?: number;
 }
 
-class Writer extends BaseWriter<Buffer> {
+export class Writer extends BaseWriter<Buffer> {
 	writer: BaseWriter<Buffer>;
 	options: WriterOptions;
 	pos: number;

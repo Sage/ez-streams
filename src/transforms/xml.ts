@@ -83,7 +83,7 @@ const MARKER = '689c93f7-0147-40e9-a172-5c6c1c12ba11';
 /// * `transform = ez.transforms.xml.parser(options)`  
 ///   creates a parser transform. The following options can be set:  
 ///   - `tags`: the list of tags that enclose each item returned by the reader
-interface ParserOptions {
+export interface ParserOptions {
 	tags?: string;
 	encoding?: string;
 }

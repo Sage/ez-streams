@@ -1,13 +1,17 @@
-"use strict";
+/// <reference path="../../node_modules/retyped-qunit-tsd-ambient/qunit.d.ts" />
+declare function asyncTest(name: string, expected: number, test: (_: _) => any): any;
+
+import { _ } from "streamline-runtime";
+import * as ez from "../../src/ez";
+
 QUnit.module(module.id);
 
-const ez = require("../..");
 const safeConverter = ez.predicate.convert;
 const unsafeConverter = ez.predicate.converter({
 	allowEval: true
 });
 
-function t(_, condition, obj, expected, unsafe) {
+function t(_: _, condition: any, obj: any, expected: any, unsafe?: boolean) {
 	const got = (unsafe ? unsafeConverter : safeConverter)(condition)(_, obj);
 	equal(got, expected, JSON.stringify(condition) + " with " + JSON.stringify(obj) + " => " + expected);
 }

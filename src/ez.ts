@@ -1,4 +1,5 @@
 "use strict";
+/*
 const fs = require('fs');
 const fsp = require('path');
 
@@ -26,7 +27,66 @@ const ez = function(arg) {
 	return ez.reader(arg);
 };
 extend(ez, api);
+*/
+import * as DevArray from './devices/array';
+import * as DevBuffer from './devices/buffer';
+import * as DevConsole from './devices/console';
+import * as DevGeneric from './devices/generic';
+import * as DevQueue from './devices/queue';
+import * as DevString from './devices/string';
 
+export const devices = {
+	array: DevArray,
+	buffer: DevBuffer,
+	child_process: require('./devices/child_process'),
+	console: DevConsole,
+	file: require('./devices/file'),
+	generic: DevGeneric,
+	http: require('./devices/http'),
+	net: require('./devices/net'),
+	node: require('./devices/node'),
+	queue: DevQueue,
+	std: require('./devices/std'),
+	string: DevString,
+	uturn: require('./devices/uturn'),
+};
+
+import * as HelpBinary from './helpers/binary';
+
+export const helpers = {
+	binary: HelpBinary,
+}
+
+export const mappers = {
+	convert: require('./mappers/convert'),
+	json: require('./mappers/json'),
+}
+
+import * as TransCsv from './transforms/csv';
+import * as TransCut from './transforms/cut';
+import * as TransJson from './transforms/json';
+import * as TransLines from './transforms/lines';
+import * as TransMultipart from './transforms/multipart';
+import * as TransXml from './transforms/xml';
+
+export const transforms = {
+	csv: TransCsv,
+	cut: TransCut,
+	json: TransJson,
+	lines: TransLines,
+	multipart: TransMultipart,
+	xml: TransXml,
+}
+
+import * as EzPredicate from './predicate';
+import * as EzReader from './reader';
+import * as EzStopException from './stop-exception';
+import * as EzWriter from './writer';
+
+export const predicate = EzPredicate;
+export const reader = EzReader;
+export const writer = EzWriter;
+/*
 ez.reader = function(arg) {
 	if (typeof arg === 'string') {
 		const f = api.factory(arg);
@@ -74,3 +134,4 @@ ez.writer = function(arg) {
 extend(ez.writer, api.writer);
 
 module.exports = ez;
+*/

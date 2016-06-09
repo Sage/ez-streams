@@ -11,12 +11,12 @@ import { _ } from "streamline-runtime";
 import { Reader } from "../reader";
 import { Writer } from "../writer";
 
-interface ParserOptions {
+export interface ParserOptions {
 	sep?: string;
 	encoding?: string;
 }
 
-export function parser(options?: ParserOptions) {
+export function parser(options?: ParserOptions): (_: _, reader: Reader<string | Buffer>, writer: Writer<string>) => void {
 	options = options || {};
 
 	function clean(line: string) {
@@ -46,7 +46,7 @@ export function parser(options?: ParserOptions) {
 ///   creates a formatter transform.
 ///   `options.eol` defines the line separator. It is set to `\n` by default.
 ///   `options.extra` indicates if an extra line separator must be emitted or not at the end. It is false by default.
-interface FormatterOptions {
+export interface FormatterOptions {
 	eol?: string;
 	extra?: boolean;
 }

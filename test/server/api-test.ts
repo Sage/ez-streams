@@ -1,13 +1,22 @@
-"use strict";
+/// <reference path="../../node_modules/retyped-qunit-tsd-ambient/qunit.d.ts" />
+declare function asyncTest(name: string, expected: number, test: (_: _) => any): any;
+
+import { _ } from "streamline-runtime";
+import * as ez from "../../src/ez";
+
+import { Reader } from "../../src/reader";
+interface TestReader extends Reader<number> {
+	finalCheck: () => void;
+}
+
 QUnit.module(module.id);
 
-const ez = require("../..");
 const generic = ez.devices.generic;
 const arraySink = ez.devices.array.writer;
 
-function numbers(limit) {
+function numbers(limit?: number): TestReader {
 	var i = 0;
-	const source = generic.reader(function read(_) {
+	const source: any = generic.reader(function read(_) {
 		return i >= limit ? undefined : i++;
 	}, function stop(_, arg) {
 		this.stopped = {
@@ -21,14 +30,14 @@ function numbers(limit) {
 	return source;
 }
 
-function fail(result) {
-	return function(_, val) {
+function fail(result?: any) {
+	return function(_: _, val: any) {
 		if (val === 3) throw new Error('FAILED');
 		return result;
 	}
 } 
 
-function minJoiner(_, values) {
+function minJoiner(_: _, values: any[]) {
 	const min = Math.min.apply(null, values.filter(function(val) { return val !== undefined; }));
 	values.forEach(function(val, i) {
 		if (val == min) values[i] = undefined;
@@ -37,7 +46,7 @@ function minJoiner(_, values) {
 }
 
 asyncTest("forEach", 2, (_) => {
-	const results = [];
+	const results: number[] = [];
 	const source = numbers(5);
 	source.forEach(_, function(_, num) {
 		results.push(num);
@@ -81,7 +90,7 @@ asyncTest("map error", 2, (_) => {
 });
 
 asyncTest("every", 12, (_) => {
-	var source;
+	var source: TestReader;
 	strictEqual((source = numbers(5)).every(_, function(_, num) {
 		return num < 5;
 	}), true);
@@ -122,7 +131,7 @@ asyncTest("every error", 2, (_) => {
 });
 
 asyncTest("some", 12, (_) => {
-	var source;
+	var source: TestReader;
 	strictEqual((source = numbers(5)).some(_, function(_, num) {
 		return num >= 5;
 	}), false);
@@ -176,7 +185,7 @@ asyncTest("reduce error", 2, (_) => {
 	try {
 		source.reduce(_, function(_, r, v) {
 			if (v === 3) throw new Error('FAILED');
-		});
+		}, null);
 		ok(false);
 	} catch (ex) {
 		strictEqual(ex.message, 'FAILED');
@@ -227,8 +236,8 @@ asyncTest("tee error", 3, (_) => {
 asyncTest("dup", 3, (_) => {
 	const source = numbers(5);
 	const streams = source.dup();
-	const f1 = streams[0].toArray(!_);
-	const f2 = streams[1].toArray(!_);
+	const f1 = _.future(_ => streams[0].toArray(_));
+	const f2 = _.future(_ => streams[1].toArray(_));
 	strictEqual(f1(_).join(','), "0,1,2,3,4");
 	strictEqual(f2(_).join(','), "0,1,2,3,4");
 	source.finalCheck();
@@ -238,8 +247,8 @@ asyncTest("dup", 3, (_) => {
 asyncTest("dup error 0", 3, (_) => {
 	const source = numbers(5);
 	const streams = source.dup();
-	const f1 = streams[0].map(fail(2)).toArray(!_);
-	const f2 = streams[1].toArray(!_);
+	const f1 = _.future(_ => streams[0].map(fail(2)).toArray(_));
+	const f2 = _.future(_ => streams[1].toArray(_));
 	try {
 		f1(_);
 		ok(false);
@@ -259,8 +268,8 @@ asyncTest("dup error 0", 3, (_) => {
 asyncTest("dup error 1", 3, (_) => {
 	const source = numbers(5);
 	const streams = source.dup();
-	const f1 = streams[0].toArray(!_);
-	const f2 = streams[1].map(fail(2)).toArray(!_);
+	const f1 = _.future(_ => streams[0].toArray(_));
+	const f2 = _.future(_ => streams[1].map(fail(2)).toArray(_));
 	try {
 		f1(_);
 		ok(false);
@@ -278,7 +287,7 @@ asyncTest("dup error 1", 3, (_) => {
 });
 
 asyncTest("concat", 4, (_) => {
-	var source;
+	var source: TestReader;
 	const rd1 = (source = numbers(5)).concat(numbers(8).skip(6), numbers(10).skip(10), numbers(15).skip(12));
 	strictEqual(rd1.toArray(_).join(), "0,1,2,3,4,6,7,12,13,14");
 	source.finalCheck();
@@ -304,7 +313,7 @@ asyncTest("concat error", 2, (_) => {
 asyncTest("transform - same number of reads and writes", 2, (_) => {
 	const source = numbers(5);
 	strictEqual(source.transform(function(_, reader, writer) {
-		var sum = 0, val;
+		var sum = 0, val: number;
 		while ((val = reader.read(_)) !== undefined) {
 			sum += val;
 			writer.write(_, sum);
@@ -317,7 +326,7 @@ asyncTest("transform - same number of reads and writes", 2, (_) => {
 asyncTest("transform - more reads than writes", 2, (_) => {
 	const source = numbers(12);
 	strictEqual(source.transform(function(_, reader, writer) {
-		var str = "", val;
+		var str = "", val: number;
 		while ((val = reader.read(_)) !== undefined) {
 			str += "-" + val;
 			if (val % 5 === 4) { 
@@ -334,7 +343,7 @@ asyncTest("transform - more reads than writes", 2, (_) => {
 asyncTest("transform - less reads than writes", 2, (_) => {
 	const source = numbers(5);
 	strictEqual(source.transform(function(_, reader, writer) {
-		var str = "", val;
+		var str = "", val: number;
 		while ((val = reader.read(_)) !== undefined) {
 			for (var i = 0; i < val; i++) writer.write(_, val);
 		}
@@ -347,7 +356,7 @@ asyncTest("transform error", 2, (_) => {
 	const source = numbers(5);
 	try {
 		source.transform(function(_, reader, writer) {
-			var str = "", val;
+			var str = "", val: number;
 			while ((val = reader.read(_)) !== undefined) {
 				fail(2)(_, val);
 				writer.write(_, val);
@@ -362,7 +371,7 @@ asyncTest("transform error", 2, (_) => {
 });
 
 asyncTest("filter", 4, (_) => {
-	var source;
+	var source: TestReader;
 	strictEqual((source = numbers(10)).filter(function(_, val) {
 		return val % 2;
 	}).pipe(_, arraySink()).toArray().join(','), "1,3,5,7,9");
@@ -376,7 +385,7 @@ asyncTest("filter", 4, (_) => {
 });
 
 asyncTest("while", 4, (_) => {
-	var source;
+	var source: TestReader;
 	strictEqual((source = numbers()).while(function(_, val) {
 		return val < 5;
 	}).pipe(_, arraySink()).toArray().join(','), "0,1,2,3,4");
@@ -389,7 +398,7 @@ asyncTest("while", 4, (_) => {
 });
 
 asyncTest("until", 4, (_) => {
-	var source;
+	var source: TestReader;
 	strictEqual((source = numbers()).until(function(_, val) {
 		return val > 5;
 	}).pipe(_, arraySink()).toArray().join(','), "0,1,2,3,4,5");
@@ -415,21 +424,21 @@ asyncTest("skip", 2, (_) => {
 	start();
 });
 
-function pow(n) {
-	return function(_, val) {
+function pow(n: number) {
+	return function(_: _, val: number) {
 		return Math.pow(val, n);
 	}
 }
 
-function wait(millis) {
-	return function(_, val) {
+function wait(millis: number | (() => number)) {
+	return function<T>(_: _, val: T) {
 		const ms = typeof millis === "function" ? millis() : millis;
 		setTimeout(_, ms)
 		return val;
 	}
 }
 
-function rand(min, max) {
+function rand(min: number, max: number) {
 	return function() {
 		return min + Math.round(Math.random() * (max - min));
 	};
@@ -442,7 +451,7 @@ asyncTest("simple chain (no buffer)", 2, (_) => {
 	start();
 });
 asyncTest("buffer in simple chain", 6, (_) => {
-	var source;
+	var source: TestReader;
 	strictEqual((source = numbers()).buffer(3).skip(2).limit(5).pipe(_, arraySink()).toArray().join(','), "2,3,4,5,6");
 	source.finalCheck();
 	strictEqual((source = numbers()).skip(2).buffer(3).limit(5).pipe(_, arraySink()).toArray().join(','), "2,3,4,5,6");
@@ -485,7 +494,7 @@ asyncTest("parallel shuffle", 2, (_) => {
 		shuffle: true,
 	}, function(source) {
 		return source.map(wait(rand(10, 10))).map(pow(2));
-	}).pipe(_, arraySink()).toArray().sort(function(i, j) {
+	}).pipe(_, arraySink()).toArray().sort(function(i: number, j: number) {
 		return i - j;
 	}).join(','), "0,1,4,9,16,25,36,49,64,81");
 	source.finalCheck();
@@ -530,8 +539,8 @@ asyncTest("fork slow and fast", 3, (_) => {
 		function(src) { return src.map(wait(rand(20, 20))).map(pow(2)); },
 		function(src) { return src.map(wait(rand(10, 10))).map(pow(3)); },
 		]).readers;
-	const f1 = readers[0].limit(10).pipe(!_, arraySink());
-	const f2 = readers[1].limit(10).pipe(!_, arraySink());
+	const f1 = _.future(_ => readers[0].limit(10).pipe(_, arraySink()));
+	const f2 = _.future(_ => readers[1].limit(10).pipe(_, arraySink()));
 	strictEqual(f1(_).toArray().join(','), "0,1,4,9,16,25,36,49,64,81");
 	strictEqual(f2(_).toArray().join(','), "0,1,8,27,64,125,216,343,512,729");
 	source.finalCheck();
@@ -544,8 +553,8 @@ asyncTest("fork slow and fast with different limits (fast ends first)", 3, (_) =
 		function(src) { return src.map(wait(rand(20, 20))).map(pow(2)).limit(10); },
 		function(src) { return src.map(wait(rand(10, 10))).map(pow(3)).limit(4); },
 		]).readers;
-	const f1 = readers[0].pipe(!_, arraySink());
-	const f2 = readers[1].pipe(!_, arraySink());
+	const f1 = _.future(_ => readers[0].pipe(_, arraySink()));
+	const f2 = _.future(_ => readers[1].pipe(_, arraySink()));
 	strictEqual(f1(_).toArray().join(','), "0,1,4,9,16,25,36,49,64,81");
 	strictEqual(f2(_).toArray().join(','), "0,1,8,27");
 	source.finalCheck();
@@ -558,8 +567,8 @@ asyncTest("fork slow and fast with different limits (slow ends first)", 3, (_) =
 		function(src) { return src.map(wait(rand(10, 10))).map(pow(2)).limit(10); },
 		function(src) { return src.map(wait(rand(20, 20))).map(pow(3)).limit(4); },
 		]).readers;
-	const f1 = readers[0].pipe(!_, arraySink());
-	const f2 = readers[1].pipe(!_, arraySink());
+	const f1 = _.future(_ => readers[0].pipe(_, arraySink()));
+	const f2 = _.future(_ => readers[1].pipe(_, arraySink()));
 	strictEqual(f1(_).toArray().join(','), "0,1,4,9,16,25,36,49,64,81");
 	strictEqual(f2(_).toArray().join(','), "0,1,8,27");
 	source.finalCheck();

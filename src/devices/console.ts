@@ -1,4 +1,5 @@
 import { _ } from "streamline-runtime";
+import { Writer } from "../writer";
 import * as generic from './generic';
 
 function consoleWriter(fn: (message: string) => void) {
@@ -18,7 +19,7 @@ function consoleWriter(fn: (message: string) => void) {
 /// * `ez.devices.console.warn`  
 /// * `ez.devices.console.errors`  
 ///   EZ writers for console 
-export const log = consoleWriter(console.log);
-export const info = consoleWriter(console.info);
-export const warn = consoleWriter(console.warn);
-export const error = consoleWriter(console.error);
+export const log: Writer<string> = consoleWriter(console.log);
+export const info: Writer<string> = consoleWriter(console.info);
+export const warn: Writer<string> = consoleWriter(console.warn);
+export const error: Writer<string> = consoleWriter(console.error);
