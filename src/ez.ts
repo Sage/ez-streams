@@ -1,6 +1,7 @@
 import * as DevArray from './devices/array';
 import * as DevBuffer from './devices/buffer';
 import * as DevConsole from './devices/console';
+import * as DevFile from './devices/file';
 import * as DevGeneric from './devices/generic';
 import * as DevQueue from './devices/queue';
 import * as DevString from './devices/string';
@@ -10,7 +11,7 @@ export const devices = {
 	buffer: DevBuffer,
 	child_process: require('./devices/child_process'),
 	console: DevConsole,
-	file: require('./devices/file'),
+	file: DevFile,
 	generic: DevGeneric,
 	http: require('./devices/http'),
 	net: require('./devices/net'),
