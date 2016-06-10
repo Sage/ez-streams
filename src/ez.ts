@@ -119,11 +119,14 @@ export function writer(arg: string | any[] | Buffer) : Writer<any> {
 }
 
 // compatibility hacks
+function anyfy(x: any) { return x; }
 var readerHack: any = reader;
 readerHack.create = EzReader.create;
+readerHack.decorate = anyfy(EzReader).decorate;
 
 var writerHack: any = writer;
 writerHack.create = EzWriter.create;
+writerHack.decorate = anyfy(EzWriter).decorate;
 
 var transformHack: any = transforms.cut.transform;
 transforms.cut = transformHack;
