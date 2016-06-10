@@ -1,7 +1,7 @@
 import { _ } from 'streamline-runtime';
 import { Reader } from '../reader';
 import { Writer } from '../writer';
-const nextTick = require('../util').nextTick;
+import { nextTick } from '../util';
 
 /// !doc
 /// ## In-memory string streams

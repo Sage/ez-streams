@@ -4,6 +4,7 @@ import * as DevChildProcess from './devices/child_process';
 import * as DevConsole from './devices/console';
 import * as DevFile from './devices/file';
 import * as DevGeneric from './devices/generic';
+import * as DevHttp from './devices/http';
 import * as DevQueue from './devices/queue';
 import * as DevNet from './devices/net';
 import * as DevNode from './devices/node';
@@ -18,7 +19,7 @@ export const devices = {
 	console: DevConsole,
 	file: DevFile,
 	generic: DevGeneric,
-	http: require('./devices/http'),
+	http: DevHttp,
 	net: DevNet,
 	node: DevNode,
 	queue: DevQueue,
@@ -58,12 +59,13 @@ export const transforms = {
 }
 
 import * as EzPredicate from './predicate';
-import * as EzReader from './reader';
 import * as EzStopException from './stop-exception';
+import * as EzReader from './reader';
 import * as EzWriter from './writer';
+import EzFactory from './factory';
 
 export const predicate = EzPredicate;
-export const factory = require('./factory');
+export const factory = EzFactory;
 
 export type Reader<T> = EzReader.Reader<T>;
 export type CompareOptions<T> = EzReader.CompareOptions<T>;

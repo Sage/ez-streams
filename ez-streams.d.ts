@@ -2,6 +2,7 @@
 // Dependencies for this module:
 //   ../fs
 //   ../streamline-runtime
+//   ../http
 //   ../stream
 
 declare module 'ez-streams' {
@@ -11,6 +12,7 @@ declare module 'ez-streams' {
     import * as DevConsole from 'ez-streams/devices/console';
     import * as DevFile from 'ez-streams/devices/file';
     import * as DevGeneric from 'ez-streams/devices/generic';
+    import * as DevHttp from 'ez-streams/devices/http';
     import * as DevQueue from 'ez-streams/devices/queue';
     import * as DevNet from 'ez-streams/devices/net';
     import * as DevNode from 'ez-streams/devices/node';
@@ -24,7 +26,7 @@ declare module 'ez-streams' {
         console: typeof DevConsole;
         file: typeof DevFile;
         generic: typeof DevGeneric;
-        http: any;
+        http: typeof DevHttp;
         net: typeof DevNet;
         node: typeof DevNode;
         queue: typeof DevQueue;
@@ -59,8 +61,9 @@ declare module 'ez-streams' {
     import * as EzPredicate from 'ez-streams/predicate';
     import * as EzReader from 'ez-streams/reader';
     import * as EzWriter from 'ez-streams/writer';
+    import EzFactory from 'ez-streams/factory';
     export const predicate: typeof EzPredicate;
-    export const factory: any;
+    export const factory: typeof EzFactory;
     export type Reader<T> = EzReader.Reader<T>;
     export type CompareOptions<T> = EzReader.CompareOptions<T>;
     export type ParallelOptions = EzReader.ParallelOptions;
@@ -161,6 +164,35 @@ declare module 'ez-streams/devices/generic' {
     };
     export function reader<T>(read: (_: _) => T, stop?: (_: _, arg?: any) => void): Reader<T>;
     export function writer<T>(write: (_: _, value: T) => Writer<T>, stop?: (_: _, arg?: any) => Writer<T>): Writer<T>;
+}
+
+declare module 'ez-streams/devices/http' {
+    import { _ } from 'streamline-runtime';
+    import * as http from 'http';
+    export interface HttpServerRequest {
+    }
+    export interface HttpServerResponse {
+    }
+    export interface HttpServerOptions {
+    }
+    export function server(listener: (request: HttpServerRequest, response: HttpServerResponse, _: _) => void, options?: HttpServerOptions): any;
+    export interface HttpClientOptions {
+        url?: string;
+        method?: 'GET' | 'PUT' | 'POST' | 'DELETE' | 'OPTIONS';
+        headers?: {
+            [name: string]: string;
+        };
+    }
+    export function client(options?: HttpClientOptions): any;
+    export interface HttpListenerOption {
+    }
+    export function listener(listener: (request: http.ServerRequest, response: http.ServerResponse) => void, options?: HttpListenerOption): any;
+    export function factory(url: string): {
+        reader(_: Streamline._): any;
+        writer(_: Streamline._): {
+            write(_: Streamline._, data: any): any;
+        };
+    };
 }
 
 declare module 'ez-streams/devices/queue' {
@@ -544,5 +576,13 @@ declare module 'ez-streams/writer' {
         writer: Writer<T>;
         constructor(writer: Writer<T>);
     }
+}
+
+declare module 'ez-streams/factory' {
+    export interface PackageFactory {
+        protocol: string;
+        module: string;
+    }
+    export default function (url: string): any;
 }
 

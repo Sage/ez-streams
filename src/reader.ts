@@ -32,9 +32,7 @@ import { convert as predicate } from "./predicate";
 import { Writer } from './writer';
 import * as stopException from './stop-exception';
 import * as nodeStream from "stream";
-
-
-const nextTick = require('./util').nextTick;
+import { nextTick } from './util';
 
 function tryCatch<R>(_: _, that: any, f: (_: _) => R) {
 	try {

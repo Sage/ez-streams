@@ -3,7 +3,7 @@ import * as generic from './generic';
 import * as stopException from '../stop-exception';
 import { Reader } from '../reader';
 import { Writer } from '../writer';
-const nextTick = require('../util').nextTick;
+import { nextTick } from '../util';
 
 var lastId = 0;
 var tracer: (...args: any[]) => void; // = console.error;

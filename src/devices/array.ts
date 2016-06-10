@@ -3,7 +3,7 @@
 import { _ } from 'streamline-runtime';
 import { Reader } from '../reader';
 import { Writer } from '../writer';
-const nextTick = require('../util').nextTick;
+import { nextTick } from '../util';
 
 export interface Options {
 	sync?: boolean;
