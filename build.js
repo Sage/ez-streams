@@ -6,7 +6,7 @@ var fsp = require('path');
 var helpers = require('streamline-helpers');
 function options(runtime, isTest) {
 	return {
-		plugins: ['flow-comments', 'transform-class-properties', 'streamline'],
+		plugins: ['transform-flow-comments', 'transform-class-properties', 'streamline'],
 		runtime: runtime,
 		isTest: isTest,
 	};
