@@ -165,7 +165,7 @@ export class Reader<T> {
 	///   Pipes from `stream` to `writer`.
 	///   Returns the writer for chaining.
 	// should be pipe<R extends Writer<T>>(_: _, writer: R) 
-	// but flow-comments plugin does not understand this syntax
+	// but transform-flow-comments plugin does not understand this syntax
 	// so I relax the return type.
 	pipe(_: _, writer: Writer<T>) : any {
 		tryCatch(_, this, (_) => {
