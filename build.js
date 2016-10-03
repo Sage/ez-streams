@@ -1,19 +1,27 @@
 "use strict";
 
 // This script rebuilds the lib/builtins-*.js files
-"use strict";
+var fs = require('fs');
 var fsp = require('path');
-var compile = require('streamline-helpers').compileSync;
-function options(runtime) {
+var helpers = require('streamline-helpers');
+function options(runtime, isTest) {
 	return {
-		plugins: ['streamline'],
+		plugins: ['transform-flow-comments', 'transform-class-properties', 'streamline'],
 		runtime: runtime,
+		isTest: isTest,
 	};
 }
 
 ['callbacks', 'fibers', 'generators'].forEach(function(runtime) {
-	compile(fsp.join(__dirname, 'src'), fsp.join(__dirname, 'lib', runtime), options(runtime));
+	helpers.compileSync(fsp.join(__dirname, 'src'), fsp.join(__dirname, 'lib', runtime), options(runtime));
 });
 ['callbacks', 'fibers'].forEach(function(runtime) {
-	compile(fsp.join(__dirname, 'test'), fsp.join(__dirname, 'test-' + runtime), options(runtime));
+	helpers.compileSync(fsp.join(__dirname, 'test'), fsp.join(__dirname, 'test-' + runtime), options(runtime, true));
+});
+
+helpers.compileTypescript({
+	name: 'ez-streams',
+	root: __dirname,
+	main: 'out/ez.d.ts',
+	dts: 'ez-streams.d.ts',
 });

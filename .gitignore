@@ -7,3 +7,4 @@ test/fixtures/rss-sample.zip
 /test-callbacks/
 /test-fibers/
 /coverage/
+out/

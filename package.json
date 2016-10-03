@@ -1,7 +1,7 @@
 {
   "name": "ez-streams",
   "description": "EZ streams for node.js",
-  "version": "3.0.10",
+  "version": "3.1.2",
   "license": "MIT",
   "author": {
     "name": "Bruno Jouhier"
@@ -18,9 +18,16 @@
   },
   "devDependencies": {
     "babel-core": "^6.3.17",
+    "babel-plugin-transform-flow-comments": "^6.8.0",
     "babel-plugin-streamline": "^2.0.6",
+    "babel-plugin-transform-class-properties": "^6.9.1",
     "babel-preset-es2015": "^6.3.13",
-    "streamline-helpers": "^2.0.4"
+    "dts-bundle": "^0.4.3",
+    "retyped-qunit-tsd-ambient": "^1.16.0-0",
+    "streamline": "^2.0.8",
+    "streamline-helpers": "^2.0.4",
+    "streamline-node": "^1.0.2",
+    "typescript": "^1.8.10"
   },
   "scripts": {
     "prepublish": "node build.js || nodejs build.js",
