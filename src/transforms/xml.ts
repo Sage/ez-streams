@@ -101,8 +101,8 @@ interface Element {
 }
 
 export function parser(options?: ParserOptions) {
-	options = options || {};
-	const ttags: any = typeof options === "string" ? options : options.tags;
+	const opts = options || {};
+	const ttags: any = typeof opts === "string" ? opts : opts.tags;
 	const tags = typeof ttags === "string" ? ttags.split('/') : ttags;
 	if (!tags) throw new Error("cannot transform XML: 'tags' option missing")
 
@@ -115,14 +115,15 @@ export function parser(options?: ParserOptions) {
 		function mustEmit(parent: Element, tag: string) {
 			if (tag !== tags[tags.length - 1]) return false;
 			// TS bugfix: for (var i = tags.length - 2; tag >= 0; tag--) {
+			var p: Element | undefined = parent;
 			for (var i = tags.length - 2; i >= 0; i--) {
-				if (!parent || parent.$tag !== tags[i]) return false;
-				parent = parent.$parent;
+				if (!p || p.$tag !== tags[i]) return false;
+				p = p.$parent;
 			}
 			return true;
 		}
 
-		function clone(parent: Element, tag: string, child: Element) : Element {
+		function clone(parent: Element, tag: string | undefined, child: Element) : Element {
 			const pp = Object.keys(parent).reduce((r: Element, k: string) => {
 				if (k[0] !== '$' || k.length === 1) r[k] = tag === k ? child : parent[k];
 				return r;
@@ -151,7 +152,7 @@ export function parser(options?: ParserOptions) {
 				}
 				elt = child;
 			},
-			pop: (_: _, writer: Writer<any>, tag: string) => {
+			pop: (_: _, writer: Writer<any>, tag?: string) => {
 				if (tag && tag !== elt.$tag) throw error("closing tag mismatch: expected " + elt.$tag + ", got " + tag);
 				const parent = elt.$parent;
 				const emit = elt.$emit;
@@ -159,8 +160,8 @@ export function parser(options?: ParserOptions) {
 				delete elt.$parent;
 				// if elt does not have attributes, replace it by value in parent
 				if (elt.$value !== undefined && !elt.$) {
-					if (emit || elt.$index === undefined) parent[elt.$tag] = elt.$value;
-					else parent[elt.$tag][elt.$index] = elt.$value;
+					if (emit || elt.$index === undefined) parent[elt.$tag!] = elt.$value;
+					else parent[elt.$tag!][elt.$index] = elt.$value;
 				} else {
 					delete elt.$tag;
 					delete elt.$childCount;
@@ -197,7 +198,7 @@ export function parser(options?: ParserOptions) {
 	return (_: _, reader: Reader<string | Buffer>, writer: Writer<any>) => {
 		var data = reader.read(_);
 		if (data === undefined) return;
-		var str = Buffer.isBuffer(data) ? data.toString(options.encoding || 'utf8') : data;
+		var str = Buffer.isBuffer(data) ? data.toString(opts.encoding || 'utf8') : data;
 		var pos = 0,
 			bld = builder(error);
 
@@ -273,7 +274,7 @@ export function parser(options?: ParserOptions) {
 					ch = str.charCodeAt(pos++);
 					if (ch === SLASH) {
 						eat(GT);
-						bld.pop(_, writer, null);
+						bld.pop(_, writer);
 						break;
 					} else if (begWord[ch]) {
 						while (inWord[str.charCodeAt(pos)]) pos++;
@@ -316,10 +317,11 @@ export function parser(options?: ParserOptions) {
 				// closing tag - read optional tag name
 				beg = pos;
 				var ch = str.charCodeAt(pos);
+				var tag: string | undefined;
 				if (begWord[ch]) {
 					pos++;
 					while (inWord[str.charCodeAt(pos)]) pos++;
-					var tag = str.substring(beg, pos);
+					tag = str.substring(beg, pos);
 				}
 				eatSpaces();
 				eat(GT);
@@ -373,17 +375,17 @@ export interface Builder {
 }
 
 export function formatter(options?: FormatterOptions) {
-	options = options || {};
-	const ttags: any = typeof options === "string" ? options : options.tags;
+	const opts = options || {};
+	const ttags: any = typeof opts === "string" ? opts : opts.tags;
 	const tags = typeof ttags === "string" ? ttags.split('/') : ttags;
 	if (!tags) throw new Error("cannot transform XML: 'tags' option missing")
-	const ident = options && options.indent;
+	const ident = opts && opts.indent;
 
 	function builder(depth: number): Builder {
 		var str = '';
 
 		function indent() {
-			str += '\n' + Array(depth + 1).join(options.indent);
+			str += '\n' + Array(depth + 1).join(opts.indent);
 		}
 
 		function escape(val: any) {
@@ -398,7 +400,7 @@ export function formatter(options?: FormatterOptions) {
 		}
 		return {
 			beginTag: (tag) => {
-				options.indent && indent();
+				opts.indent && indent();
 				str += '<' + tag;
 				depth++;
 			},
@@ -414,7 +416,7 @@ export function formatter(options?: FormatterOptions) {
 				if (val != null) {
 					str += escape(val);
 				} else {
-					options.indent && indent();
+					opts.indent && indent();
 				}
 				str += '</' + tag + '>';
 			},
@@ -507,7 +509,7 @@ export function formatter(options?: FormatterOptions) {
 		const markerPos = envelope.indexOf(marker);
 		if (markerPos < 0) throw new Error("internal error: marker not found");
 
-		const prologue = '<?xml version="1.0"?>' + (options.indent ? '\n' : '');
+		const prologue = '<?xml version="1.0"?>' + (opts.indent ? '\n' : '');
 		writer.write(_, prologue + envelope.substring(0, markerPos));
 		while (true) {
 			var xml = strfy(builder(tags.length - 1), parent[parentTag], parentTag).getResult(true);

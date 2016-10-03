@@ -6,10 +6,11 @@
         "outDir": "out",
         "sourceMap": true,
         "noImplicitAny": true,
+        "strictNullChecks": true,
         "rootDir": "."
     },
     "exclude": [
-        "node_modules",
-        "lib"
+        "lib",
+        "node_modules"
     ]
 }

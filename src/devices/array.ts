@@ -1,5 +1,3 @@
-"use strict";
-
 import { _ } from 'streamline-runtime';
 import { Reader } from '../reader';
 import { Writer } from '../writer';
@@ -16,7 +14,7 @@ export class ArrayWriter<T> extends Writer<T> {
 			if (!options.sync) nextTick(_);
 			if (value !== undefined) this.values.push(value);
 			return this;
-		}, null);
+		});
 		this.values = [];
 	}
 	toArray() : T[] {
@@ -37,10 +35,10 @@ export class ArrayWriter<T> extends Writer<T> {
 ///   `reader.read(_)` will return its entries asynchronously by default.  
 ///   You can force synchronous delivery by setting `options.sync` to `true`.
 export function reader<T>(array: T[], options?: Options) {
-	if (!options) options = {};
+	var opts = options || {};
 	const values = array.slice(0);
 	return new Reader(function(_) {
-		if (!options.sync) nextTick(_);
+		if (!opts.sync) nextTick(_);
 		return values.shift();
 	});
 }
@@ -52,6 +50,6 @@ export function reader<T>(array: T[], options?: Options) {
 ///   `writer.toArray()` returns the internal array into which the 
 ///   entries have been collected.
 export function writer<T>(options?: Options) {
-	if (!options) options = {};
-	return new ArrayWriter(options || {});
+	var opts = options || {};
+	return new ArrayWriter(opts);
 };

@@ -185,6 +185,7 @@ asyncTest("reduce error", 2, (_) => {
 	try {
 		source.reduce(_, function(_, r, v) {
 			if (v === 3) throw new Error('FAILED');
+			return r;
 		}, null);
 		ok(false);
 	} catch (ex) {
@@ -313,7 +314,7 @@ asyncTest("concat error", 2, (_) => {
 asyncTest("transform - same number of reads and writes", 2, (_) => {
 	const source = numbers(5);
 	strictEqual(source.transform(function(_, reader, writer) {
-		var sum = 0, val: number;
+		var sum = 0, val: number | undefined;
 		while ((val = reader.read(_)) !== undefined) {
 			sum += val;
 			writer.write(_, sum);
@@ -326,7 +327,7 @@ asyncTest("transform - same number of reads and writes", 2, (_) => {
 asyncTest("transform - more reads than writes", 2, (_) => {
 	const source = numbers(12);
 	strictEqual(source.transform(function(_, reader, writer) {
-		var str = "", val: number;
+		var str = "", val: number | undefined;
 		while ((val = reader.read(_)) !== undefined) {
 			str += "-" + val;
 			if (val % 5 === 4) { 
@@ -343,7 +344,7 @@ asyncTest("transform - more reads than writes", 2, (_) => {
 asyncTest("transform - less reads than writes", 2, (_) => {
 	const source = numbers(5);
 	strictEqual(source.transform(function(_, reader, writer) {
-		var str = "", val: number;
+		var str = "", val: number | undefined;
 		while ((val = reader.read(_)) !== undefined) {
 			for (var i = 0; i < val; i++) writer.write(_, val);
 		}
@@ -356,7 +357,7 @@ asyncTest("transform error", 2, (_) => {
 	const source = numbers(5);
 	try {
 		source.transform(function(_, reader, writer) {
-			var str = "", val: number;
+			var str = "", val: number | undefined;
 			while ((val = reader.read(_)) !== undefined) {
 				fail(2)(_, val);
 				writer.write(_, val);
@@ -539,8 +540,8 @@ asyncTest("fork slow and fast", 3, (_) => {
 		function(src) { return src.map(wait(rand(20, 20))).map(pow(2)); },
 		function(src) { return src.map(wait(rand(10, 10))).map(pow(3)); },
 		]).readers;
-	const f1 = _.future(_ => readers[0].limit(10).pipe(_, arraySink()));
-	const f2 = _.future(_ => readers[1].limit(10).pipe(_, arraySink()));
+	const f1 = _.future(_ => readers[0]!.limit(10).pipe(_, arraySink()));
+	const f2 = _.future(_ => readers[1]!.limit(10).pipe(_, arraySink()));
 	strictEqual(f1(_).toArray().join(','), "0,1,4,9,16,25,36,49,64,81");
 	strictEqual(f2(_).toArray().join(','), "0,1,8,27,64,125,216,343,512,729");
 	source.finalCheck();
@@ -553,8 +554,8 @@ asyncTest("fork slow and fast with different limits (fast ends first)", 3, (_) =
 		function(src) { return src.map(wait(rand(20, 20))).map(pow(2)).limit(10); },
 		function(src) { return src.map(wait(rand(10, 10))).map(pow(3)).limit(4); },
 		]).readers;
-	const f1 = _.future(_ => readers[0].pipe(_, arraySink()));
-	const f2 = _.future(_ => readers[1].pipe(_, arraySink()));
+	const f1 = _.future(_ => readers[0]!.pipe(_, arraySink()));
+	const f2 = _.future(_ => readers[1]!.pipe(_, arraySink()));
 	strictEqual(f1(_).toArray().join(','), "0,1,4,9,16,25,36,49,64,81");
 	strictEqual(f2(_).toArray().join(','), "0,1,8,27");
 	source.finalCheck();
@@ -567,8 +568,8 @@ asyncTest("fork slow and fast with different limits (slow ends first)", 3, (_) =
 		function(src) { return src.map(wait(rand(10, 10))).map(pow(2)).limit(10); },
 		function(src) { return src.map(wait(rand(20, 20))).map(pow(3)).limit(4); },
 		]).readers;
-	const f1 = _.future(_ => readers[0].pipe(_, arraySink()));
-	const f2 = _.future(_ => readers[1].pipe(_, arraySink()));
+	const f1 = _.future(_ => readers[0]!.pipe(_, arraySink()));
+	const f2 = _.future(_ => readers[1]!.pipe(_, arraySink()));
 	strictEqual(f1(_).toArray().join(','), "0,1,4,9,16,25,36,49,64,81");
 	strictEqual(f2(_).toArray().join(','), "0,1,8,27");
 	source.finalCheck();

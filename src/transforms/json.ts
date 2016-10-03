@@ -76,12 +76,12 @@ export function parser(options: ParserOptions) {
 		}
 		var pos = 0,
 			chunk = read(_),
-			beg: number, collected = "",
+			beg: number | undefined, collected = "",
 			line = 1,
 			depth = 1,
 			quoted = false,
 			escape = false,
-			ch: string;
+			ch: string | undefined;
 
 		function error(msg: string) {
 			throw new Error(line + ": " + msg + " near " + (chunk ? chunk.substring(pos, pos + 20) : "<EOF>"));
@@ -102,7 +102,7 @@ export function parser(options: ParserOptions) {
 		}
 
 		function skipSpaces(_: _) {
-			var ch: string;
+			var ch: string | undefined;
 			while ((ch = peekch(_)) !== undefined && /^\s/.test(ch)) {
 				line += ch === '\n' ? 1 : 0;
 				pos++;
@@ -112,6 +112,7 @@ export function parser(options: ParserOptions) {
 
 
 		function flush(_: _) {
+			if (chunk === undefined || beg === undefined) return;
 			collected += chunk.substring(beg, pos);
 			const val = JSON.parse(collected, options.reviver);
 			writer.write(_, val);

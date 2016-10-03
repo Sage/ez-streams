@@ -10,7 +10,7 @@ import { Writer } from "../writer";
 import * as binary from '../helpers/binary';
 import * as generic from '../devices/generic';
 
-function parseContentType(contentType: string) {
+function parseContentType(contentType?: string) {
 	if (!contentType) throw new Error("content-type missing");
 	const match = /^multipart\/([\w\-]*)/.exec(contentType);
 	if (!match) return null;
@@ -36,7 +36,7 @@ export type ParserOptions = {
 
 export function parser(options: ParserOptions) {
 	const ct = parseContentType(options && options["content-type"]);
-	const boundary = ct.boundary;
+	const boundary = ct && ct.boundary;
 	if (!boundary) throw new Error("multipart boundary missing");
 
 	return (_: _, reader: Reader<Buffer>, writer: Writer<any>) => {
@@ -102,15 +102,16 @@ export interface FormatterOptions {
 
 export function formatter(options?: FormatterOptions) {
 	const ct = parseContentType(options && options["content-type"]);
-	const boundary = ct.boundary;
+	const boundary = ct && ct.boundary;
 	if (!boundary) throw new Error("multipart boundary missing");
 
 	return (_: _, reader: Reader<Reader<string>>, writer: Writer<Buffer>) => {
-		var part: Reader<any>;
+		var part: Reader<any> | undefined;
 		while ((part = reader.read(_)) !== undefined) {
-			if (!part.headers) throw new Error("part does not have headers");
+			var headers = part.headers;
+			if (!headers) throw new Error("part does not have headers");
 			Object.keys(part.headers).forEach_(_, (_, key) => {
-				writer.write(_, new Buffer(key + ": " + part.headers[key] + "\n", "binary"));
+				writer.write(_, new Buffer(key + ": " + headers[key] + "\n", "binary"));
 			});
 			writer.write(_, new Buffer("\n" + boundary + "\n"));
 			// cannot use pipe because pipe writes undefined at end.

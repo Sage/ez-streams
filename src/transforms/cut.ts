@@ -27,7 +27,7 @@ export function transform<T>(options?: Options) {
 					data = d;
 				} else {
 					if (typeof data === 'string') data += d;
-					else if (Buffer.isBuffer(data)) data = Buffer.concat([data, d]);
+					else if (Buffer.isBuffer(data) && Buffer.isBuffer(d)) data = Buffer.concat([data, d]);
 					else if (Array.isArray(data)) data = data.concat(d);
 					else throw new Error("Cannot cut: bad data type: " + typeof data);
 				}

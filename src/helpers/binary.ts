@@ -26,7 +26,7 @@ export class Reader extends BaseReader<Buffer> {
 	reader: BaseReader<Buffer>;
 	options: ReaderOptions;
 	pos: number;
-	buf: Buffer;
+	buf: Buffer | undefined;
 	constructor(reader: BaseReader<Buffer>, options: ReaderOptions) {
 		/// 
 		/// * `buf = reader.read(_, len)`  
@@ -44,7 +44,8 @@ export class Reader extends BaseReader<Buffer> {
 		// override read for compat
 		this.read = this.readData;
 	}
-	readData(_: _, len?: number, peekOnly?: boolean): Buffer {
+	readData(_: _, len?: number, peekOnly?: boolean): Buffer | undefined {
+		if (this.buf === undefined) return undefined;
 		if (len === undefined) {
 			if (this.pos < this.buf.length) return this.readData(_, this.buf.length - this.pos);
 			else {
@@ -170,7 +171,7 @@ export class Writer extends BaseWriter<Buffer> {
 		this.writer = writer;
 		this.options = options;
 		this.pos = 0;
-		this.buf = new Buffer(options.bufSize > 0 ? options.bufSize : 16384);
+		this.buf = new Buffer(options.bufSize && options.bufSize > 0 ? options.bufSize : 16384);
 	}
 		
 

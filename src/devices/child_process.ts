@@ -25,15 +25,15 @@ export interface ReaderOptions {
 }
 
 export function reader(proc: NodeJS.Process, options?: ReaderOptions) {
-	options = options || {};
-	var err: NodeJS.ErrnoException, closeCb: (err: Error) => void, closed: boolean;
+	var opts = options || {};
+	var err: NodeJS.ErrnoException, closeCb: ((err: Error) => void) | null, closed: boolean;
 	proc.on('close', (ec: number) => {
 		closed = true;
 		if (ec === -1) {
 			proc.stdout.emit('end');
 			proc.stderr.emit('end');
 		}
-		if (ec && !(options.acceptCode && options.acceptCode(ec))) {
+		if (ec && !(opts.acceptCode && opts.acceptCode(ec))) {
 			err = new Error("process exited with code:" + ec);
 			err.errno = ec;
 			// compat code
@@ -47,8 +47,8 @@ export function reader(proc: NodeJS.Process, options?: ReaderOptions) {
 	proc.on('error', (e: NodeJS.ErrnoException) => {
 		err = err || e;
 	});
-	var stdout: Reader<string | Buffer> = node.reader(proc.stdout, options);
-	var stderr: Reader<string | Buffer> = node.reader(proc.stderr, options);
+	var stdout: Reader<string | Buffer> = node.reader(proc.stdout, opts);
+	var stderr: Reader<string | Buffer> = node.reader(proc.stderr, opts);
 	// node does not send close event if we remove all listeners on stdin and stdout
 	// so we disable the stop methods and we call stop explicitly after the close.
 	const stops = [stdout.stop.bind(stdout), stderr.stop.bind(stderr)];
@@ -58,15 +58,15 @@ export function reader(proc: NodeJS.Process, options?: ReaderOptions) {
 			stop(_, arg);
 		});
 	}
-	if (options.encoding !== 'buffer') {
+	if (opts.encoding !== 'buffer') {
 		stdout = stdout.map(stringify()).transform(linesParser());
 		stderr = stderr.map(stringify()).transform(linesParser());
 	}
-	if (options.dataHandler) stdout = options.dataHandler(stdout);
-	if (options.errorHandler) stderr = options.errorHandler(stderr);
-	if (options.errorPrefix || options.errorThrow) stderr = stderr.map(function(_, data) {
-		if (options.errorThrow) throw new Error((options.errorPrefix || "") + data);
-		return options.errorPrefix + data;
+	if (opts.dataHandler) stdout = opts.dataHandler(stdout);
+	if (opts.errorHandler) stderr = opts.errorHandler(stderr);
+	if (opts.errorPrefix || opts.errorThrow) stderr = stderr.map(function(_, data) {
+		if (opts.errorThrow) throw new Error((opts.errorPrefix || "") + data);
+		return opts.errorPrefix + data;
 	});
 	const rd = stdout.join(stderr);
 	return generic.reader(function read(_) {

@@ -8,7 +8,7 @@ export type Predicate = (_: _, val: any) => boolean;
 export type Op = (val: any, parent?: any) => Predicate;
 
 export function converter(options?: Options) {
-	options = options || {};
+	const opts = options || {};
 
 	const pfalse: Predicate = (_, obj) => false;
 	const ptrue: Predicate = (_, obj) => true;
@@ -42,7 +42,7 @@ export function converter(options?: Options) {
 		},*/
 		$where: (val) => {
 			if (typeof val !== "function") {
-				if (options.allowEval) val = new Function("return (" + val + ")");
+				if (opts.allowEval) val = new Function("return (" + val + ")");
 				else throw new Error("$where value is not a function");
 			}
 			return (_, v) => val.call(v);

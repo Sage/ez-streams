@@ -65,9 +65,9 @@ export interface ListEntry {
 }
 
 export function list(path: string, options?: ListOptions) {
-	var recurse: boolean | 'preorder' | 'postorder', accept: (_: _, entry: ListEntry) => boolean;
+	var recurse: boolean | 'preorder' | 'postorder', accept: ((_: _, entry: ListEntry) => boolean) | undefined;
 	if (options && typeof options === 'object') {
-		recurse = options.recurse;
+		recurse = options.recurse || false;
 		accept = options.accept;
 	} else {
 		recurse = arguments[1];

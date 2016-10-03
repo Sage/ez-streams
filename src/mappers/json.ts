@@ -17,11 +17,11 @@ export interface ParseOptions {
 }
 
 export function parse(options?: ParseOptions) {
-	options = options || {};
-	const sep = options.sep == null ? ',' : options.sep;
+	const opts = options || {};
+	const sep = opts.sep == null ? ',' : opts.sep;
 	return (_: _, data: string | Buffer) => {
 		var str: string;
-		if (Buffer.isBuffer(data)) str = data.toString(options.encoding || 'utf8');
+		if (Buffer.isBuffer(data)) str = data.toString(opts.encoding || 'utf8');
 		else str = data;
 		if (str === '') return;
 		// remove trailing separator, if any
@@ -40,9 +40,9 @@ export interface FormatterOptions {
 }
 
 export function stringify(options?: FormatterOptions) {
-	options = options || {};
-	const sep = options.sep == null ? ',\n' : options.sep;
+	const opts = options || {};
+	const sep = opts.sep == null ? ',\n' : opts.sep;
 	return (_: _, data: any) => {
-		return JSON.stringify(data, options.replacer, options.space) + sep;
+		return JSON.stringify(data, opts.replacer, opts.space) + sep;
 	}
 }
