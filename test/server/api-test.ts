@@ -2,7 +2,7 @@
 declare function asyncTest(name: string, expected: number, test: (_: _) => any): any;
 
 import { _ } from "streamline-runtime";
-import * as ez from "../../src/ez";
+import * as ez from "../..";
 
 import { Reader } from "../../src/reader";
 interface TestReader extends Reader<number> {

@@ -550,9 +550,9 @@ export class Reader<T> {
 
 	/// * `cmp = reader1.compare(_, reader2)`  
 	///   compares reader1 and reader2 return 0 if equal,  
-	compare(_: _, other: Reader<T>, options: CompareOptions<T>) {
-		options = options || {};
-		var compare = options.compare;
+	compare(_: _, other: Reader<T>, options?: CompareOptions<T>) {
+		const opts = options || {};
+		var compare = opts.compare;
 		if (!compare) compare = (a, b) => a === b ? 0 : a < b ? -1 : +1;
 		var cmp = 0;
 		while (true) {

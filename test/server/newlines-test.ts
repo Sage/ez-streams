@@ -1,6 +1,10 @@
-"use strict";
+/// <reference path="../../node_modules/retyped-qunit-tsd-ambient/qunit.d.ts" />
+declare function asyncTest(name: string, expected: number, test: (_: _) => any): any;
+
+import { _ } from "streamline-runtime";
+import * as ez from "../..";
+
 QUnit.module(module.id);
-const ez = require("../..");
 const lines = ez.transforms.lines;
 const file = ez.devices.file;
 
@@ -9,7 +13,7 @@ const outputFile = require('os').tmpdir() + '/jsonOutput.json';
 const fs = require('fs');
 const string = ez.devices.string;
 
-function nodeStream(_, text) {
+function nodeStream(_: _, text : string) {
 	fs.writeFile(inputFile, text, "utf8", _);
 	return file.text.reader(inputFile);
 }

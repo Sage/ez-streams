@@ -119,7 +119,7 @@ declare module 'ez-streams/devices/child_process' {
         errorThrow?: boolean;
     }
     export function reader(proc: ChildProcess, options?: ReaderOptions): Reader<{}>;
-    export function writer(proc: NodeJS.Process, options: node.NodeWriterOptions): any;
+    export function writer(proc: ChildProcess, options: node.NodeWriterOptions): any;
 }
 
 declare module 'ez-streams/devices/console' {
@@ -406,13 +406,13 @@ declare module 'ez-streams/transforms/json' {
         reviver?: (key: any, value: any) => any;
         unbounded?: boolean;
     }
-    export function parser(options: ParserOptions): (_: Streamline._, reader: Reader<string | Buffer>, writer: Writer<any>) => void;
+    export function parser(options?: ParserOptions): (_: Streamline._, reader: Reader<string | Buffer>, writer: Writer<any>) => void;
     export interface FormatterOptions {
         unbounded?: boolean;
         replacer?: (key: string, value: any) => any;
         space?: string;
     }
-    export function formatter(options: FormatterOptions): (_: Streamline._, reader: Reader<any>, writer: Writer<string>) => void;
+    export function formatter(options?: FormatterOptions): (_: Streamline._, reader: Reader<any>, writer: Writer<string>) => void;
 }
 
 declare module 'ez-streams/transforms/lines' {
@@ -428,7 +428,7 @@ declare module 'ez-streams/transforms/lines' {
         eol?: string;
         extra?: boolean;
     }
-    export function formatter(options: FormatterOptions): (_: Streamline._, reader: Reader<string>, writer: Writer<string>) => void;
+    export function formatter(options?: FormatterOptions): (_: Streamline._, reader: Reader<string>, writer: Writer<string>) => void;
 }
 
 declare module 'ez-streams/transforms/multipart' {
@@ -549,7 +549,7 @@ declare module 'ez-streams/reader' {
         join(streams: Reader<T>[] | Reader<T>, thisObj?: any): Reader<{}>;
         nodify(): any;
         nodeTransform(duplex: nodeStream.Duplex): any;
-        compare(_: _, other: Reader<T>, options: CompareOptions<T>): number;
+        compare(_: _, other: Reader<T>, options?: CompareOptions<T>): number;
         stop(_: _, arg?: any): void;
     }
     export class PeekableReader<T> extends Reader<T> {

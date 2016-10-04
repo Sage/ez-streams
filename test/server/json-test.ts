@@ -1,6 +1,11 @@
-"use strict";
+/// <reference path="../../node_modules/retyped-qunit-tsd-ambient/qunit.d.ts" />
+declare function asyncTest(name: string, expected: number, test: (_: _) => any): any;
+
+import { _ } from "streamline-runtime";
+import * as ez from "../..";
+
 QUnit.module(module.id);
-const ez = require('../..');
+
 const file = ez.devices.file;
 const jsonTrans = ez.transforms.json;
 
@@ -20,7 +25,7 @@ const mixedData = '[' + //
 '\n 5, 8, 13],' + //
 '\n true]';
 
-function nodeStream(_, text) {
+function nodeStream(_: _, text: string) {
 	fs.writeFile(inputFile, text, "utf8", _);
 	return file.text.reader(inputFile);
 }
@@ -64,12 +69,12 @@ asyncTest("roundtrip", 11, (_) => {
 		return (elt && elt.lastName) ? elt.lastName : elt;
 	}).transform(jsonTrans.formatter()).pipe(_, writer);
 	const result = JSON.parse(writer.toString());
-	const expected = JSON.parse(mixedData).map(function(elt) {
+	const expected = JSON.parse(mixedData).map(function(elt: any) {
 		return (elt && elt.lastName) ? elt.lastName : elt;
 	});
 	ok(Array.isArray(result), "isArray");
 	equal(result.length, expected.length, "length=" + result.length)
-	result.forEach(function(elt, i) {
+	result.forEach(function(elt: any, i: number) {
 		deepEqual(result[i], elt, elt);
 	});
 	start();
