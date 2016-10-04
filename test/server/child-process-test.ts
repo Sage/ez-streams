@@ -1,9 +1,14 @@
-"use strict";
+/// <reference path="../../node_modules/retyped-qunit-tsd-ambient/qunit.d.ts" />
+declare function asyncTest(name: string, expected: number, test: (_: _) => any): any;
+
+import { _ } from "streamline-runtime";
+import * as ez from "../..";
+
+import * as cp from "child_process";
+import * as fsp from "path";
+import * as os from "os";
+
 QUnit.module(module.id);
-const cp = require('child_process');
-const ez = require('../..');
-const fsp = require('path');
-const os = require('os');
 
 asyncTest("echo ok", 1, (_) => {
     if (os.type() === 'Windows_NT') {

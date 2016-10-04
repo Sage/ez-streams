@@ -1,10 +1,15 @@
-"use strict";
+/// <reference path="../../node_modules/retyped-qunit-tsd-ambient/qunit.d.ts" />
+declare function asyncTest(name: string, expected: number, test: (_: _) => any): any;
+
+import { _ } from "streamline-runtime";
+import * as ez from "../..";
+
 QUnit.module(module.id);
 
-const ez = require("../..");
 const TESTBUF = new Buffer([1, 4, 9, 16, 25, 36, 49, 64, 81, 100]);
 
-function eqbuf(b1, b2, msg) {
+function eqbuf(b1: Buffer | undefined, b2: Buffer, msg: string) {
+	if (!b1) throw new Error('unexpected EOF');
 	equal(b1.toString('hex'), b2.toString('hex'), msg);
 }
 
@@ -24,7 +29,7 @@ asyncTest("roundtrip", 52, (_) => {
 		writer.write(_);
 		const result = dst.toBuffer();
 
-		const src = ez.devices.buffer.reader(result).transform(ez.transforms.cut(5));
+		const src = ez.devices.buffer.reader(result).transform<Buffer>(ez.transforms.cut.transform(5));
 		const reader = ez.helpers.binary.reader(src);
 		eqbuf(reader.read(_, 7), TESTBUF.slice(0, 7), 'read 7 (size=' + size + ')');
 		reader.unread(3);

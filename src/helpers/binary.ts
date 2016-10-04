@@ -262,14 +262,50 @@ const ReaderBE = makeEndian(Reader, ['read', 'peek', 'unread'], 'BE');
 const WriterLE = makeEndian(Writer, ['write'], 'LE');
 const WriterBE = makeEndian(Writer, ['write'], 'BE');
 
+// Interfaces to get the specialized methods in TypeScript
+export interface BinaryReader extends Reader {
+	read(_: _, len?: number): Buffer | undefined;
+	readInt8(_: _): number;
+	peekInt8(_: _): number;
+	unreadInt8(): void;
+	readInt16(_: _): number;
+	peekInt16(_: _): number;
+	unreadInt16(): void;
+	readUInt16(_: _): number;
+	peekUInt16(_: _): number;
+	unreadUInt16(): void;
+	readInt32(_: _): number;
+	peekInt32(_: _): number;
+	unreadInt32(): void;
+	readUInt32(_: _): number;
+	peekUInt32(_: _): number;
+	unreadUInt32(): void;
+	readFloat(_: _): number;
+	peekFloat(_: _): number;
+	unreadFloat(): void;
+	readDouble(_: _): number;
+	peekDouble(_: _): number;
+	unreadDouble(): void;
+}
+
+export interface BinaryWriter extends Writer {
+	writeInt8(_: _, val: number): void;
+	writeInt16(_: _, val: number): void;
+	writeUInt16(_: _, val: number): void;
+	writeInt32(_: _, val: number): void;
+	writeUInt32(_: _, val: number): void;
+	writeFloat(_: _, val: number): void;
+	writeDouble(_: _, val: number): void;
+}
+
 // Documentation above, next to the constructor
-export function reader(reader: BaseReader<Buffer>, options?: ReaderOptions) : Reader {
+export function reader(reader: BaseReader<Buffer>, options?: ReaderOptions) : BinaryReader {
 	options = options || {};
 	const constr: any = options.endian === 'little' ? ReaderLE : ReaderBE;
 	return new constr(reader, options);
 }
 
-export function	writer(writer: BaseWriter<Buffer>, options?: WriterOptions) : Writer {
+export function	writer(writer: BaseWriter<Buffer>, options?: WriterOptions) : BinaryWriter {
 	options = options || {};
 	const constr: any = options.endian === 'little' ? WriterLE : WriterBE;
 	return new constr(writer, options);
