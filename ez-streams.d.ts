@@ -526,7 +526,7 @@ declare module 'ez-streams/reader' {
         };
         constructor(read: (_: _) => T | undefined, stop?: (_: _, arg: any) => void, parent?: Stoppable);
         forEach(_: _, fn: (_: _, value: T, index: number) => void, thisObj?: any): any;
-        map<U>(fn: (_: _, value: T, index: number) => U, thisObj?: any): Reader<U>;
+        map<U>(fn: (_: _, value: T, index?: number) => U, thisObj?: any): Reader<U>;
         every(_: _, fn: ((_: _, value: T) => boolean) | {}, thisObj?: any): any;
         some(_: _, fn: ((_: _, value: T) => boolean) | {}, thisObj?: any): any;
         reduce<U>(_: _, fn: (_: _, prev: U, value: T) => U, v: U, thisObj?: any): U;
@@ -537,9 +537,9 @@ declare module 'ez-streams/reader' {
         toArray(_: _): T[];
         readAll(_: _): string | Buffer | T[] | undefined;
         transform<U>(fn: (_: _, reader: Reader<T>, writer: Writer<U>) => void, thisObj?: any): Reader<U>;
-        filter(fn: ((_: _, value: T, index: number) => boolean) | {}, thisObj?: any): Reader<T>;
-        until(fn: ((_: _, value: T, index: number) => boolean) | {}, thisObj?: any, stopArg?: any): Reader<T>;
-        while(fn: ((_: _, value: T, index: number) => boolean) | {}, thisObj?: any, stopArg?: any): Reader<T>;
+        filter(fn: ((_: _, value: T, index?: number) => boolean) | {}, thisObj?: any): Reader<T>;
+        until(fn: ((_: _, value: T, index?: number) => boolean) | {}, thisObj?: any, stopArg?: any): Reader<T>;
+        while(fn: ((_: _, value: T, index?: number) => boolean) | {}, thisObj?: any, stopArg?: any): Reader<T>;
         limit(n: number, stopArg?: any): Reader<T>;
         skip(n: number): Reader<T>;
         fork(consumers: ((source: any) => Reader<T>)[]): StreamGroup<T>;
@@ -548,7 +548,7 @@ declare module 'ez-streams/reader' {
         buffer(max: number): Reader<{}>;
         join(streams: Reader<T>[] | Reader<T>, thisObj?: any): Reader<{}>;
         nodify(): any;
-        nodeTransform(duplex: nodeStream.Duplex): any;
+        nodeTransform<U>(duplex: nodeStream.Duplex): Reader<U>;
         compare(_: _, other: Reader<T>, options?: CompareOptions<T>): number;
         stop(_: _, arg?: any): void;
     }
@@ -595,6 +595,7 @@ declare module 'ez-streams/writer' {
       * OTHER DEALINGS IN THE SOFTWARE.
       */
     import { _ } from "streamline-runtime";
+    import { Reader, ParallelOptions } from "ez-streams/reader";
     import * as nodeStream from "stream";
     export class Writer<T> {
         write: (_: _, value?: T) => Writer<T>;
@@ -607,9 +608,23 @@ declare module 'ez-streams/writer' {
         nodify(): nodeStream.Writable;
     }
     export function create<T>(write: (_: _, value: T) => Writer<T>, stop?: (_: _, arg?: any) => Writer<T>): Writer<T>;
-    export class Pre<T> {
+    export class PreImpl<T> {
         writer: Writer<T>;
         constructor(writer: Writer<T>);
+    }
+    export interface Pre<T> extends PreImpl<T> {
+        map<U>(fn: (_: _, elt: U, index?: number) => T, thisObj?: any): Writer<U>;
+        tee(writer: Writer<T>): Writer<T>;
+        concat(readers: Reader<T>[]): Writer<T>;
+        transform<U>(fn: (_: _, reader: Reader<U>, writer: Writer<T>) => void, thisObj?: any): Writer<U>;
+        filter(fn: (_: _, elt: T, index?: number) => boolean, thisObj?: any): Writer<T>;
+        until(fn: (_: _, elt: T, index?: number) => boolean, thisObj?: any): Writer<T>;
+        while(fn: (_: _, elt: T, index?: number) => boolean, thisObj?: any): Writer<T>;
+        limit(n: number, stopArg?: any): Writer<T>;
+        skip(n: number): Writer<T>;
+        parallel(options: ParallelOptions | number, consumer: (source: any) => Reader<T>): Writer<T>;
+        buffer(max: number): Writer<T>;
+        nodeTransform<U>(duplex: nodeStream.Duplex): Writer<U>;
     }
 }
 

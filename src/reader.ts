@@ -95,7 +95,7 @@ export class Reader<T> {
 	///   Similar to `map` on arrays.  
 	///   The `fn` function is called as `fn(_, elt, i)`.  
 	///   Returns another reader on which other operations may be chained.
-	map<U>(fn: (_: _, value: T, index: number) => U, thisObj?: any) : Reader<U> {
+	map<U>(fn: (_: _, value: T, index?: number) => U, thisObj?: any) : Reader<U> {
 		thisObj = thisObj !== undefined ? thisObj : this;
 		return new Reader((_) => {
 			var count = 0;
@@ -324,7 +324,7 @@ export class Reader<T> {
 	///   Similar to `filter` on arrays.  
 	///   The `fn` function is called as `fn(_, elt, i)`.  
 	///   Returns another reader on which other operations may be chained.
-	filter(fn: ((_: _, value: T, index: number) => boolean) | {}, thisObj?: any) {
+	filter(fn: ((_: _, value: T, index?: number) => boolean) | {}, thisObj?: any) {
 		thisObj = thisObj !== undefined ? thisObj : this;
 		const f = resolvePredicate(fn);
 		const parent = this;
@@ -343,7 +343,7 @@ export class Reader<T> {
 	///   The `fn` function is called as `fn(_, elt, i)`.  
 	///   `stopArg` is an optional argument which is passed to `stop` when `fn` becomes true.  
 	///   Returns another reader on which other operations may be chained.
-	until(fn: ((_: _, value: T, index: number) => boolean) | {}, thisObj?: any, stopArg?: any) {
+	until(fn: ((_: _, value: T, index?: number) => boolean) | {}, thisObj?: any, stopArg?: any) {
 		thisObj = thisObj !== undefined ? thisObj : this;
 		const f = resolvePredicate(fn);
 		const parent = this;
@@ -363,7 +363,7 @@ export class Reader<T> {
 	///   The `fn` function is called as `fn(_, elt, i)`.  
 	///   `stopArg` is an optional argument which is passed to `stop` when `fn` becomes false.  
 	///   Returns another reader on which other operations may be chained.
-	while(fn: ((_: _, value: T, index: number) => boolean) | {}, thisObj?: any, stopArg?: any) {
+	while(fn: ((_: _, value: T, index?: number) => boolean) | {}, thisObj?: any, stopArg?: any) {
 		const f = resolvePredicate(fn);
 		return this.until((_, val, i) => !f.call(thisObj, _, val, i), thisObj, stopArg);
 	}
@@ -544,7 +544,7 @@ export class Reader<T> {
 
 	/// * `reader = reader.nodeTransform(duplex)`  
 	///   pipes the reader into a node duplex stream. Returns another reader. 
-	nodeTransform(duplex: nodeStream.Duplex) {
+	nodeTransform<U>(duplex: nodeStream.Duplex): Reader<U> {
 		return require('./devices/node').reader(this.nodify().pipe(duplex));
 	}
 
