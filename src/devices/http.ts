@@ -23,7 +23,7 @@ function endWrite(_: _, cli: HttpClient) {
 }
 
 function guessType(data: any) {
-    if (!data) return;
+    if (!data) return null;
     if (Buffer.isBuffer(data)) return "application/octet-stream";
     if (typeof data === "object") return "application/json";
     if (typeof data !== "string") throw new TypeError("invalid data type: " + typeof data);
@@ -97,7 +97,7 @@ export function factory(url: string) {
         /// * `writer = factory.writer(_)`  
         writer(_: _) {
             var cli: HttpClient;
-            var type: string;
+            var type: string | null;
             return {
                 write(_: _, data: any) {
                     const opt: HttpClientOptions = {
@@ -107,7 +107,7 @@ export function factory(url: string) {
                     };
                     if (!cli) {
                         type = guessType(data);
-                        if (type) opt.headers["content-type"] = type;
+                        if (type) opt.headers!["content-type"] = type;
                         cli = client(opt);
                     }
                     if (data === undefined) return this.result = endWrite(_, cli);

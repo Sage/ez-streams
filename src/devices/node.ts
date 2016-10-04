@@ -21,7 +21,7 @@ export interface NodeReaderOptions {
 	encoding?: string;
 }
 
-export function fixOptions(options: NodeReaderOptions | string) {
+export function fixOptions(options: NodeReaderOptions | string | undefined) {
 	var opts: NodeReaderOptions;
 	if (typeof options === "string") {
 		opts = {

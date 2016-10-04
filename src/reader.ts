@@ -63,12 +63,12 @@ function resolvePredicate<T>(fn: ((_: _, value: T) => boolean) | {}): (_: _, val
 }
 
 export class Reader<T> {
-	parent: Stoppable;
-	read: (_: _) => T;
+	parent?: Stoppable;
+	read: (_: _) => T | undefined;
 	_stop: (_: _, arg?: any) => void;
 	stopped: boolean;
 	headers: { [name: string]: string }; // experimental
-	constructor(read: (_: _) => T, stop?: (_: _, arg: any) => void, parent?: Stoppable) {
+	constructor(read: (_: _) => T | undefined, stop?: (_: _, arg: any) => void, parent?: Stoppable) {
 		if (typeof read !== 'function') throw new Error("invalid reader.read: " + (read && typeof read));
 		this.parent = parent;
 		this.read = read;
@@ -102,7 +102,7 @@ export class Reader<T> {
 			var val = this.read(_);
 			if (val === undefined) return undefined;
 			return fn.call(thisObj, _, val, count++);
-		}, null, this);
+		}, undefined, this);
 	}
 
 	/// * `result = reader.every(_, fn, thisObj)`  
@@ -196,7 +196,7 @@ export class Reader<T> {
 		const parent = this;
 		var writeStop: [any];
 		var readStop: [any];
-		const stopResult: (arg: any) => T = (arg) => {
+		const stopResult: (arg: any) => T | undefined = (arg) => {
 			if (!arg || arg === true) return undefined;
 			else throw arg;			
 		}
@@ -264,9 +264,9 @@ export class Reader<T> {
 	///   Works like array.concat: you can pass the readers as separate arguments, or pass an array of readers.  
 	concat(...readers: (Reader<T> | Reader<T>[])[]) {
 		const streams: Reader<T>[] = Array.prototype.concat.apply([], arguments);
-		var stream: Reader<T> = this;
+		var stream: Reader<T> | undefined = this;
 		return new Reader(function read(_) {
-			var val: T;
+			var val: T | undefined;
 			while (stream && (val = stream.read(_)) === undefined) stream = streams.shift();
 			return val;
 		}, function stop(_, arg) {
@@ -284,13 +284,13 @@ export class Reader<T> {
 		return this.reduce(_, (_, arr, elt) => {
 			arr.push(elt);
 			return arr;
-		}, []);
+		}, [] as T[]);
 	}
 
 	/// * `result = reader.readAll(_)`  
 	///   Reads all entries and returns them as a single string or buffer. Returns undefined if nothing has been read.
 	///   Note that this call is an anti-pattern for streaming but it may be useful when working with small streams.
-	readAll(_: _) : string | Buffer | T[] {
+	readAll(_: _) : string | Buffer | T[] | undefined {
 		const arr = this.toArray(_);
 		if (typeof arr[0] === 'string') return arr.join('');
 		if (Buffer.isBuffer(arr[0])) {
@@ -335,7 +335,7 @@ export class Reader<T> {
 				done = val === undefined;
 				if (done || f.call(thisObj, _, val, i++)) return val;
 			}
-		}, null, parent);
+		}, undefined, parent);
 	}
 
 	/// * `result = reader.until(fn, testVal, thisObj, stopArg)`  
@@ -353,7 +353,7 @@ export class Reader<T> {
 			if (val === undefined) return undefined;
 			if (!f.call(thisObj, _, val, i++)) return val;
 			parent.stop(_, stopArg);
-		}, null, parent);
+		}, undefined, parent);
 	}
 
 	/// * `result = reader.while(fn, testVal, thisObj, stopArg)`  
@@ -462,8 +462,8 @@ export class Reader<T> {
 	///   Returns a stream which is identical to the original one but in which up to `max` entries may have been buffered.  
 	buffer(max: number) {
 		const parent = this;
-		const buffered: T[] = [];
-		var resume: (err: any, val?: T) => void;
+		const buffered: (T | undefined)[] = [];
+		var resume: ((err: any, val?: T) => void) | undefined;
 		var err: any;
 		var pending = false;
 
@@ -500,7 +500,7 @@ export class Reader<T> {
 			} else {
 				resume = cb;
 			}
-		}), null, parent);
+		}), undefined, parent);
 	}
 
 	join(streams: Reader<T>[] | Reader<T>, thisObj?: any) {
@@ -586,15 +586,15 @@ export class Reader<T> {
 
 
 export class PeekableReader<T> extends Reader<T> {
-	buffered: T[];
+	buffered: (T|undefined)[];
 	constructor(parent: Reader<T>) {
 		super((_: _) => {
 			return this.buffered.length > 0 ? this.buffered.pop() : parent.read(_);
-		}, null, parent);
+		}, undefined, parent);
 		this.buffered = [];
 	}
 
-	unread(val: T) {
+	unread(val: T | undefined) {
 		this.buffered.push(val);
 		return this; // for chaining
 	}
@@ -620,13 +620,13 @@ exports.decorate = function(proto: any) {
 }
 
 export function create<T>(read: (_: _) => T, stop?: (_: _, arg: any) => void) {
-	return new Reader(read, stop, null);
+	return new Reader(read, stop, undefined);
 }
 
 /// ## StreamGroup API
 
 export class StreamGroup<T> implements Stoppable {
-	readers: Reader<T>[];
+	readers: (Reader<T> | null)[];
 	constructor(readers: Reader<T>[]) {
 		this.readers = readers;
 	}
@@ -642,14 +642,15 @@ export class StreamGroup<T> implements Stoppable {
 	dequeue() {
 		interface Result {
 			i: number;
-			e: any;
-			v: T;
+			e: any | undefined;
+			v: T | undefined;
 			next: () => void;
 		}
 		const results: Result[] = [];
 		var alive = this.readers.length;
-		var resume: (err: any, val: T) => void;
+		var resume: ((err: any, val?: T) => void) | undefined;
 		this.readers.forEach((stream, i) => {
+			if (!stream) return;
 			const next = () => {
 				if (alive === 0) return;
 					_.run(_ => stream.read(_), (e, v) => {
@@ -657,7 +658,7 @@ export class StreamGroup<T> implements Stoppable {
 						if (e || v !== undefined || alive === 0) {
 							if (resume) {
 								var cb = resume;
-								resume = null;
+								resume = undefined;
 								cb(e, v);
 								next();
 							} else {
@@ -682,7 +683,7 @@ export class StreamGroup<T> implements Stoppable {
 			} else {
 				resume = cb;
 			}
-		}), null, this);
+		}), undefined, this);
 	}
 	/// * `reader = group.rr()`  
 	///   Dequeues values in round robin fashion.
@@ -691,7 +692,7 @@ export class StreamGroup<T> implements Stoppable {
 		interface Entry {
 			i: number;
 			stream: Reader<T>;
-			read: (_: _) => T; 
+			read: (_: _) => T | undefined; 
 		}
 		const entry = (stream: Reader<T>, i: number) => ({
 			i: i,
@@ -700,7 +701,7 @@ export class StreamGroup<T> implements Stoppable {
 		});
 		const q = this.readers.map(entry);
 		return new Reader(function(_) {
-			var elt: Entry;
+			var elt: Entry | undefined;
 			while (elt = q.shift()) {
 				var val = elt.read(_);
 				if (val !== undefined) {
@@ -709,7 +710,7 @@ export class StreamGroup<T> implements Stoppable {
 				}
 			}
 			return undefined;
-		}, null, this);
+		}, undefined, this);
 	}
 
 	/// * `reader = group.join(fn, thisObj)`  
@@ -720,7 +721,7 @@ export class StreamGroup<T> implements Stoppable {
 	///   that it has consumed. The next `read(_)` on the joined stream will fetch these values. 
 	///   Note that the length of the `values` array will decrease every time an input stream is exhausted.
 	///   Returns a stream on which other operations may be chained.
-	join(fn: (_: _, values: T[]) => T, thisObj?: any) {
+	join(fn: (_: _, values: (T | undefined)[]) => T | undefined, thisObj?: any) {
 		thisObj = thisObj !== undefined ? thisObj : this;
 
 		var last = 0; // index of last value read by default fn 
@@ -740,27 +741,27 @@ export class StreamGroup<T> implements Stoppable {
 		const values: T[] = [];
 		var active = this.readers.length;
 		var done = false;
-		var reply: (err?: any, val?: T) => void;
+		var reply: ((err?: any, val?: T) => void) | undefined;
 		const joinerCb = (err: any, val: T) => {
 			if (err || val === undefined) {
 				done = true;
-				return reply(err, val);
+				return reply && reply(err, val);
 			}
 			// be careful with re-entrancy
 			const rep = reply;
-			reply = null;
-			rep(null, val);
+			reply = undefined;
+			if (rep) rep(null, val);
 		};
 		const callbacks = this.readers.map((reader, i) => ((err: any, data: T) => {
-			if (active === 0) return reply();
+			if (active === 0) return reply && reply();
 			if (err) {
 				done = true;
-				return reply(err);
+				return reply && reply(err);
 			}
 			values[i] = data;
 			if (data === undefined) {
 				this.readers[i] = null;
-				if (--active === 0) return reply();
+				if (--active === 0) return reply && reply();
 			}
 			const vals = values.filter((val) => val !== undefined);
 			if (vals.length === active) {
@@ -785,6 +786,6 @@ export class StreamGroup<T> implements Stoppable {
 			}
 			reply = cb;
 			refill();
-		}), null, this);
+		}), undefined, this);
 	}
 }

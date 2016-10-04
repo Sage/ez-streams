@@ -24,24 +24,24 @@ export interface Uturn<T> {
 } 
 
 export function create<T>():  Uturn<T> {
-	var state = 'idle', pendingData: T,  error: any;
+	var state = 'idle', pendingData: T | undefined,  error: any;
 	const id = ++lastId;
 
-	var pendingReaderCb: (_: _, value: T) => void;
+	var pendingReaderCb: ((_: _, value: (T | undefined)) => void) | null;
 	function bounceReader(err?: any, val?: T) {
 		const lcb = pendingReaderCb;
 		pendingReaderCb = null;
 		if (lcb) lcb(err, val);
 	}
 
-	var pendingWriterCb: (_: _, value: Writer<T>) => void;
+	var pendingWriterCb: ((_: _, value?: Writer<T>) => void) | null;
 	function bounceWriter(err?: any, val?: Writer<T>) {
 		const lcb = pendingWriterCb;
 		pendingWriterCb = null;
 		if (lcb) lcb(err, val);
 	}
 
-	var pendingStopCb: (_: _, value: any) => void;
+	var pendingStopCb: ((_: _, value: any) => void) | null;
 	function bounceStop(err?: any, val?: any) {
 		const lcb = pendingStopCb;
 		pendingStopCb = null;
@@ -60,7 +60,7 @@ export function create<T>():  Uturn<T> {
 						bounceWriter(null, uturn.writer);
 						// return the data posted by the write
 						cb(null, pendingData);
-						pendingData = null;
+						pendingData = undefined;
 						break;
 					case 'idle':
 						// remember it

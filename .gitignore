@@ -8,3 +8,4 @@ test/fixtures/rss-sample.zip
 /test-fibers/
 /coverage/
 out/
+.vscode/

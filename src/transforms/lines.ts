@@ -17,19 +17,20 @@ export interface ParserOptions {
 }
 
 export function parser(options?: ParserOptions): (_: _, reader: Reader<string | Buffer>, writer: Writer<string>) => void {
-	options = options || {};
+	const opts = options || {};
 
 	function clean(line: string) {
-		return (!options.sep && line[line.length - 1] === '\r') ? line.substring(0, line.length - 1) : line;
+		return (!opts.sep && line[line.length - 1] === '\r') ? line.substring(0, line.length - 1) : line;
 	}
 	return (_: _, reader: Reader<string | Buffer>, writer: Writer<string>) => {
 		var remain = "";
 		reader.forEach(_, (_, chunk) => {
 			var str: string;
 			if (typeof chunk === 'string') str = chunk;
-			else if (Buffer.isBuffer(chunk)) str = chunk.toString(options.encoding || 'utf8');
-			else if (chunk !== undefined) throw new Error("bad input: " + (str && typeof chunk));
-			const lines = str.split(options.sep || '\n');
+			else if (Buffer.isBuffer(chunk)) str = chunk.toString(opts.encoding || 'utf8');
+			else if (chunk === undefined) return;
+			else throw new Error("bad input: " + typeof chunk);
+			const lines = str.split(opts.sep || '\n');
 			if (lines.length > 1) {
 				writer.write(_, clean(remain + lines[0]));
 				for (var i = 1; i < lines.length - 1; i++) writer.write(_, clean(lines[i]));

@@ -18,15 +18,15 @@ export interface ParserOptions {
 }
 
 export function parser(options?: ParserOptions) {
-	options = options || {};
-	options.sep = options.sep || ',';
+	const opts = options || {};
+	const sep = opts.sep || ',';
 	return (_: _, reader: Reader<string | Buffer>, writer: Writer<any>) => {
 		const rd = reader.transform(lines.parser());
-		const keys = rd.read(_).split(options.sep);
+		const keys = (rd.read(_) || '').split(sep);
 		rd.forEach(_, (_, line) => {
 			// ignore empty line (we get one at the end if file is terminated by newline)
 			if (line.length === 0) return;
-			const values = line.split(options.sep);
+			const values = line.split(sep);
 			const obj: any = {};
 			keys.forEach((key, i) => {
 				obj[key] = values[i];
@@ -44,17 +44,17 @@ export interface FormatterOptions {
 	eol?: string;
 }
 export function formatter(options?: FormatterOptions) {
-	options = options || {};
-	options.sep = options.sep || ',';
-	options.eol = options.eol || '\n';
+	const opts = options || {};
+	const sep = opts.sep || ',';
+	const eol = opts.eol || '\n';
 	return (_: _, reader: Reader<any>, writer: Writer<string>) => {
 		var obj = reader.read(_);
 		if (!obj) return;
 		const keys = Object.keys(obj);
-		writer.write(_, keys.join(options.sep) + options.eol);
+		writer.write(_, keys.join(sep) + eol);
 		do {
 			var values = keys.map((key) => obj[key]);
-			writer.write(_, values.join(options.sep) + options.eol);
+			writer.write(_, values.join(sep) + eol);
 		} while ((obj = reader.read(_)) !== undefined);
 	};
 }

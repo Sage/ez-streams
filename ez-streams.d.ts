@@ -82,7 +82,7 @@ declare module 'ez-streams/devices/array' {
         values: T[];
         constructor(options: Options);
         toArray(): T[];
-        result: T[];
+        readonly result: T[];
     }
     export function reader<T>(array: T[], options?: Options): Reader<T>;
     export function writer<T>(options?: Options): ArrayWriter<{}>;
@@ -99,7 +99,7 @@ declare module 'ez-streams/devices/buffer' {
         chunks: Buffer[];
         constructor(options: Options);
         toBuffer(): Buffer;
-        result: Buffer;
+        readonly result: Buffer;
     }
     export function reader(buffer: Buffer, options?: Options | number): Reader<Buffer>;
     export function writer(options?: Options): BufferWriter;
@@ -227,7 +227,7 @@ declare module 'ez-streams/devices/node' {
     export interface NodeReaderOptions {
         encoding?: string;
     }
-    export function fixOptions(options: NodeReaderOptions | string): NodeReaderOptions;
+    export function fixOptions(options: NodeReaderOptions | string | undefined): NodeReaderOptions;
     export function reader(emitter: NodeJS.EventEmitter, options?: NodeReaderOptions | string): Reader<any>;
     export interface NodeWriterOptions {
     }
@@ -261,7 +261,7 @@ declare module 'ez-streams/devices/string' {
         buf: string;
         constructor(options: Options);
         toString(): string;
-        result: string;
+        readonly result: string;
     }
     export function reader(text: string, options?: Options | number): Reader<string>;
     export function writer(options?: Options): StringWriter;
@@ -294,9 +294,9 @@ declare module 'ez-streams/helpers/binary' {
         reader: BaseReader<Buffer>;
         options: ReaderOptions;
         pos: number;
-        buf: Buffer;
+        buf: Buffer | undefined;
         constructor(reader: BaseReader<Buffer>, options: ReaderOptions);
-        readData(_: _, len?: number, peekOnly?: boolean): Buffer;
+        readData(_: _, len?: number, peekOnly?: boolean): Buffer | undefined;
         ensure(_: _, len: number): number;
         peek(_: _, len: number): Buffer;
         unread(len: number): void;
@@ -439,8 +439,8 @@ declare module 'ez-streams/predicate' {
     }
     export type Predicate = (_: _, val: any) => boolean;
     export type Op = (val: any, parent?: any) => Predicate;
-    export function converter(options?: Options): (val: any) => (_: Streamline._, val: any) => boolean;
-    export const convert: (val: any) => (_: Streamline._, val: any) => boolean;
+    export function converter(options?: Options): (val: any) => Predicate;
+    export const convert: (val: any) => Predicate;
 }
 
 declare module 'ez-streams/reader' {
@@ -482,14 +482,14 @@ declare module 'ez-streams/reader' {
         stop: (_: _, arg?: any) => void;
     }
     export class Reader<T> {
-        parent: Stoppable;
-        read: (_: _) => T;
+        parent?: Stoppable;
+        read: (_: _) => T | undefined;
         _stop: (_: _, arg?: any) => void;
         stopped: boolean;
         headers: {
             [name: string]: string;
         };
-        constructor(read: (_: _) => T, stop?: (_: _, arg: any) => void, parent?: Stoppable);
+        constructor(read: (_: _) => T | undefined, stop?: (_: _, arg: any) => void, parent?: Stoppable);
         forEach(_: _, fn: (_: _, value: T, index: number) => void, thisObj?: any): any;
         map<U>(fn: (_: _, value: T, index: number) => U, thisObj?: any): Reader<U>;
         every(_: _, fn: ((_: _, value: T) => boolean) | {}, thisObj?: any): any;
@@ -500,7 +500,7 @@ declare module 'ez-streams/reader' {
         dup(): [Reader<T>, Reader<T>];
         concat(...readers: (Reader<T> | Reader<T>[])[]): Reader<T>;
         toArray(_: _): T[];
-        readAll(_: _): string | Buffer | T[];
+        readAll(_: _): string | Buffer | T[] | undefined;
         transform<U>(fn: (_: _, reader: Reader<T>, writer: Writer<U>) => void, thisObj?: any): Reader<U>;
         filter(fn: ((_: _, value: T, index: number) => boolean) | {}, thisObj?: any): Reader<T>;
         until(fn: ((_: _, value: T, index: number) => boolean) | {}, thisObj?: any, stopArg?: any): Reader<T>;
@@ -518,19 +518,19 @@ declare module 'ez-streams/reader' {
         stop(_: _, arg?: any): void;
     }
     export class PeekableReader<T> extends Reader<T> {
-        buffered: T[];
+        buffered: (T | undefined)[];
         constructor(parent: Reader<T>);
-        unread(val: T): this;
+        unread(val: T | undefined): this;
         peek(_: _): T;
     }
     export function create<T>(read: (_: _) => T, stop?: (_: _, arg: any) => void): Reader<T>;
     export class StreamGroup<T> implements Stoppable {
-        readers: Reader<T>[];
+        readers: (Reader<T> | null)[];
         constructor(readers: Reader<T>[]);
         stop(_: _, arg?: any): void;
         dequeue(): Reader<{}>;
         rr(): Reader<T>;
-        join(fn: (_: _, values: T[]) => T, thisObj?: any): Reader<{}>;
+        join(fn: (_: _, values: (T | undefined)[]) => T | undefined, thisObj?: any): Reader<{}>;
     }
 }
 
@@ -562,13 +562,13 @@ declare module 'ez-streams/writer' {
     import { _ } from "streamline-runtime";
     import * as nodeStream from "stream";
     export class Writer<T> {
-        write: (_: _, value: T) => Writer<T>;
+        write: (_: _, value?: T) => Writer<T>;
         ended: boolean;
         constructor(write: (_: _, value: T) => Writer<T>, stop?: (_: _, arg?: any) => Writer<T>);
         writeAll(_: _, val: T): this;
         stop(_: _, arg?: any): Writer<T>;
         end(): this;
-        pre: Pre<T>;
+        readonly pre: Pre<T>;
         nodify(): nodeStream.Writable;
     }
     export function create<T>(write: (_: _, value: T) => Writer<T>, stop?: (_: _, arg?: any) => Writer<T>): Writer<T>;

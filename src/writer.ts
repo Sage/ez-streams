@@ -33,7 +33,7 @@ import { Reader } from "./reader";
 import * as nodeStream from "stream";
 
 export class Writer<T> {
-	write: (_: _, value: T) => Writer<T>;
+	write: (_: _, value?: T) => Writer<T>;
 	ended: boolean;
 	constructor(write: (_: _, value: T) => Writer<T>, stop?: (_: _, arg?: any) => Writer<T>) {
 		if (typeof write !== 'function') throw new Error("invalid writer.write: " + (write && typeof write));

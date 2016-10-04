@@ -25,9 +25,9 @@
     "dts-bundle": "^0.4.3",
     "retyped-qunit-tsd-ambient": "^1.16.0-0",
     "streamline": "^2.0.8",
-    "streamline-helpers": "^2.0.4",
+    "streamline-helpers": "^3.0.0",
     "streamline-node": "^1.0.2",
-    "typescript": "^1.8.10"
+    "typescript": "^2.0.3"
   },
   "scripts": {
     "prepublish": "node build.js || nodejs build.js",
