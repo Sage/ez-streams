@@ -377,7 +377,7 @@ export class WritableStream<EmitterT extends NodeJS.WritableStream> extends Wrap
 	end(data?: Data, enc?: string) {
 		if (this.writer.ended) {
 			if (data != null) throw new Error("invalid attempt to write after end");
-			return;
+			return this;
 		}
 		if (typeof data === "string") data = new Buffer(data, enc || this._encoding || "utf8");
 		else if (data === null) data = undefined;
@@ -489,10 +489,10 @@ export class HttpServerRequest extends ReadableStream<http.ServerRequest> {
 	}
 
 	// method, url, headers and trailers are read-write - for compatibility
-	get method() { return this._emitter.method; }
-	set method(val: string | undefined) { this._emitter.method = val; }
-	get url() { return this._emitter.url; }
-	set url(val: string | undefined) { this._emitter.url = val; }
+	get method() { return this._emitter.method!; }
+	set method(val: string) { this._emitter.method = val; }
+	get url() { return this._emitter.url!; }
+	set url(val: string) { this._emitter.url = val; }
 	get headers() { return this._emitter.headers; }
 	set headers(val: any) { this._emitter.headers = val; }
 	get trailers() { return this._emitter.trailers; }
@@ -532,6 +532,7 @@ export class HttpServerResponse extends WritableStream<http.ServerResponse> {
 		return this;
 	}
 	/// * `response.writeHead(statusCode, headers)` 
+	writeHead(statusCode: number, headers?: any): this;
 	writeHead(statusCode: number, reasonPhrase?: string, headers?: any) {
 		this._emitter.writeHead(statusCode, reasonPhrase, headers);
 		return this;

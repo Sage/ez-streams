@@ -3,19 +3,33 @@ import { fixOptions } from './node';
 import { Reader } from '../reader';
 import { Writer } from '../writer';
 import * as http from 'http';
-const streams = require('../node-wrappers');
 
-interface HttpClientResponse extends Reader<any> {
-    statusCode: number;
+import {
+    HttpProxyClientRequest, 
+    HttpClientRequest, 
+    HttpClientResponse,
+    HttpClientOptions,
+    HttpServer,
+    HttpServerRequest, 
+    HttpServerResponse,
+    HttpServerOptions,
+    createHttpServer,
+    httpRequest,
+    httpListener,
+} from '../node-wrappers';
+
+export {
+    HttpProxyClientRequest, 
+    HttpClientRequest, 
+    HttpClientResponse,
+    HttpClientOptions,
+    HttpServer,
+    HttpServerRequest, 
+    HttpServerResponse,
+    HttpServerOptions,
 }
 
-interface HttpClient {
-    write(_: _, data: any): HttpClient;
-    end(data?: any): HttpClient;
-    response: (_: _) => HttpClientResponse;
-}
-
-function endWrite(_: _, cli: HttpClient) {
+function endWrite(_: _, cli: HttpClientRequest) {
     const resp = cli.end().response(_);
     if (resp.statusCode != 201) throw new Error("Request return status code: " + resp.statusCode); // TODO: better manage errors
     const data = resp.readAll(_);
@@ -46,15 +60,9 @@ function guessType(data: any) {
 ///   where `request` is an EZ reader and `response` an EZ writer.  
 ///   For a full description of this API, see `HttpServerRequest/Response` in
 ///   https://github.com/Sage/ez-streams/blob/master/lib/node-wrappers.md 
-export interface HttpServerRequest {
-}
-export interface HttpServerResponse {
-}
-export interface HttpServerOptions {
-}
 
 export function server(listener: (request: HttpServerRequest, response: HttpServerResponse, _: _) => void, options?: HttpServerOptions) {
-    return streams.createHttpServer(listener, fixOptions(options));
+    return createHttpServer(listener, fixOptions(options));
 }
 /// * `client = ez.devices.http.client(options)`  
 ///   Creates an EZ HTTP client.  
@@ -62,21 +70,17 @@ export function server(listener: (request: HttpServerRequest, response: HttpServ
 ///   The response object returned by `client.response(_)`  is an EZ reader.  
 ///   For a full description of this API, see `HttpClientRequest/Response` in
 ///   https://github.com/Sage/ez-streams/blob/master/lib/node-wrappers.md 
-export interface HttpClientOptions {
-    url?: string;
-    method?: 'GET' | 'PUT' | 'POST' | 'DELETE' | 'OPTIONS';
-    headers?: { [name: string]: string }
-}
+
 export function client(options?: HttpClientOptions) {
-    return streams.httpRequest(fixOptions(options));
+    return httpRequest(fixOptions(options));
 }
 /// * `listener = ez.devices.http.listener(listener, options)`  
 ///    wraps an ez-streams listener as a vanilla node.js listener
 export interface HttpListenerOption {
 
 }
-export function listener(listener: (request: http.ServerRequest, response: http.ServerResponse) => void, options? : HttpListenerOption) {
-    return streams.httpListener(listener, fixOptions(options));
+export function listener(listener: (request: HttpServerRequest, response: HttpServerResponse) => void, options? : HttpListenerOption) {
+    return httpListener(listener, fixOptions(options));
 }
 /// * `factory = ez.factory("http://user:pass@host:port/...")` 
 ///    Use reader for a GET request, writer for POST request
@@ -96,10 +100,10 @@ export function factory(url: string) {
         },
         /// * `writer = factory.writer(_)`  
         writer(_: _) {
-            var cli: HttpClient;
+            var cli: HttpClientRequest;
             var type: string | null;
             return {
-                write(_: _, data: any) {
+                write: function(_: _, data: any) {
                     const opt: HttpClientOptions = {
                         url: url,
                         method: "POST",
@@ -108,12 +112,12 @@ export function factory(url: string) {
                     if (!cli) {
                         type = guessType(data);
                         if (type) opt.headers!["content-type"] = type;
-                        cli = client(opt);
+                        cli = client(opt).proxyConnect(_);
                     }
                     if (data === undefined) return this.result = endWrite(_, cli);
                     else return cli.write(_, type === "application/json" ? JSON.stringify(data) : data);
                 }
-            }
+            };
         }
     };
 }
