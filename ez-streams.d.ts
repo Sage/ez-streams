@@ -210,6 +210,7 @@ declare module 'ez-streams/writer' {
         end(): this;
         readonly pre: Pre<T>;
         nodify(): nodeStream.Writable;
+        readonly result: any;
     }
     export function create<T>(write: (_: _, value: T) => Writer<T>, stop?: (_: _, arg?: any) => Writer<T>): Writer<T>;
     export class PreImpl<T> {

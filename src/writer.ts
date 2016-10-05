@@ -113,6 +113,10 @@ export class Writer<T> {
 		};
 		return stream;
 	}
+	// optional result getter - only implemneted in some subclasses
+	get result(): any {
+		throw new Error("result not supported");
+	}
 };
 
 export function create<T>(write: (_: _, value: T) => Writer<T>, stop?: (_: _, arg?: any) => Writer<T>) {
@@ -130,7 +134,7 @@ exports.decorate = function(proto: any) {
 	const writerProto: any = Writer.prototype;
 	Object.getOwnPropertyNames(Writer.prototype).forEach(k => {
 		// compare with == is important here!
-		if (k == 'constructor') return;
+		if (k == 'constructor' || k == 'result') return;
 		if (k == 'pre') {
 			Object.defineProperty(proto, k, {
 				get() { return new PreImpl(this); }
