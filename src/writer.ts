@@ -136,7 +136,7 @@ exports.decorate = function(proto: any) {
 				get() { return new PreImpl(this); }
 			});
 		} else {
-			proto[k] = writerProto[k];
+			if (!proto[k]) proto[k] = writerProto[k];
 		}
 	});
 	return proto;
