@@ -66,13 +66,13 @@ export interface ParserOptions {
 	unbounded?: boolean;
 }
 
-export function parser(options: ParserOptions) {
-	options = options || {};
+export function parser(options?: ParserOptions) {
+	const opts = options || {};
 
 	return (_: _, reader: Reader<string | Buffer>, writer: Writer<any>) => {
 		function read(_: _) {
 			const data = reader.read(_);
-			return Buffer.isBuffer(data) ? data.toString(options.encoding || 'utf8') : data;
+			return Buffer.isBuffer(data) ? data.toString(opts.encoding || 'utf8') : data;
 		}
 		var pos = 0,
 			chunk = read(_),
@@ -114,14 +114,14 @@ export function parser(options: ParserOptions) {
 		function flush(_: _) {
 			if (chunk === undefined || beg === undefined) return;
 			collected += chunk.substring(beg, pos);
-			const val = JSON.parse(collected, options.reviver);
+			const val = JSON.parse(collected, opts.reviver);
 			writer.write(_, val);
 			beg = undefined;
 			collected = "";
 		}
 
 		ch = skipSpaces(_);
-		if (!options.unbounded) {
+		if (!opts.unbounded) {
 			if (ch !== '[') throw error("expected [, got " + ch);
 			pos++;
 		} else {
@@ -140,7 +140,7 @@ export function parser(options: ParserOptions) {
 			} else {
 				switch (ch) {
 				case undefined:
-					if (depth === 1 && options.unbounded && beg === undefined) return;
+					if (depth === 1 && opts.unbounded && beg === undefined) return;
 					else throw error("unexpected EOF");
 				case '"':
 					if (depth === 1 && beg === undefined) beg = pos;
@@ -158,7 +158,7 @@ export function parser(options: ParserOptions) {
 				case ']':
 					depth--;
 					if (depth === 0) {
-						if (options.unbounded) throw error("unexpected ]");
+						if (opts.unbounded) throw error("unexpected ]");
 						if (beg !== undefined) flush(_);
 						return;
 					}
@@ -190,15 +190,15 @@ export interface FormatterOptions {
 	space?: string;
 }
 
-export function formatter(options: FormatterOptions) {
-	options = options || {};
+export function formatter(options?: FormatterOptions) {
+	const opts = options || {};
 	return (_: _, reader: Reader<any>, writer: Writer<string>) => {
-		if (!options.unbounded) writer.write(_, '[');
+		if (!opts.unbounded) writer.write(_, '[');
 		reader.forEach(_, (_, obj, i) => {
 			if (i > 0) writer.write(_, ',\n');
-			writer.write(_, JSON.stringify(obj, options.replacer, options.space));
+			writer.write(_, JSON.stringify(obj, opts.replacer, opts.space));
 		});
-		writer.write(_, options.unbounded ? ',' : ']');
+		writer.write(_, opts.unbounded ? ',' : ']');
 		writer.write(_, undefined);
 	}
 }

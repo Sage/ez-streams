@@ -29,7 +29,7 @@
 /// `const ez = require("ez-streams")`  
 /// 
 import { _ } from "streamline-runtime";
-import { Reader } from "./reader";
+import { Reader, ParallelOptions } from "./reader";
 import * as nodeStream from "stream";
 
 export class Writer<T> {
@@ -83,7 +83,7 @@ export class Writer<T> {
 	///   returns another writer which applies `action(fn)` before writing to the original writer.  
 	///   `action` may be any chainable action from the reader API: `map`, `filter`, `transform`, ...  
 	get pre() : Pre<T> {
-		return new Pre(this);
+		return new PreImpl(this) as Pre<T>;
 	}
 
 	/// * `stream = writer.nodify()`  
@@ -113,6 +113,10 @@ export class Writer<T> {
 		};
 		return stream;
 	}
+	// optional result getter - only implemneted in some subclasses
+	get result(): any {
+		throw new Error("result not supported");
+	}
 };
 
 export function create<T>(write: (_: _, value: T) => Writer<T>, stop?: (_: _, arg?: any) => Writer<T>) {
@@ -130,13 +134,13 @@ exports.decorate = function(proto: any) {
 	const writerProto: any = Writer.prototype;
 	Object.getOwnPropertyNames(Writer.prototype).forEach(k => {
 		// compare with == is important here!
-		if (k == 'constructor') return;
+		if (k == 'constructor' || k == 'result') return;
 		if (k == 'pre') {
 			Object.defineProperty(proto, k, {
-				get() { return new Pre(this); }
+				get() { return new PreImpl(this); }
 			});
 		} else {
-			proto[k] = writerProto[k];
+			if (!proto[k]) proto[k] = writerProto[k];
 		}
 	});
 	return proto;
@@ -146,7 +150,7 @@ function createUturn() {
 
 }
 
-export class Pre<T> {
+export class PreImpl<T> {
 	writer: Writer<T>;
 	constructor(writer: Writer<T>) {
 		if (typeof writer.write !== 'function') throw new Error("invalid pre writer: " + require('sys').inspect(writer));
@@ -154,16 +158,29 @@ export class Pre<T> {
 	}
 }
 
+export interface Pre<T> extends PreImpl<T> {
+	map<U>(fn: (_:_, elt: U, index?: number) => T, thisObj?: any): Writer<U>;
+	tee(writer: Writer<T>): Writer<T>;
+	concat(readers: Reader<T>[]): Writer<T>;
+	transform<U>(fn: (_: _, reader: Reader<U>, writer: Writer<T>) => void, thisObj?: any): Writer<U>;
+	filter(fn: (_: _, elt: T, index?: number) => boolean, thisObj?: any): Writer<T>;
+	until(fn: (_: _, elt: T, index?: number) => boolean, thisObj?: any): Writer<T>;
+	while(fn: (_: _, elt: T, index?: number) => boolean, thisObj?: any): Writer<T>;
+	limit(n: number, stopArg?: any): Writer<T>;
+	skip(n: number): Writer<T>;
+	parallel(options: ParallelOptions | number, consumer: (source: any) => Reader<T>): Writer<T>;
+	buffer(max: number): Writer<T>;
+	nodeTransform<U>(duplex: nodeStream.Duplex): Writer<U>;
+}
+
 // add reader methods to Pre.prototype
 // fragile but we'll fix later
 process.nextTick(() => {
-	const preProto: any = Pre.prototype;
+	const preProto: any = PreImpl.prototype;
 	const api: any = Reader.prototype;
 	[
 		'map',
-		'reduce',
 		'tee',
-		'dup',
 		'concat',
 		'transform',
 		'filter', 
@@ -172,9 +189,7 @@ process.nextTick(() => {
 		'limit',
 		'skip',
 		'parallel',
-		'peekable',
 		'buffer',
-		'join',
 		'nodeTransform'
 	].forEach((name) => {
 		preProto[name] = function(arg: any) {

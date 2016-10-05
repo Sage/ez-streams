@@ -10,6 +10,7 @@ import * as generic from './generic';
 import { parser as linesParser } from '../transforms/lines';
 import * as node from './node';
 import { stringify } from '../mappers/convert';
+import { ChildProcess } from 'child_process';
 
 /// * `reader = ez.devices.child_process.reader(proc, options)`  
 ///   wraps a node.js child process as an EZ reader.  
@@ -24,7 +25,7 @@ export interface ReaderOptions {
 	errorThrow?: boolean;
 }
 
-export function reader(proc: NodeJS.Process, options?: ReaderOptions) {
+export function reader(proc: ChildProcess, options?: ReaderOptions) {
 	var opts = options || {};
 	var err: NodeJS.ErrnoException, closeCb: ((err: Error) => void) | null, closed: boolean;
 	proc.on('close', (ec: number) => {
@@ -92,6 +93,6 @@ export function reader(proc: NodeJS.Process, options?: ReaderOptions) {
 ///   For a full description of the options, see `WritableStream` in
 ///   https://github.com/Sage/ez-streams/blob/master/lib/node-wrappers.md 
 
-export function writer(proc: NodeJS.Process, options: node.NodeWriterOptions) {
+export function writer(proc: ChildProcess, options: node.NodeWriterOptions) {
 	return node.writer(proc.stdin, options);
 }

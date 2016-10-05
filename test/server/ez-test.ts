@@ -1,10 +1,12 @@
-"use strict";
+// <reference path="../../node_modules/retyped-qunit-tsd-ambient/qunit.d.ts" />
+declare function asyncTest(name: string, expected: number, test: (_: _) => any): any;
+
+import { _ } from "streamline-runtime";
+import * as ez from "../..";
 
 QUnit.module(module.id);
 
-const ez = require("../..");
-
-var server;
+var server: ez.devices.http.HttpServer;
 
 asyncTest("start echo server", 1, (_) => {
     server = ez.devices.http.server(function(req, res, _) {
@@ -27,7 +29,7 @@ asyncTest("start echo server", 1, (_) => {
                 var parts = crt.split("=");
                 if (parts[0]) prev[parts[0]] = parts[1];
                 return prev;
-            }, {});
+            }, {} as any);
             res.writeHead(query.status || 200, {});
             res.end("reply for GET");
         }
@@ -92,7 +94,7 @@ asyncTest("string readers and writers", 1, (_) => {
 
 asyncTest("buffer test", 1, (_) => {
     const buf = new Buffer('hello world', 'utf8');
-    const reply = ez.reader(buf).transform(ez.transforms.cut(2)).readAll(_);
+    const reply = ez.reader(buf).transform(ez.transforms.cut.transform(2)).readAll(_) as Buffer;
     deepEqual(reply.toString('utf8'), buf.toString('utf8'));
     start();
 });

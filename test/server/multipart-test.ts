@@ -1,17 +1,26 @@
-"use strict";
+/// <reference path="../../node_modules/retyped-qunit-tsd-ambient/qunit.d.ts" />
+declare function asyncTest(name: string, expected: number, test: (_: _) => any): any;
+
+import { _ } from "streamline-runtime";
+import * as ez from "../..";
+
 QUnit.module(module.id);
 
-const ez = require("../..");
 const buffer = ez.devices.buffer;
 const multipart = ez.transforms.multipart
 
 const boundary = "-- my boundary --";
 
-function headers(subType) {
+function headers(subType: string) {
 		return {
 			"content-type": "multipart/" + subType + ";atb1=val1; boundary=" + boundary + "; atb2=val2",
 		};
 	}
+
+type Part = {
+	headers: { [key: string]: string };
+	body: string;
+};
 
 function testStream() {
 	const parts = [{
@@ -30,7 +39,7 @@ function testStream() {
 		body: "C2",
 	}];
 
-	function formatPart(part) {
+	function formatPart(part: Part) {
 		return Object.keys(part.headers).map(function(name) {
 			return name + ': ' + part.headers[name]
 		}).join('\n') + '\n\n' + boundary + '\n' + part.body + '\n' + boundary + '\n';
@@ -39,7 +48,7 @@ function testStream() {
 }
 
 asyncTest('basic multipart/mixed', 13, (_) => {
-	const source = testStream("mixed");
+	const source = testStream();
 	const stream = source.transform(multipart.parser(headers("mixed")));
 	var part = stream.read(_);
 	ok(part != null, "part != null");
@@ -68,7 +77,7 @@ asyncTest('basic multipart/mixed', 13, (_) => {
 
 asyncTest('multipart/mixed roundtrip', 2, (_) => {
 	const heads = headers("mixed");
-	const source = testStream("mixed");
+	const source = testStream();
 	const writer = buffer.writer();
 	source.transform(multipart.parser(heads)).transform(multipart.formatter(heads)).pipe(_, writer);
 	const result = writer.toBuffer();

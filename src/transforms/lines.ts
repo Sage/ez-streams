@@ -52,11 +52,11 @@ export interface FormatterOptions {
 	extra?: boolean;
 }
 
-export function formatter(options: FormatterOptions) {
-	options = options || {};
-	const eol = options.eol || '\n';
+export function formatter(options?: FormatterOptions) {
+	const opts = options || {};
+	const eol = opts.eol || '\n';
 	return (_: _, reader: Reader<string>, writer: Writer<string>) => {
-		if (options.extra) {
+		if (opts.extra) {
 			reader.forEach(_, (_, line) => {
 				writer.write(_, line + eol);
 			});

@@ -1,12 +1,15 @@
-"use strict";
+// <reference path="../../node_modules/retyped-qunit-tsd-ambient/qunit.d.ts" />
+declare function asyncTest(name: string, expected: number, test: (_: _) => any): any;
+
+import { _ } from "streamline-runtime";
+import * as ez from "../..";
 
 QUnit.module(module.id);
 
-const ez = require("../..");
+var server: ez.devices.http.HttpServer;
 
-var server;
 asyncTest("Echo service test", 6, (_) => {
-    function _test(_, type, message) {
+    function _test(_: _, type: string, message: any) {
         const writer = ez.factory("http://localhost:3004").writer(_);
         writer.write(_, message);
         strictEqual(writer.write(_, undefined), type + ((type === "application/json") ? JSON.stringify(message) : message), "POST result ok for " + type);
@@ -23,7 +26,7 @@ asyncTest("Echo service test", 6, (_) => {
                 var parts = crt.split("=");
                 if (parts[0]) prev[parts[0]] = parts[1];
                 return prev;
-            }, {});
+            }, {} as any);
             res.writeHead(query.status || 200, {});
             res.end("reply for GET");
         }

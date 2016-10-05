@@ -4,7 +4,6 @@ declare function asyncTest(name: string, expected: number, test: (_: _) => any):
 import { _ } from "streamline-runtime";
 import * as ez from "../..";
 
-import { Reader } from "../../src/reader";
 QUnit.module(module.id);
 const csv = ez.transforms.csv;
 const string = ez.devices.string;

@@ -1,75 +1,23 @@
-import * as DevArray from './devices/array';
-import * as DevBuffer from './devices/buffer';
-import * as DevChildProcess from './devices/child_process';
-import * as DevConsole from './devices/console';
-import * as DevFile from './devices/file';
-import * as DevGeneric from './devices/generic';
-import * as DevHttp from './devices/http';
-import * as DevQueue from './devices/queue';
-import * as DevNet from './devices/net';
-import * as DevNode from './devices/node';
-import * as DevStd from './devices/std';
-import * as DevString from './devices/string';
-import * as DevUturn from './devices/uturn';
+import * as devices from './devices/index';
+import * as helpers from './helpers/index';
+import * as mappers from './mappers/index';
+import * as transforms from './transforms/index';
+import * as predicate from './predicate';
+import * as stopException from './stop-exception';
 
-export const devices = {
-	array: DevArray,
-	buffer: DevBuffer,
-	child_process: DevChildProcess,
-	console: DevConsole,
-	file: DevFile,
-	generic: DevGeneric,
-	http: DevHttp,
-	net: DevNet,
-	node: DevNode,
-	queue: DevQueue,
-	std: DevStd,
-	string: DevString,
-	uturn: DevUturn,
-};
-
-import * as HelpBinary from './helpers/binary';
-
-export const helpers = {
-	binary: HelpBinary,
-}
-
-import * as MapConvert from './mappers/convert';
-import * as MapJson from './mappers/json';
-
-export const mappers = {
-	convert: MapConvert,
-	json: MapJson,
-}
-
-import * as TransCsv from './transforms/csv';
-import * as TransCut from './transforms/cut';
-import * as TransJson from './transforms/json';
-import * as TransLines from './transforms/lines';
-import * as TransMultipart from './transforms/multipart';
-import * as TransXml from './transforms/xml';
-
-export const transforms = {
-	csv: TransCsv,
-	cut: TransCut,
-	json: TransJson,
-	lines: TransLines,
-	multipart: TransMultipart,
-	xml: TransXml,
-}
-
-import * as EzPredicate from './predicate';
-import * as EzStopException from './stop-exception';
 import * as EzReader from './reader';
 import * as EzWriter from './writer';
 import EzFactory from './factory';
 
-export const predicate = EzPredicate;
+export { devices, helpers, mappers, transforms,
+	predicate, stopException  };
+
 export const factory = EzFactory;
 
 export type Reader<T> = EzReader.Reader<T>;
 export type CompareOptions<T> = EzReader.CompareOptions<T>;
 export type ParallelOptions = EzReader.ParallelOptions;
+
 export type Writer<T> = EzWriter.Writer<T>;
 
 export function reader(arg: string | any[] | Buffer) : Reader<any> {
@@ -91,6 +39,7 @@ export function reader(arg: string | any[] | Buffer) : Reader<any> {
 		throw new Error(`invalid argument ${ arg && typeof arg }`);
 	}
 }
+
 export function writer(arg: string | any[] | Buffer) : Writer<any> {
 	if (typeof arg === 'string') {
 		const f = factory(arg);
@@ -129,9 +78,9 @@ writerHack.create = EzWriter.create;
 writerHack.decorate = anyfy(EzWriter).decorate;
 
 var transformHack: any = transforms.cut.transform;
-transforms.cut = transformHack;
+(transforms as any).cut = transformHack;
 transforms.cut.transform = transformHack;
 
 var queueHack: any = devices.queue.create;
-devices.queue = queueHack;
+(devices as any).queue = queueHack;
 devices.queue.create = queueHack;
