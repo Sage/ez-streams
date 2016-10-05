@@ -102,9 +102,14 @@ export class Wrapper<EmitterT extends Emitter> {
 	///    The wrapper should not be used after this call.
 	unwrap() {
 		this._emitter.removeAllListeners();
-		closed = true;
+		this._closed = true;
 		return this._emitter;
-	};
+	}
+	/// * `emitter = wrapper.emitter`  
+	///    returns the underlying emitter. The emitter stream can be used to attach additional observers.
+	get emitter() {
+		return this._emitter;
+	}
 }
 
 /// 
@@ -161,7 +166,7 @@ export class ReadableStream<EmitterT extends NodeJS.ReadableStream> extends Wrap
 		this._autoClosed.push(() => {
 			if (!this._done) this._onData(new Error("stream was closed unexpectedly"));
 		});
-		this.reader = generic.reader(this._readChunk.bind(this), this.stop);
+		this.reader = generic.reader(this._readChunk.bind(this), this.stop.bind(this));
 	}
 
 	_trackData(err: Error, chunk?: Data) {
@@ -483,11 +488,15 @@ export class HttpServerRequest extends ReadableStream<http.ServerRequest> {
 		this._doesNotEmitClose = true;
 	}
 
-	// warning: these were writable before !!
+	// method, url, headers and trailers are read-write - for compatibility
 	get method() { return this._emitter.method; }
+	set method(val: string | undefined) { this._emitter.method = val; }
 	get url() { return this._emitter.url; }
+	set url(val: string | undefined) { this._emitter.url = val; }
 	get headers() { return this._emitter.headers; }
+	set headers(val: any) { this._emitter.headers = val; }
 	get trailers() { return this._emitter.trailers; }
+	set trailers(val: any) { this._emitter.trailers = val; }
 	get rawHeaders() { return this._emitter.rawHeaders; }
 	get rawTrailers() { return this._emitter.rawTrailers; }
 	get httpVersion() { return this._emitter.httpVersion; }
@@ -499,6 +508,10 @@ export class HttpServerRequest extends ReadableStream<http.ServerRequest> {
 	get client() { return (this._emitter as any).client; }
 }
 
+// compat API: hide from typescript
+Object.defineProperty(HttpServerRequest.prototype, '_request', {
+	get() { return this._emitter; }
+})
 /// 
 /// ## HttpServerResponse
 /// 

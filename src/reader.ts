@@ -614,7 +614,7 @@ export class PeekableReader<T> extends Reader<T> {
 exports.decorate = function(proto: any) {
 	const readerProto: any = Reader.prototype;
 	Object.getOwnPropertyNames(Reader.prototype).forEach(k => {
-		if (k !== 'constructor') proto[k] = readerProto[k];
+		if (k !== 'constructor' && !proto[k]) proto[k] = readerProto[k];
 	});
 	return proto;
 }
