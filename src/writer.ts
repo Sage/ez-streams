@@ -94,7 +94,7 @@ export class Writer<T> {
 		stream._write = function(chunk, encoding, done) {
 			if (chunk && encoding && encoding !== 'buffer') chunk = chunk.toString(encoding);
 			_.run(_ => self.write(_, chunk), err => {
-				if (err) return stream.emit('error', err);
+				if (err) return stream.emit('error', err) as never;
 				done();
 			});
 		}
@@ -106,7 +106,7 @@ export class Writer<T> {
 		const anyStream: any = stream;
 		anyStream.end = function(chunk: any, encoding?: string, cb?: (err: any, val?: any) => any) {
 			end.call(stream, chunk, encoding, (err: any) => {
-				if (err) return stream.emit('error', err);
+				if (err) return stream.emit('error', err) as never;
 				cb = cb || ((err) => {});
 				_.run(_ => self.write(_, undefined), cb);
 			});

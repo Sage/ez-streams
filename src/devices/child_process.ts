@@ -78,7 +78,6 @@ export function reader(proc: ChildProcess, options?: ReaderOptions) {
 		if (closed) {
 			// already got close event
 			if (err) throw err;
-			return undefined;
 		} else {
 			// wait for the close event
 			_.cast(function(cb) {
@@ -86,6 +85,7 @@ export function reader(proc: ChildProcess, options?: ReaderOptions) {
 			})(_);
 			stopStreams(_);
 		}
+		return undefined;
 	}, stopStreams);
 }
 /// * `writer = ez.devices.child_process.writer(proc, options)`  

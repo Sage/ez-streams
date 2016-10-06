@@ -335,6 +335,7 @@ export class Reader<T> {
 				done = val === undefined;
 				if (done || f.call(thisObj, _, val, i++)) return val;
 			}
+			return undefined;
 		}, undefined, parent);
 	}
 
@@ -353,6 +354,7 @@ export class Reader<T> {
 			if (val === undefined) return undefined;
 			if (!f.call(thisObj, _, val, i++)) return val;
 			parent.stop(_, stopArg);
+			return undefined;
 		}, undefined, parent);
 	}
 
@@ -736,6 +738,7 @@ export class StreamGroup<T> implements Stoppable {
 					return v;
 				}
 			} while (i !== last);
+			return undefined;
 		});
 
 		const values: T[] = [];
