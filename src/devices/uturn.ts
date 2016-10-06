@@ -120,7 +120,7 @@ export function create<T>():  Uturn<T> {
 				}
 			});
 		})),
-		writer: new Writer(_.cast(function write(cb: (err?: any, val?: Writer<T>) => void, data: T) {
+		writer: new Writer(_.cast(function write(this: Writer<T>, cb: (err?: any, val?: Writer<T>) => void, data: T) {
 			nextTick(() => {
 				tracer && tracer(id, "WRITE", state, data);
 				const st = state;

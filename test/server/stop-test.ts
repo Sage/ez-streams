@@ -16,10 +16,10 @@ interface TestReader extends ez.Reader<number> {
 //interface TestReader extends ez.reader.Reader<number> 
 function numbers(limit: number) : TestReader {
 	var i = 0;
-	return ez.devices.generic.reader(function read(_) {
+	return ez.devices.generic.reader(function read(this: TestReader, _: _) {
 		if (this.stoppedReason) throw new Error("attempt to read after stop: " + i);
 		return i >= limit ? undefined : i++;
-	}, function stop(_, arg) {
+	}, function stop(this: TestReader, _: _, arg: any) {
 		this.stoppedReason = {
 			at: i,
 			arg: arg,

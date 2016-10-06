@@ -36,7 +36,7 @@ export class Reader extends BaseReader<Buffer> {
 		///   returns `undefined`.  
 		///   If the `len` parameter is omitted, the call returns the next available chunk of data.
 		// peekOnly is internal and not documented
-		super(function read(_) { return this.readData(_); });
+		super((_) => { return this.readData(_); });
 		this.reader = reader;
 		this.options = options;
 		this.pos = 0;
@@ -119,11 +119,11 @@ export class Reader extends BaseReader<Buffer> {
 /// * `val = reader.peekDouble(_)`  
 ///   Specialized peekers for numbers.
 function numberReader(name: string, len: number, peekOnly?: boolean) {
-	return function(_: _) {
+	return function(this: Reader, _: _) {
 		const got = this.ensure(_, len);
 		if (got === 0) return undefined;
 		if (got < len) throw new Error("unexpected EOF: expected " + len + ", got " + got);
-		const result = this.buf[name](this.pos);
+		const result = (this.buf as any)[name](this.pos);
 		if (!peekOnly) this.pos += len;
 		return result;
 	};
@@ -139,7 +139,7 @@ function numberReader(name: string, len: number, peekOnly?: boolean) {
 /// * `val = reader.unreadDouble()`  
 ///   Specialized unreaders for numbers.
 function numberUnreader(len: number) {
-	return function() {
+	return function(this: Reader) {
 		return this.unread(len);
 	};
 }
@@ -163,7 +163,7 @@ export class Writer extends BaseWriter<Buffer> {
 	pos: number;
 	buf: Buffer;
 	constructor(writer: BaseWriter<Buffer>, options?: WriterOptions) {
-		super(function write(_: _, buf: Buffer) {
+		super((_: _, buf: Buffer) => {
 			this.writeDate(_, buf);
 			return this;
 		});
@@ -221,9 +221,9 @@ export class Writer extends BaseWriter<Buffer> {
 /// * `writer.writeDouble(_, val)`  
 ///   Specialized writers for numbers.
 function numberWriter(name: string, len: number) {
-	return function(_: _, val: number) {
+	return function(this: Writer, _: _, val: number) {
 		this.ensure(_, len);
-		this.buf[name](val, this.pos);
+		(this.buf as any)[name](val, this.pos);
 		this.pos += len;
 	};
 }
@@ -242,7 +242,7 @@ NUMBERS.forEach(function(pair) {
 });
 
 function makeEndian(base: Function, verbs: string[], suffix: string) {
-	const construct = function() {
+	const construct = function(this: Reader | Writer) {
 		base.apply(this, arguments);
 	}
 	construct.prototype = Object.create(base.prototype);

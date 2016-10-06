@@ -33,12 +33,12 @@ import { Reader, ParallelOptions } from "./reader";
 import * as nodeStream from "stream";
 
 export class Writer<T> {
-	write: (_: _, value?: T) => Writer<T>;
+	write: (this: Writer<T>, _: _, value?: T) => this;
 	ended: boolean;
 	constructor(write: (_: _, value: T) => Writer<T>, stop?: (_: _, arg?: any) => Writer<T>) {
 		if (typeof write !== 'function') throw new Error("invalid writer.write: " + (write && typeof write));
 		this.ended = false;
-		this.write = function(_, data) {
+		this.write = (_, data) => {
 			if (data === undefined) {
 				if (!this.ended) write.call(this, _);
 				this.ended = true;
@@ -137,7 +137,7 @@ exports.decorate = function(proto: any) {
 		if (k == 'constructor' || k == 'result') return;
 		if (k == 'pre') {
 			Object.defineProperty(proto, k, {
-				get() { return new PreImpl(this); }
+				get(this: Writer<any>) { return new PreImpl(this); }
 			});
 		} else {
 			if (!proto[k]) proto[k] = writerProto[k];
@@ -192,7 +192,7 @@ process.nextTick(() => {
 		'buffer',
 		'nodeTransform'
 	].forEach((name) => {
-		preProto[name] = function(arg: any) {
+		preProto[name] = function(this: Pre<any>, arg: any) {
 			const uturn = require('./devices/uturn').create();
 			uturn.reader[name](arg).pipe(uturn.end, this.writer);
 			return uturn.writer;

@@ -64,8 +64,8 @@ function resolvePredicate<T>(fn: ((_: _, value: T) => boolean) | {}): (_: _, val
 
 export class Reader<T> {
 	parent?: Stoppable;
-	read: (_: _) => T | undefined;
-	_stop: (_: _, arg?: any) => void;
+	read: (this: Reader<T>, _: _) => T | undefined;
+	_stop: (this: Reader<T>, _: _, arg?: any) => void;
 	stopped: boolean;
 	headers: { [name: string]: string }; // experimental
 	constructor(read: (_: _) => T | undefined, stop?: (_: _, arg: any) => void, parent?: Stoppable) {

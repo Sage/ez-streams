@@ -122,8 +122,8 @@ declare module 'ez-streams/reader' {
     }
     export class Reader<T> {
         parent?: Stoppable;
-        read: (_: _) => T | undefined;
-        _stop: (_: _, arg?: any) => void;
+        read: (this: Reader<T>, _: _) => T | undefined;
+        _stop: (this: Reader<T>, _: _, arg?: any) => void;
         stopped: boolean;
         headers: {
             [name: string]: string;
@@ -202,7 +202,7 @@ declare module 'ez-streams/writer' {
     import { Reader, ParallelOptions } from "ez-streams/reader";
     import * as nodeStream from "stream";
     export class Writer<T> {
-        write: (_: _, value?: T) => Writer<T>;
+        write: (this: Writer<T>, _: _, value?: T) => this;
         ended: boolean;
         constructor(write: (_: _, value: T) => Writer<T>, stop?: (_: _, arg?: any) => Writer<T>);
         writeAll(_: _, val: T): this;
@@ -330,7 +330,7 @@ declare module 'ez-streams/devices/generic' {
     import { Writer } from 'ez-streams/writer';
     export const empty: {
         reader: Reader<void>;
-        writer: Writer<{}>;
+        writer: Writer<any>;
     };
     export function reader<T>(read: (_: _) => T, stop?: (_: _, arg?: any) => void): Reader<T>;
     export function writer<T>(write: (_: _, value: T) => Writer<T>, stop?: (_: _, arg?: any) => Writer<T>): Writer<T>;
@@ -338,6 +338,7 @@ declare module 'ez-streams/devices/generic' {
 
 declare module 'ez-streams/devices/http' {
     import { _ } from 'streamline-runtime';
+    import { Writer } from 'ez-streams/writer';
     import * as http from 'http';
     import { HttpProxyClientRequest, HttpClientRequest, HttpClientResponse, HttpClientOptions, HttpServer, HttpServerRequest, HttpServerResponse, HttpServerOptions } from 'ez-streams/node-wrappers';
     export { HttpProxyClientRequest, HttpClientRequest, HttpClientResponse, HttpClientOptions, HttpServer, HttpServerRequest, HttpServerResponse, HttpServerOptions };
@@ -346,10 +347,14 @@ declare module 'ez-streams/devices/http' {
     export interface HttpListenerOption {
     }
     export function listener(listener: (request: HttpServerRequest, response: HttpServerResponse) => void, options?: HttpListenerOption): (request: http.ServerRequest, response: http.ServerResponse) => void;
+    export type FactoryWriter = Writer<any> & {
+        _result: any;
+    };
     export function factory(url: string): {
         reader(_: Streamline._): any;
         writer(_: Streamline._): {
-            write: (_: Streamline._, data: any) => any;
+            write(this: FactoryWriter, _: Streamline._, data: any): any;
+            readonly result: any;
         };
     };
 }

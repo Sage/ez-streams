@@ -84,6 +84,8 @@ export function listener(listener: (request: HttpServerRequest, response: HttpSe
 }
 /// * `factory = ez.factory("http://user:pass@host:port/...")` 
 ///    Use reader for a GET request, writer for POST request
+export type FactoryWriter = Writer<any> & { _result: any };
+
 export function factory(url: string) {
     return {
         /// * `reader = factory.reader(_)`  
@@ -103,7 +105,7 @@ export function factory(url: string) {
             var cli: HttpClientRequest;
             var type: string | null;
             return {
-                write: function(_: _, data: any) {
+                write(this: FactoryWriter, _: _, data: any) {
                     const opt: HttpClientOptions = {
                         url: url,
                         method: "POST",
@@ -114,9 +116,10 @@ export function factory(url: string) {
                         if (type) opt.headers!["content-type"] = type;
                         cli = client(opt).proxyConnect(_);
                     }
-                    if (data === undefined) return this.result = endWrite(_, cli);
+                    if (data === undefined) return this._result = endWrite(_, cli);
                     else return cli.write(_, type === "application/json" ? JSON.stringify(data) : data);
-                }
+                },
+                get result(this: FactoryWriter) { return this._result }
             };
         }
     };

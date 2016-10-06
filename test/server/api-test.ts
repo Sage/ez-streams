@@ -6,6 +6,7 @@ import * as ez from "../..";
 
 import { Reader } from "../../src/reader";
 interface TestReader extends Reader<number> {
+	stopInfo: { at: number, arg: any };
 	finalCheck: () => void;
 }
 
@@ -18,14 +19,14 @@ function numbers(limit?: number): TestReader {
 	var i = 0;
 	const source: any = generic.reader(function read(_) {
 		return i >= limit ? undefined : i++;
-	}, function stop(_, arg) {
-		this.stopped = {
+	}, function stop(this: TestReader, _: _, arg: number) {
+		this.stopInfo = {
 			at: i,
 			arg: arg,
 		};
 	});
-	source.finalCheck = function() {
-		ok(this.stopped || i == limit, "final check");
+	source.finalCheck = function(this: TestReader) {
+		ok(this.stopInfo || i == limit, "final check");
 	}
 	return source;
 }

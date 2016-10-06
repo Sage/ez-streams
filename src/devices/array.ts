@@ -10,7 +10,7 @@ export interface Options {
 export class ArrayWriter<T> extends Writer<T> {
 	values: T[];
 	constructor(options: Options) {
-		super(function(_: _, value: T) {
+		super((_: _, value: T) => {
 			if (!options.sync) nextTick(_);
 			if (value !== undefined) this.values.push(value);
 			return this;

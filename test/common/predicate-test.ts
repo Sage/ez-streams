@@ -328,7 +328,7 @@ asyncTest("where", 4, (_) => {
 	}, false, true);
 
 	t(_, {
-		$where: function() {
+		$where: function(this: any) {
 			return this.a === this.b;
 		},
 	}, {
@@ -337,7 +337,7 @@ asyncTest("where", 4, (_) => {
 	}, true);
 
 	t(_, {
-		$where: function() {
+		$where: function(this: any) {
 			return this.a === this.b;
 		},
 	}, {

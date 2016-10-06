@@ -17,7 +17,7 @@ export interface Options {
 export class StringWriter extends Writer<string> {
 	buf: string;
 	constructor(options: Options) {
-		super(function(_: _, value: string) {
+		super((_: _, value: string) => {
 			if (!options.sync) nextTick(_);
 			if (value !== undefined) this.buf += value;
 			return this;

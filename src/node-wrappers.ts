@@ -510,7 +510,7 @@ export class HttpServerRequest extends ReadableStream<http.ServerRequest> {
 
 // compat API: hide from typescript
 Object.defineProperty(HttpServerRequest.prototype, '_request', {
-	get() { return this._emitter; }
+	get(this: HttpServerRequest) { return this._emitter; }
 })
 /// 
 /// ## HttpServerResponse
@@ -1094,7 +1094,7 @@ export class NetServer extends Server<net.Server> {
 ///    passes the wrapper to `fn(_, wrapper)` and closes the stream after `fn` returns.  
 ///    `fn` is called inside a `try/finally` block to guarantee that the stream is closed in all cases.  
 ///    Returns the value returned by `fn`.
-exports.using = function(_: _, constructor: any, emitter: NodeJS.EventEmitter, options?: any, fn?: (_: _, stream: any) => any) {
+exports.using = function(this: any, _: _, constructor: any, emitter: NodeJS.EventEmitter, options?: any, fn?: (_: _, stream: any) => any) {
 	if (!fn && typeof options === 'function') fn = options, options = null;
 	if (!fn) throw new Error("using body missing");
 	const stream = new constructor(emitter, options);
@@ -1107,13 +1107,13 @@ exports.using = function(_: _, constructor: any, emitter: NodeJS.EventEmitter, o
 
 /// * `result = streams.usingReadable(_, stream[, options], fn)`  
 ///    shortcut for `streams.using(_, streams.ReadableStream, stream, options, fn)` 
-exports.usingReadable = function(_: _, emitter: NodeJS.ReadableStream, options?: ReadableOptions, fn?: (_: _, stream: any) => any) {
+exports.usingReadable = function(this: any, _: _, emitter: NodeJS.ReadableStream, options?: ReadableOptions, fn?: (_: _, stream: any) => any) {
 	return exports.using.call(this, _, ReadableStream, emitter, options, fn);
 };
 
 /// * `result = streams.usingWritable(_, stream[, options], fn)`  
 ///    shortcut for `streams.using(_, streams.WritableStream, stream, options, fn)` 
-exports.usingWritable = function(_: _, emitter: NodeJS.WritableStream, options?: WritableOptions, fn?: (_: _, stream: any) => any) {
+exports.usingWritable = function(this: any, _: _, emitter: NodeJS.WritableStream, options?: WritableOptions, fn?: (_: _, stream: any) => any) {
 	return exports.using.call(this, _, WritableStream, emitter, options, fn);
 };
 

@@ -11,7 +11,7 @@ export interface Options {
 export class BufferWriter extends Writer<Buffer> {
 	chunks: Buffer[];
 	constructor(options: Options) {
-		super(function(_: _, data: Buffer) {
+		super((_: _, data: Buffer) => {
 			if (!options.sync) nextTick(_);
 			if (data !== undefined) this.chunks.push(data);
 			return this;
