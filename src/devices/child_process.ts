@@ -36,7 +36,7 @@ export function reader(proc: ChildProcess, options?: ReaderOptions) {
 		}
 		if (ec && !(opts.acceptCode && opts.acceptCode(ec))) {
 			err = new Error("process exited with code:" + ec);
-			err.errno = ec;
+			err.errno = '' + ec;
 			// compat code
 			var anyErr: any = err;
 			anyErr.code = ec;

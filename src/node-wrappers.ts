@@ -135,7 +135,7 @@ export class ReadableStream<EmitterT extends NodeJS.ReadableStream> extends Wrap
 	_chunks: Data[];
 	_error: Error;
 	_done: boolean;
-	_encoding?: string;
+	_encoding: string | null;
 	_onData: (err?: Error, chunk?: Data) => void;
 	/// * `reader = stream.reader`  
 	///   returns a clean ez reader.
@@ -227,7 +227,7 @@ export class ReadableStream<EmitterT extends NodeJS.ReadableStream> extends Wrap
 	/// * `stream.setEncoding(enc)`  
 	///   sets the encoding.
 	///   returns `this` for chaining.
-	setEncoding(enc?: string) {
+	setEncoding(enc: string | null) {
 		this._encoding = enc;
 		if (enc) this._emitter.setEncoding(enc);
 		return this;
@@ -412,14 +412,14 @@ function _getEncodingDefault(headers: Headers) {
 		}
 	}
 	if (ctype.indexOf('text') >= 0 || ctype.indexOf('json') >= 0) return "utf8";
-	return undefined;
+	return null;
 }
 
 function _getEncodingStrict(headers: Headers) {
 	// As per RFC-2616-7.2.1, if media type is unknown we should treat it
 	// as "application/octet-stream" (may optionally try to determine it by
 	// looking into content body - we don't)
-	if (!headers['content-type'] || headers['content-encoding']) return undefined;
+	if (!headers['content-type'] || headers['content-encoding']) return null;
 
 	const comps = headers['content-type'].split(';');
 	const ctype = comps[0];
@@ -440,24 +440,24 @@ function _getEncodingStrict(headers: Headers) {
 				case 'us-ascii':
 					return 'ascii';
 			}
-			return undefined; // we do not understand this charset - do *not* encode
+			return null; // we do not understand this charset - do *not* encode
 		}
 	}
-	return undefined;
+	return null;
 }
 
 export interface EncodingOptions {
 	detectEncoding?: 'strict' | 'disable' | ((Headers: Headers) => string);
 }
 function _getEncoding(headers: Headers, options?: EncodingOptions) {
-	if (headers['content-encoding']) return undefined;
+	if (headers['content-encoding']) return null;
 	if (!options) return _getEncodingDefault(headers);
 	if (typeof options.detectEncoding === "function") return options.detectEncoding(headers);
 	switch (options.detectEncoding) {
 		case 'strict':
 			return _getEncodingStrict(headers);
 		case 'disable':
-			return undefined;
+			return null;
 		default:
 			return _getEncodingDefault(headers);
 	}
@@ -931,10 +931,12 @@ export interface SocketOptions extends ReadableOptions, WritableOptions {
 	read?: ReadableOptions;
 	write?: WritableOptions;
 }
-export class NetStream extends ReadableStream<net.Socket> {
+// we need to hack the net.Socket type, because node.js setEncoding signatures are not aligne.
+export class NetStream extends ReadableStream<net.Socket & NodeJS.ReadableStream> {
 	_writableStream: WritableStream<net.Socket>;
 	constructor(emitter: net.Socket, options?: SocketOptions) {
-		super(emitter, (options && options.read) || options);
+		// net.Socket type hack part 2: as any
+		super(emitter as any, (options && options.read) || options);
 		this._writableStream = new WritableStream(emitter, (options && options.write) || options);
 	}
 	// no multiple inheritance - so we delegate WritableStream methods

@@ -9,7 +9,11 @@
         "noImplicitThis": true,
         "noImplicitReturns": true,
         "strictNullChecks": true,
-        "rootDir": "."
+        "rootDir": ".",
+        "baseUrl": "./node_modules",
+        "paths": {
+            "qunit": ["./node_modules/retyped-qunit-tsd-ambient/qunit.d.ts"] 
+        }
     },
     "exclude": [
         "lib",

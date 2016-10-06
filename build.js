@@ -19,9 +19,9 @@ function options(runtime, isTest) {
 	helpers.compileSync(fsp.join(__dirname, 'test'), fsp.join(__dirname, 'test-' + runtime), options(runtime, true));
 });
 
-helpers.compileTypescript({
+/*helpers.compileTypescript({
 	name: 'ez-streams',
 	root: __dirname,
 	main: 'out/ez.d.ts',
 	dts: 'ez-streams.d.ts',
-});
+});*/

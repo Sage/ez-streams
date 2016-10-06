@@ -14,6 +14,7 @@
     "node": ">=0.12.0"
   },
   "dependencies": {
+    "@types/node": "^6.0.45",
     "streamline-runtime": "^1.0.17"
   },
   "devDependencies": {
@@ -26,7 +27,7 @@
     "retyped-qunit-tsd-ambient": "^1.16.0-0",
     "streamline": "^2.0.8",
     "streamline-helpers": "^3.0.0",
-    "streamline-node": "^1.0.2",
+    "streamline-node": "^2.0.0",
     "typescript": "^2.0.3"
   },
   "scripts": {
