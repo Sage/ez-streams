@@ -13,6 +13,7 @@ import * as streams from '../node-wrappers';
 ///   where `stream` is an EZ reader and writer.  
 ///   For a full description of this API, see `NetServer` in
 ///   https://github.com/Sage/ez-streams/blob/master/lib/node-wrappers.md 
+export type SocketServer = streams.SocketServer;
 export type SocketServerOptions = streams.SocketServerOptions;
 export type SocketStream = streams.SocketStream;
 export type SocketOptions = streams.SocketOptions;
