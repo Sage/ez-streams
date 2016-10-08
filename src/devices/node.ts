@@ -1,7 +1,7 @@
 /// 
 /// ## Native node.js streams
 /// 
-const streams = require('../node-wrappers');
+import * as streams from '../node-wrappers';
 import { Reader } from '../reader';
 
 require('../reader').decorate(streams.ReadableStream.prototype);
@@ -10,7 +10,7 @@ require('../writer').decorate(streams.WritableStream.prototype);
 /// !doc
 /// ## EZ Stream wrappers for native node streams
 /// 
-/// `const ez = require('ez-streams');`
+/// `import * as ez from 'ez-streams'`
 /// 
 /// * `reader = ez.devices.node.reader(stream, options)`  
 ///   wraps a node.js stream as an EZ reader.  
@@ -33,7 +33,7 @@ export function fixOptions(options: NodeReaderOptions | string | undefined) {
 	return opts;
 }
 
-export function reader(emitter: NodeJS.EventEmitter, options?: NodeReaderOptions | string): Reader<any> {
+export function reader(emitter: NodeJS.ReadableStream, options?: NodeReaderOptions | string): Reader<any> {
 	var opts = fixOptions(options);
 	const reader = new streams.ReadableStream(emitter, opts);
 	if (opts.encoding) reader.setEncoding(opts.encoding);
@@ -46,7 +46,7 @@ export function reader(emitter: NodeJS.EventEmitter, options?: NodeReaderOptions
 
 export interface NodeWriterOptions {};
 
-export function writer(emitter: NodeJS.EventEmitter, options?: NodeWriterOptions) {
+export function writer(emitter: NodeJS.WritableStream, options?: NodeWriterOptions) {
 	const writer = new streams.WritableStream(emitter, fixOptions(options));
 	return writer.writer;
 }

@@ -1,6 +1,6 @@
 ## EZ wrappers for standard I/O streams
 
-`var ez = require('ez-streams');`
+`import * as ez from 'ez-streams'`
 
 * `reader = ez.devices.std.in(encoding)`  
 * `writer = ez.devices.std.out(encoding)`  

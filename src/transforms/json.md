@@ -48,7 +48,7 @@ and the corresponding _unbounded_ stream:
 
 ## API
 
-`var ez = require("ez-streams")`  
+`import * as ez from 'ez-streams'`  
 
 * `transform = ez.transforms.json.parser(options)`  
   creates a parser transform. The following options can be set:  

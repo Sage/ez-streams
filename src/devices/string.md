@@ -1,6 +1,6 @@
 ## In-memory string streams
 
-`var ez = require('ez-streams');`
+`import * as ez from 'ez-streams'`
 
 * `reader = ez.devices.string.reader(text, options)`  
   creates an EZ reader that reads its chunks from `text`.  

@@ -1,7 +1,7 @@
 /// !doc
 /// ## EZ Stream wrappers for node child processes
 /// 
-/// `const ez = require('ez-streams');`
+/// `import * as ez from 'ez-streams'`
 /// 
 import { _ } from 'streamline-runtime';
 import { Reader } from '../reader';

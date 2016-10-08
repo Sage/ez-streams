@@ -1,6 +1,6 @@
 ## EZ Streams core writer API
 
-`var ez = require("ez-streams")`  
+`import * as ez from 'ez-streams'`  
 
 * `ez.writer.decorate(proto)`  
   Adds the EZ streams writer API to an object. 

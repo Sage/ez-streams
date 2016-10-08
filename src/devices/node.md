@@ -1,6 +1,6 @@
 ## EZ Stream wrappers for native node streams
 
-`var ez = require('ez-streams');`
+`import * as ez from 'ez-streams'`
 
 * `reader = ez.devices.node.reader(stream, options)`  
   wraps a node.js stream as an EZ reader.  

@@ -1,6 +1,6 @@
 ## EZ Stream wrappers for node child processes
 
-`var ez = require('ez-streams');`
+`import * as ez from 'ez-streams'`
 
 * `reader = ez.devices.child_process.reader(proc, options)`  
   wraps a node.js child process as an EZ reader.  

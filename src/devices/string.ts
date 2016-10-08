@@ -6,7 +6,7 @@ import { nextTick } from '../util';
 /// !doc
 /// ## In-memory string streams
 /// 
-/// `const ez = require('ez-streams');`
+/// `import * as ez from 'ez-streams'`
 /// 
 
 export interface Options {

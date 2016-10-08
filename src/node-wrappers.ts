@@ -932,7 +932,7 @@ export interface SocketOptions extends ReadableOptions, WritableOptions {
 	write?: WritableOptions;
 }
 // we need to hack the net.Socket type, because node.js setEncoding signatures are not aligne.
-export class NetStream extends ReadableStream<net.Socket & NodeJS.ReadableStream> {
+export class SocketStream extends ReadableStream<net.Socket & NodeJS.ReadableStream> {
 	_writableStream: WritableStream<net.Socket>;
 	constructor(emitter: net.Socket, options?: SocketOptions) {
 		// net.Socket type hack part 2: as any
@@ -995,25 +995,24 @@ export class NetStream extends ReadableStream<net.Socket & NodeJS.ReadableStream
 ///    returns a socket client.  
 ///    The `options` parameter of the constructor provide options for the stream (`lowMark` and `highMark`). 
 ///    If you want different options for `read` and `write` operations, you can specify them by creating `options.read` and `options.write` sub-objects inside `options`.
-export interface NetClientOptions extends SocketOptions {}
 
-export function tcpClient(port: number, host: string, options?: NetClientOptions) {
+export function tcpClient(port: number, host?: string, options?: SocketOptions) {
 	host = host || "localhost";
 	options = options || {};
-	return new NetClient(options, port, host);
+	return new SocketClient(options, port, host);
 };
-export function socketClient(path: string, options?: NetClientOptions) {
+export function socketClient(path: string, options?: SocketOptions) {
 	options = options || {};
-	return new NetClient(options, path);
+	return new SocketClient(options, path);
 };
 
-export class NetClient {
-	_options?: NetClientOptions;
+export class SocketClient {
+	_options?: SocketOptions;
 	_connection: net.Socket;
 	_error: Error;
 	_done: boolean;
 	_onConnect: (err?: Error) => void;
-	constructor(options?: NetClientOptions, ...args: any[]) {
+	constructor(options?: SocketOptions, ...args: any[]) {
 		this._options = options;
 		this._connection = net.createConnection.apply(net, args);
 		this._connection.on('error', (err: Error) => {
@@ -1034,13 +1033,13 @@ export class NetClient {
 
 	/// * `stream = client.connect(_)`  
 	///    connects the client and returns a network stream.
-	connect(callback: (err?: Error, stream?: NetStream) => void) {
+	connect(callback: (err?: Error, stream?: SocketStream) => void) {
 		if (typeof callback !== 'function') throw new TypeError("bad callback parameter: " + typeof callback);
-		if (this._done) return callback(this._error, new NetStream(this._connection, this._options));
+		if (this._done) return callback(this._error, new SocketStream(this._connection, this._options));
 		else {
 			this._onConnect = (err) => {
 				this._done = true;
-				callback(err, new NetStream(this._connection, this._options));
+				callback(err, new SocketStream(this._connection, this._options));
 				callback = nop;
 			};
 		}
@@ -1061,15 +1060,15 @@ export class NetClient {
 /// * `server.listen(_, path)`  
 ///   (same as `net.Server`)
 
-export interface NetServerOptions {}
-export type NetServerListener = (stream: NetStream, _: _) => void;
+export interface SocketServerOptions {}
+export type SocketServerListener = (stream: SocketStream, _: _) => void;
 
-export function createNetServer(serverOptions: NetServerOptions, connectionListener: NetServerListener, streamOptions: SocketOptions) {
-	return new NetServer(serverOptions, connectionListener, streamOptions);
+export function createNetServer(serverOptions: SocketServerOptions, connectionListener: SocketServerListener, streamOptions: SocketOptions) {
+	return new SocketServer(serverOptions, connectionListener, streamOptions);
 };
 
-export class NetServer extends Server<net.Server> {
-	constructor(serverOptions: NetServerOptions, connectionListener: NetServerListener, streamOptions: SocketOptions) {
+export class SocketServer extends Server<net.Server> {
+	constructor(serverOptions: SocketServerOptions, connectionListener: SocketServerListener, streamOptions: SocketOptions) {
 		if (typeof(serverOptions) === 'function') {
 			streamOptions = connectionListener;
 			connectionListener = serverOptions;
@@ -1077,7 +1076,7 @@ export class NetServer extends Server<net.Server> {
 		}
 		var emitter = net.createServer(serverOptions, (connection) => {
 			_.withContext(() => {
-				_.run(_ => connectionListener(new NetStream(connection, streamOptions || {}), _), (err?: Error) => {
+				_.run(_ => connectionListener(new SocketStream(connection, streamOptions || {}), _), (err?: Error) => {
 					if (err) throw err;
 				});
 			})();

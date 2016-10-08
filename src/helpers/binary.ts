@@ -1,7 +1,7 @@
 /// !doc
 /// ## helpers for binary streams
 /// 
-/// `const ez = require("ez-streams")`  
+/// `import * as ez from 'ez-streams'`  
 import { _ } from "streamline-runtime";
 import { Reader as BaseReader } from "../reader";
 import { Writer as BaseWriter } from "../writer";

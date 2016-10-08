@@ -1,6 +1,6 @@
 ## File based EZ streams
 
-`var ez = require('ez-streams');`
+`import * as ez from 'ez-streams'`
 
 * `reader = ez.devices.file.text.reader(path, encoding)`  
   creates an EZ reader that reads from a text file.    

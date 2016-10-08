@@ -8,7 +8,7 @@ import { Writer } from '../writer';
 /// !doc
 /// ## File based EZ streams
 /// 
-/// `const ez = require('ez-streams');`
+/// `import * as ez from 'ez-streams'`
 /// 
 export const text = {
 	/// * `reader = ez.devices.file.text.reader(path, encoding)`  

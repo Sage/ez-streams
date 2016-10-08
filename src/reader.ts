@@ -25,7 +25,7 @@
 /// !doc
 /// ## EZ Streams core reader API
 /// 
-/// `const ez = require("ez-streams")`  
+/// `import * as ez from 'ez-streams'`  
 /// 
 import { _ } from "streamline-runtime";
 import { convert as predicate } from "./predicate";

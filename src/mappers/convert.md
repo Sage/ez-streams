@@ -1,6 +1,6 @@
 ## Encoding mappers
 
-`var ez = require("ez-streams")`  
+`import * as ez from 'ez-streams'`  
 
 * `mapper = ez.mappers.convert.stringify(encoding)`  
   returns a mapper that converts to string

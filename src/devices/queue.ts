@@ -9,7 +9,7 @@ import * as generic from './generic';
 /// The queue device can be used to desynchronize processing between one or several tasks that produce
 /// data and a task that consumes queued data.
 /// 
-/// `const ez = require('ez-streams');`
+/// `import * as ez from 'ez-streams'`
 /// 
 /// * `queue = ez.devices.queue.create(options)`  
 ///   creates a queue device.  

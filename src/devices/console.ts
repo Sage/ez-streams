@@ -12,7 +12,7 @@ function consoleWriter(fn: (message: string) => void) {
 /// !doc
 /// ## Console EZ streams
 /// 
-/// `const ez = require('ez-streams');`
+/// `import * as ez from 'ez-streams'`
 /// 
 /// * `ez.devices.console.log`  
 /// * `ez.devices.console.info`  

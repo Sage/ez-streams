@@ -16,7 +16,7 @@ export const empty = {
 /// !doc
 /// ## Generic stream constructors
 /// 
-/// `const ez = require('ez-streams');`
+/// `import * as ez from 'ez-streams'`
 /// 
 /// * `reader = ez.devices.generic.reader(read[, stop])`  
 ///   creates an EZ reader from a given `read(_)` function and an optional `stop(_, [arg])` function.

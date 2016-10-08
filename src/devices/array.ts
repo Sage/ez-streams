@@ -28,7 +28,7 @@ export class ArrayWriter<T> extends Writer<T> {
 /// !doc
 /// ## Array readers and writers
 /// 
-/// `const ez = require('ez-streams');`
+/// `import * as ez from 'ez-streams'`
 /// 
 /// * `reader = ez.devices.array.reader(array, options)`  
 ///   creates an EZ reader that reads its entries from `array`.  

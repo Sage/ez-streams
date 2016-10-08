@@ -26,11 +26,13 @@
 /// !doc
 /// ## EZ Streams core writer API
 /// 
-/// `const ez = require("ez-streams")`  
+/// `import * as ez from 'ez-streams'`  
 /// 
 import { _ } from "streamline-runtime";
 import { Reader, ParallelOptions } from "./reader";
+import { create as createUturn } from './devices/uturn';
 import * as nodeStream from "stream";
+import * as sys from 'util';
 
 export class Writer<T> {
 	write: (this: Writer<T>, _: _, value?: T) => this;
@@ -146,14 +148,11 @@ exports.decorate = function(proto: any) {
 	return proto;
 }
 
-function createUturn() {
-
-}
 
 export class PreImpl<T> {
 	writer: Writer<T>;
 	constructor(writer: Writer<T>) {
-		if (typeof writer.write !== 'function') throw new Error("invalid pre writer: " + require('sys').inspect(writer));
+		if (typeof writer.write !== 'function') throw new Error("invalid pre writer: " + sys.inspect(writer));
 		this.writer = writer;
 	}
 }

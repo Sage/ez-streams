@@ -1,6 +1,6 @@
 ## EZ Streams core reader API
 
-`var ez = require("ez-streams")`  
+`import * as ez from 'ez-streams'`  
 
 * `ez.reader.decorate(proto)`  
   Adds the EZ streams reader API to an object. 

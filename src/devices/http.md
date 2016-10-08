@@ -1,6 +1,6 @@
 ## HTTP EZ Streams
 
-`var ez = require('ez-streams');`
+`import * as ez from 'ez-streams'`
 
 * `server = ez.devices.http.server(listener, options)`  
   Creates an EZ HTTP server.  

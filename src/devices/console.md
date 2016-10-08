@@ -1,6 +1,6 @@
 ## Console EZ streams
 
-`var ez = require('ez-streams');`
+`import * as ez from 'ez-streams'`
 
 * `ez.devices.console.log`  
 * `ez.devices.console.info`  

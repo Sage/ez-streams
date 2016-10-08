@@ -11,7 +11,7 @@ var tracer: (...args: any[]) => void; // = console.error;
 /// !doc
 /// ## Special device that transforms a writer into a reader
 /// 
-/// `const ez = require('ez-streams');`
+/// `import * as ez from 'ez-streams'`
 /// 
 /// * `uturn = ez.devices.uturn.create()`  
 ///   creates a uturn device.  

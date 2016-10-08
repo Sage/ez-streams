@@ -1,6 +1,6 @@
 ## Stream transform for CSV files
 
-`var ez = require("ez-streams")`  
+`import * as ez from 'ez-streams'`  
 
 * `transform = ez.transforms.csv.parser(options)`  
   creates a parser transform. The following options can be set:  

@@ -1,6 +1,6 @@
 ## Stream transform for MIME multipart
 
-`var ez = require("ez-streams")`  
+`import * as ez from 'ez-streams'`  
 
 * `transform = ez.transforms.multipart.parser(options)`  
   Creates a parser transform.

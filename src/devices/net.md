@@ -1,6 +1,6 @@
 ## TCP and socket EZ Streams
 
-`var ez = require('ez-streams');`
+`import * as ez from 'ez-streams'`
 
 * `server = ez.devices.net.server(serverOptions, listener, streamOptions)`  
   Creates an EZ HTTP server.  

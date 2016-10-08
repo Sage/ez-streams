@@ -1,6 +1,6 @@
 ## JSON mappers
 
-`var ez = require("ez-streams")`  
+`import * as ez from 'ez-streams'`  
 
 * `mapper = ez.mappers.json.parse()`  
   returns a mapper that parses JSON string.  

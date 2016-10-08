@@ -1,6 +1,6 @@
 ## helpers for binary streams
 
-`var ez = require("ez-streams")`  
+`import * as ez from 'ez-streams'`  
 
 ----
 

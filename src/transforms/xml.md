@@ -28,7 +28,7 @@ See the `test/server/xml-test._js` unit test for more examples.
 
 ## API
 
-`var ez = require('ez-streams')`  
+`import * as ez from 'ez-streams'`  
 
 * `transform = ez.transforms.xml.parser(options)`  
   creates a parser transform. The following options can be set:  

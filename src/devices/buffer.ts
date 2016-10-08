@@ -30,7 +30,7 @@ export class BufferWriter extends Writer<Buffer> {
 /// !doc
 /// ## In-memory buffer streams
 /// 
-/// `const ez = require('ez-streams');`
+/// `import * as ez from 'ez-streams'`
 /// 
 /// * `reader = ez.devices.buffer.reader(buffer, options)`  
 ///   creates an EZ reader that reads its entries from `buffer`.  

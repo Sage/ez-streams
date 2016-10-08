@@ -2,7 +2,7 @@
 /// !doc
 /// ## JSON mappers
 /// 
-/// `const ez = require("ez-streams")`  
+/// `import * as ez from 'ez-streams'`  
 /// 
 
 import { _ } from 'streamline-runtime';

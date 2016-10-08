@@ -3,7 +3,7 @@
 The queue device can be used to desynchronize processing between one or several tasks that produce
 data and a task that consumes queued data.
 
-`var ez = require('ez-streams');`
+`import * as ez from 'ez-streams'`
 
 * `queue = ez.devices.queue(options)`  
   creates a queue device.  

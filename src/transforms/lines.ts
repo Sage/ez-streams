@@ -2,7 +2,7 @@
 /// !doc
 /// ## Stream transform for line-oriented text streams
 /// 
-/// `const ez = require("ez-streams")`  
+/// `import * as ez from 'ez-streams'`  
 /// 
 /// * `transform = ez.transforms.lines.parser(options)`  
 ///   creates a parser transform.
