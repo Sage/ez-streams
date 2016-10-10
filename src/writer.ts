@@ -37,7 +37,7 @@ import * as sys from 'util';
 export class Writer<T> {
 	write: (this: Writer<T>, _: _, value?: T) => this;
 	ended: boolean;
-	constructor(write: (_: _, value: T) => Writer<T>, stop?: (_: _, arg?: any) => Writer<T>) {
+	constructor(write: (_: _, value: T) => void, stop?: (_: _, arg?: any) => void) {
 		if (typeof write !== 'function') throw new Error("invalid writer.write: " + (write && typeof write));
 		this.ended = false;
 		this.write = (_, data) => {
@@ -50,7 +50,12 @@ export class Writer<T> {
 			}
 			return this;
 		};
-		if (stop) this.stop = stop;
+		if (stop) {
+			this.stop = (_: _, arg?: any) => {
+				stop.call(this, _, arg);
+				return this;
+			};
+		}
 	}
 
 

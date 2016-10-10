@@ -10,7 +10,7 @@ import { Writer } from '../writer';
 ///   It is also a null sink. It just discards anything you would write to it.
 export const empty = {
 	reader: new Reader(function(this: Reader<any>, _: _) {}),
-	writer: new Writer(function(this: Writer<any>, _: _, value: any) { return this; }),
+	writer: new Writer(function(this: Writer<any>, _: _, value: any) {}),
 };
 
 /// !doc
@@ -26,6 +26,6 @@ export function reader<T>(read: (_: _) => T, stop?: (_: _, arg?: any) => void) {
 
 /// * `writer = ez.devices.generic.writer(write)`  
 ///   creates an ES writer from a given `write(_, val)` function.
-export function writer<T>(write: (_:_, value: T) => Writer<T>, stop?: (_: _, arg?: any) => Writer<T>) {
+export function writer<T>(write: (_:_, value: T) => void, stop?: (_: _, arg?: any) => void) {
 	return new Writer(write, stop);
 }
