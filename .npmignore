@@ -3,3 +3,6 @@ examples/config-custom.*
 .DS_Store
 test/fixtures/rss-sample.zip
 /node_modules/
+/out/
+/coverage/
+.vscode
