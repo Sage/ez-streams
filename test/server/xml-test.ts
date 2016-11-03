@@ -14,12 +14,12 @@ function short(s: string) {
 function parseTest(_: _, xml: string, js: any, skipRT?: boolean) {
 	const full = '<?xml version="1.0"?><root>' + xml + "</root>\n";
 	const parsed = ez.devices.string.reader(full).transform(ez.transforms.cut.transform(2)) //
-	.transform(ez.transforms.xml.parser('root')).toArray(_);
+		.transform(ez.transforms.xml.parser('root')).toArray(_);
 	deepEqual(parsed[0].root, js, "parse " + short(xml));
 	if (!skipRT) {
 		const rt = ez.devices.string.reader(full).transform(ez.transforms.cut.transform(2)) //
-		.transform(ez.transforms.xml.parser('root')) //
-		.transform(ez.transforms.xml.formatter('root')).toArray(_).join('');
+			.transform(ez.transforms.xml.parser('root')) //
+			.transform(ez.transforms.xml.formatter('root')).toArray(_).join('');
 		strictEqual(rt, full, "roundtrip " + short(full));
 	}
 }
@@ -28,11 +28,11 @@ function rtTest(_: _, name: string, xml: string, indent: string | undefined, res
 	const full = '<?xml version="1.0"?><root>' + xml + "</root>\n";
 	result = '<?xml version="1.0"?>' + (indent ? '\n' : '') + '<root>' + (result || xml) + "</root>\n";
 	const rt = ez.devices.string.reader(full).transform(ez.transforms.cut.transform(2)) //
-	.transform(ez.transforms.xml.parser('root')) //
-	.transform(ez.transforms.xml.formatter({
-		tags: 'root',
-		indent: indent
-	})).toArray(_).join('');
+		.transform(ez.transforms.xml.parser('root')) //
+		.transform(ez.transforms.xml.formatter({
+			tags: 'root',
+			indent: indent
+		})).toArray(_).join('');
 	strictEqual(rt, result, "roundtrip " + full);
 }
 
@@ -162,8 +162,8 @@ asyncTest('empty element in list', 1, (_) => {
 
 asyncTest("rss feed", 5, (_) => {
 	const entries = ez.devices.file.text.reader(__dirname + '/../../test/fixtures/rss-sample.xml') //
-	.transform(ez.transforms.cut.transform(2)) //
-	.transform(ez.transforms.xml.parser("rss/channel/item")).toArray(_);
+		.transform(ez.transforms.cut.transform(2)) //
+		.transform(ez.transforms.xml.parser("rss/channel/item")).toArray(_);
 	strictEqual(entries.length, 10);
 	strictEqual(entries[0].rss.channel.title, "Yahoo! Finance: Top Stories");
 	strictEqual(entries[0].rss.channel.item.title, "Wall Street ends down on first trading day of 2014");
@@ -174,8 +174,8 @@ asyncTest("rss feed", 5, (_) => {
 
 asyncTest("binary input", 5, (_) => {
 	const entries = ez.devices.file.binary.reader(__dirname + '/../../test/fixtures/rss-sample.xml') //
-	.transform(ez.transforms.cut.transform(2)) //
-	.transform(ez.transforms.xml.parser("rss/channel/item")).toArray(_);
+		.transform(ez.transforms.cut.transform(2)) //
+		.transform(ez.transforms.xml.parser("rss/channel/item")).toArray(_);
 	strictEqual(entries.length, 10);
 	strictEqual(entries[0].rss.channel.title, "Yahoo! Finance: Top Stories");
 	strictEqual(entries[0].rss.channel.item.title, "Wall Street ends down on first trading day of 2014");
@@ -187,13 +187,13 @@ asyncTest("binary input", 5, (_) => {
 asyncTest("rss roundtrip", 1, (_) => {
 	var expected = fs.readFile(__dirname + '/../../test/fixtures/rss-sample.xml', 'utf8', _);
 	var result = ez.devices.file.text.reader(__dirname + '/../../test/fixtures/rss-sample.xml') //
-	.transform(ez.transforms.cut.transform(5)) //
-	.transform(ez.transforms.xml.parser("rss/channel/item")) //
-	.transform(ez.transforms.xml.formatter({
-		tags: "rss/channel/item",
-		indent: "  "
-	})) //
-	.toArray(_).join('');
+		.transform(ez.transforms.cut.transform(5)) //
+		.transform(ez.transforms.xml.parser("rss/channel/item")) //
+		.transform(ez.transforms.xml.formatter({
+			tags: "rss/channel/item",
+			indent: "  "
+		})) //
+		.toArray(_).join('');
 	expected = expected.replace(/\r?\n */g, '').replace(/<\!--.*-->/g, '');
 	result = result.replace(/\r?\n */g, '');
 	strictEqual(result, expected);
@@ -225,7 +225,7 @@ asyncTest('escaping', 2, (_) => {
 	}
 	xml += '</a>';
 	parseTest(_, xml, {
-		a: js 
+		a: js
 	});
 	start();
 });

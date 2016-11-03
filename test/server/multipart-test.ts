@@ -12,10 +12,10 @@ const multipart = ez.transforms.multipart
 const boundary = "-- my boundary --";
 
 function headers(subType: string) {
-		return {
-			"content-type": "multipart/" + subType + ";atb1=val1; boundary=" + boundary + "; atb2=val2",
-		};
-	}
+	return {
+		"content-type": "multipart/" + subType + ";atb1=val1; boundary=" + boundary + "; atb2=val2",
+	};
+}
 
 type Part = {
 	headers: { [key: string]: string };
@@ -40,7 +40,7 @@ function testStream() {
 	}];
 
 	function formatPart(part: Part) {
-		return Object.keys(part.headers).map(function(name) {
+		return Object.keys(part.headers).map(function (name) {
 			return name + ': ' + part.headers[name]
 		}).join('\n') + '\n\n' + boundary + '\n' + part.body + '\n' + boundary + '\n';
 	}

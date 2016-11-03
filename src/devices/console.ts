@@ -3,7 +3,7 @@ import { Writer } from "../writer";
 import * as generic from './generic';
 
 function consoleWriter(fn: (message: string) => void) {
-	return generic.writer(function(this: Writer<string>, _:_, value: any) {
+	return generic.writer(function (this: Writer<string>, _: _, value: any) {
 		if (value !== undefined) fn(value);
 		return this;
 	});

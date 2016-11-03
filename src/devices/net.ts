@@ -21,7 +21,7 @@ export type SocketClient = streams.SocketClient;
 
 export function server(listener: (stream: SocketStream, _: _) => void, streamOptions?: SocketOptions, serverOptions?: SocketServerOptions) {
 	// compat hack 
-	if (typeof streamOptions === "function") 
+	if (typeof streamOptions === "function")
 		return streams.createNetServer(arguments[0], arguments[1], fixOptions(arguments[2]));
 	return streams.createNetServer(serverOptions!, listener, fixOptions(streamOptions));
 }

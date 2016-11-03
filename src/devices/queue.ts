@@ -30,9 +30,9 @@ export interface Duplex<T> {
 }
 
 // any and type intersection to the rescuse because queue is not an ES2015 class
-export function create<T>(max?: number) : Streamline.Queue<T> & Duplex<T> {
+export function create<T>(max?: number): Streamline.Queue<T> & Duplex<T> {
 	const queue: any = _.queue(max);
-	queue.reader = generic.reader(queue.read.bind(queue),  function(_) { queue.end.call(queue); })
+	queue.reader = generic.reader(queue.read.bind(queue), function (_) { queue.end.call(queue); })
 	queue.writer = generic.writer(queue.write.bind(queue))
 	return queue;
 }

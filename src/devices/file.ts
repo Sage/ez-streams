@@ -71,7 +71,7 @@ export function list(path: string, options?: ListOptions) {
 		accept = options.accept;
 	} else {
 		recurse = arguments[1];
-		accept = arguments[2];			
+		accept = arguments[2];
 	}
 	const postorder = recurse === 'postorder';
 	return generic.empty.reader.transform((_, reader, writer) => {

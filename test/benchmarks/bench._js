@@ -32,7 +32,7 @@ function myReader(max) {
 
 const benches = {
 	'streamline dummy loop': {
-		fn: function(_, max) {
+		fn: function (_, max) {
 			var result;
 			for (var i = 0; i < max; i++) result = dummy(_, i);
 			return result;
@@ -40,7 +40,7 @@ const benches = {
 		time: 2
 	},
 	'streamline bound dummy loop': {
-		fn: function(_, max) {
+		fn: function (_, max) {
 			var result;
 			for (var i = 0; i < max; i++) result = [dummy][0](_, i);
 			return result;
@@ -48,7 +48,7 @@ const benches = {
 		time: 24
 	},
 	'callbacks loop nextTick': {
-		fn: function(cb, max) {
+		fn: function (cb, max) {
 			var i = 0;
 
 			function next() {
@@ -60,7 +60,7 @@ const benches = {
 		time: 24
 	},
 	'callbacks loop setImmediate': {
-		fn: function(cb, max) {
+		fn: function (cb, max) {
 			var i = 0;
 
 			function next() {
@@ -72,7 +72,7 @@ const benches = {
 		time: 24
 	},
 	'streamline loop nextTick': {
-		fn: function(_, max) {
+		fn: function (_, max) {
 			var i = 0;
 			for (i = 0; i < max; i++) process.nextTick(_);
 			return dummy(_, i - 1);
@@ -80,7 +80,7 @@ const benches = {
 		time: 681
 	},
 	'streamline loop setImmediate': {
-		fn: function(_, max) {
+		fn: function (_, max) {
 			var i = 0;
 			for (i = 0; i < max; i++) setImmediate(_);
 			return dummy(_, i - 1);
@@ -88,7 +88,7 @@ const benches = {
 		time: 681
 	},
 	'reader with read loop': {
-		fn: function(_, max) {
+		fn: function (_, max) {
 			const rd = myReader(max * 2);
 			var result;
 			for (var i = 0; i < max; i++) result = rd.read(_);
@@ -97,9 +97,9 @@ const benches = {
 		time: 10
 	},
 	'reader with limit': {
-		fn: function(_, max) {
+		fn: function (_, max) {
 			var result;
-			myReader(max * 2).limit(max).forEach(_, function(_, val) {
+			myReader(max * 2).limit(max).forEach(_, function (_, val) {
 				result = val;
 			});
 			return result;
@@ -107,9 +107,9 @@ const benches = {
 		time: 3326
 	},
 	'reader with filter': {
-		fn: function(_, max) {
+		fn: function (_, max) {
 			var result;
-			myReader(max).filter((_) => true).forEach(_, function(_, val) {
+			myReader(max).filter((_) => true).forEach(_, function (_, val) {
 				result = val;
 			});
 			return result;
@@ -117,9 +117,9 @@ const benches = {
 		time: 1735
 	},
 	'reader with limit and filter': {
-		fn: function(_, max) {
+		fn: function (_, max) {
 			var result;
-			myReader(max * 2).limit(max).filter((_) => true).forEach(_, function(_, val) {
+			myReader(max * 2).limit(max).filter((_) => true).forEach(_, function (_, val) {
 				result = val;
 			});
 			return result;
@@ -127,9 +127,9 @@ const benches = {
 		time: 3724
 	},
 	'reader with transform': {
-		fn: function(_, max) {
+		fn: function (_, max) {
 			var result;
-			myReader(max).transform((_, reader, writer) => reader.pipe(_, writer)).forEach(_, function(_, val) {
+			myReader(max).transform((_, reader, writer) => reader.pipe(_, writer)).forEach(_, function (_, val) {
 				result = val;
 			});
 			return result;
@@ -138,6 +138,6 @@ const benches = {
 	},
 };
 
-Object.keys(benches).forEach_(_, function(_, name) {
+Object.keys(benches).forEach_(_, function (_, name) {
 	bench(_, name, benches[name].fn)
 });

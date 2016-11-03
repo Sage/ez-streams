@@ -9,7 +9,7 @@ QUnit.module(module.id);
 var server: ez.devices.http.HttpServer;
 
 asyncTest("start echo server", 1, (_) => {
-    server = ez.devices.http.server(function(req, res, _) {
+    server = ez.devices.http.server(function (req, res, _) {
         if (req.method === "POST") {
             const text = req.readAll(_);
             const ct = req.headers["content-type"];
@@ -25,7 +25,7 @@ asyncTest("start echo server", 1, (_) => {
         }
         if (req.method === "GET") {
             // query parameters
-            var query = (req.url.split("?")[1] || "").split("&").reduce(function(prev, crt) {
+            var query = (req.url.split("?")[1] || "").split("&").reduce(function (prev, crt) {
                 var parts = crt.split("=");
                 if (parts[0]) prev[parts[0]] = parts[1];
                 return prev;
@@ -46,7 +46,7 @@ asyncTest("http test", 2, (_) => {
     try {
         const reply404 = ez.reader("http://localhost:3005?status=404").readAll(_);
         ok(false, "Reader supposed to throw");
-    } catch(ex) {
+    } catch (ex) {
         ok(/Status 404/.test(ex.message), "Reader throws ok");
     }
     start();
@@ -62,7 +62,7 @@ asyncTest("http readers and writers", 1, (_) => {
 asyncTest("http JSON", 1, (_) => {
     const writer = ez.writer("http://localhost:3005");
     const result = writer.writeAll(_, [2, 4]).result;
-    deepEqual(result, { echo: [2, 4]});
+    deepEqual(result, { echo: [2, 4] });
     start();
 });
 

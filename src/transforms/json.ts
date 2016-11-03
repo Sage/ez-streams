@@ -62,7 +62,7 @@ import { Writer } from "../writer";
 export interface ParserOptions {
 	size?: number;
 	encoding?: string;
-	reviver?:  (key: any, value: any) => any;
+	reviver?: (key: any, value: any) => any;
 	unbounded?: boolean;
 }
 
@@ -139,39 +139,39 @@ export function parser(options?: ParserOptions) {
 				}
 			} else {
 				switch (ch) {
-				case undefined:
-					if (depth === 1 && opts.unbounded && beg === undefined) return;
-					else throw error("unexpected EOF");
-				case '"':
-					if (depth === 1 && beg === undefined) beg = pos;
-					quoted = true;
-					break;
-				case '{':
-				case '[':
-					if (depth === 1 && beg === undefined) beg = pos;
-					depth++;
-					break;
-				case '}':
-					depth--;
-					if (depth === 0) throw error("unexpected }");
-					break;
-				case ']':
-					depth--;
-					if (depth === 0) {
-						if (opts.unbounded) throw error("unexpected ]");
-						if (beg !== undefined) flush(_);
-						return;
-					}
-					break;
-				case ',':
-					if (depth === 1) {
-						if (beg === undefined) throw error("unexpected comma");
-						flush(_);
-					}
-					break;
-				default:
-					if (/^\s/.test(ch)) line += (ch === '\n') ? 1 : 0;
-					else if (depth === 1 && beg === undefined) beg = pos;
+					case undefined:
+						if (depth === 1 && opts.unbounded && beg === undefined) return;
+						else throw error("unexpected EOF");
+					case '"':
+						if (depth === 1 && beg === undefined) beg = pos;
+						quoted = true;
+						break;
+					case '{':
+					case '[':
+						if (depth === 1 && beg === undefined) beg = pos;
+						depth++;
+						break;
+					case '}':
+						depth--;
+						if (depth === 0) throw error("unexpected }");
+						break;
+					case ']':
+						depth--;
+						if (depth === 0) {
+							if (opts.unbounded) throw error("unexpected ]");
+							if (beg !== undefined) flush(_);
+							return;
+						}
+						break;
+					case ',':
+						if (depth === 1) {
+							if (beg === undefined) throw error("unexpected comma");
+							flush(_);
+						}
+						break;
+					default:
+						if (/^\s/.test(ch)) line += (ch === '\n') ? 1 : 0;
+						else if (depth === 1 && beg === undefined) beg = pos;
 				}
 			}
 			pos++;

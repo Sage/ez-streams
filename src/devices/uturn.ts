@@ -20,11 +20,11 @@ var tracer: (...args: any[]) => void; // = console.error;
 export interface Uturn<T> {
 	reader: Reader<T>;
 	writer: Writer<T>;
-	end: (_: _) => void; 
-} 
+	end: (_: _) => void;
+}
 
-export function create<T>():  Uturn<T> {
-	var state = 'idle', pendingData: T | undefined,  error: any;
+export function create<T>(): Uturn<T> {
+	var state = 'idle', pendingData: T | undefined, error: any;
 	const id = ++lastId;
 
 	var pendingReaderCb: ((_: _, value: (T | undefined)) => void) | null;
@@ -182,7 +182,7 @@ export function create<T>():  Uturn<T> {
 				}
 			});
 		})),
-		end: _.cast(function(err) {
+		end: _.cast(function (err) {
 			nextTick(() => {
 				tracer && tracer(id, "END", state, err);
 				err = stopException.unwrap(err);

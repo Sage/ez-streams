@@ -17,10 +17,10 @@ export class ArrayWriter<T> extends Writer<T> {
 		});
 		this.values = [];
 	}
-	toArray() : T[] {
+	toArray(): T[] {
 		return this.values;
 	}
-	get result() : T[] {
+	get result(): T[] {
 		return this.values;
 	}
 }
@@ -37,7 +37,7 @@ export class ArrayWriter<T> extends Writer<T> {
 export function reader<T>(array: T[], options?: Options) {
 	var opts = options || {};
 	const values = array.slice(0);
-	return new Reader(function(_) {
+	return new Reader(function (_) {
 		if (!opts.sync) nextTick(_);
 		return values.shift();
 	});

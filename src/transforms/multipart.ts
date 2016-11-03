@@ -58,32 +58,32 @@ export function parser(options: ParserOptions) {
 			binReader.unread(buf.length - i - 1);
 
 			var read = (_: _) => {
-					const len = Math.max(boundary.length, 256);
-					const buf = binReader.readData(_, 32 * len);
-					if (!buf || !buf.length) {
-						handshake.notify();
-						return;
-					}
-					// would be nice if Buffer had an indexOf. Would avoid a conversion to string.
-					// I could use node-buffertools but it introduces a dependency on a binary module.
-					const s = buf.toString("binary");
-					const i = s.indexOf(boundary);
-					if (i === 0) {
-						const j = s.indexOf('\n', boundary.length);
-						if (j < 0) throw new Error("newline missing after boundary");
-						binReader.unread(buf.length - j - 1);
-						handshake.notify();
-						return undefined;
-					} else if (i > 0) {
-						var j = s.lastIndexOf('\n', i);
-						if (s[j - 1] === '\r') j--;
-						binReader.unread(buf.length - i);
-						return buf.slice(0, j);
-					} else {
-						binReader.unread(buf.length - 31 * len);
-						return buf.slice(0, 31 * len);
-					}
-				};
+				const len = Math.max(boundary.length, 256);
+				const buf = binReader.readData(_, 32 * len);
+				if (!buf || !buf.length) {
+					handshake.notify();
+					return;
+				}
+				// would be nice if Buffer had an indexOf. Would avoid a conversion to string.
+				// I could use node-buffertools but it introduces a dependency on a binary module.
+				const s = buf.toString("binary");
+				const i = s.indexOf(boundary);
+				if (i === 0) {
+					const j = s.indexOf('\n', boundary.length);
+					if (j < 0) throw new Error("newline missing after boundary");
+					binReader.unread(buf.length - j - 1);
+					handshake.notify();
+					return undefined;
+				} else if (i > 0) {
+					var j = s.lastIndexOf('\n', i);
+					if (s[j - 1] === '\r') j--;
+					binReader.unread(buf.length - i);
+					return buf.slice(0, j);
+				} else {
+					binReader.unread(buf.length - 31 * len);
+					return buf.slice(0, 31 * len);
+				}
+			};
 			const partReader = generic.reader(read);
 			partReader.headers = headers;
 			writer.write(_, partReader);

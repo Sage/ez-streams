@@ -86,7 +86,7 @@ export class Reader<T> {
 			var i: number, val: any;
 			for (i = 0; (val = this.read(_)) !== undefined; i++) {
 				fn.call(thisObj, _, val, i);
-			}			
+			}
 			return i;
 		});
 	}
@@ -95,7 +95,7 @@ export class Reader<T> {
 	///   Similar to `map` on arrays.  
 	///   The `fn` function is called as `fn(_, elt, i)`.  
 	///   Returns another reader on which other operations may be chained.
-	map<U>(fn: (_: _, value: T, index?: number) => U, thisObj?: any) : Reader<U> {
+	map<U>(fn: (_: _, value: T, index?: number) => U, thisObj?: any): Reader<U> {
 		thisObj = thisObj !== undefined ? thisObj : this;
 		return new Reader((_) => {
 			var count = 0;
@@ -130,7 +130,7 @@ export class Reader<T> {
 	///   The `fn` function is called as `fn(_, elt)`.  
 	///   Returns false at the end of stream if `fn` returned false on every entry.  
 	///   Stops streaming and returns true as soon as `fn` returns true on an entry.
-	some(_:_, fn: ((_: _, value: T) => boolean) | {}, thisObj?: any) {
+	some(_: _, fn: ((_: _, value: T) => boolean) | {}, thisObj?: any) {
 		thisObj = thisObj !== undefined ? thisObj : this;
 		const f = resolvePredicate(fn);
 		return tryCatch(_, this, (_) => {
@@ -150,7 +150,7 @@ export class Reader<T> {
 	///   The `fn` function is called as `fn(_, current, elt)` where `current` is `initial` on the first entry and
 	///   the result of the previous `fn` call otherwise.
 	///   Returns the value returned by the last `fn` call.
-	reduce<U>(_: _, fn: (_: _, prev: U, value: T) => U, v: U, thisObj?: any) : U {
+	reduce<U>(_: _, fn: (_: _, prev: U, value: T) => U, v: U, thisObj?: any): U {
 		thisObj = thisObj !== undefined ? thisObj : this;
 		return tryCatch(_, this, (_) => {
 			while (true) {
@@ -167,7 +167,7 @@ export class Reader<T> {
 	// should be pipe<R extends Writer<T>>(_: _, writer: R) 
 	// but transform-flow-comments plugin does not understand this syntax
 	// so I relax the return type.
-	pipe(_: _, writer: Writer<T>) : any {
+	pipe(_: _, writer: Writer<T>): any {
 		tryCatch(_, this, (_) => {
 			do {
 				var val = this.read(_);
@@ -198,7 +198,7 @@ export class Reader<T> {
 		var readStop: [any];
 		const stopResult: (arg: any) => T | undefined = (arg) => {
 			if (!arg || arg === true) return undefined;
-			else throw arg;			
+			else throw arg;
 		}
 		const readDirect = (_: _) => {
 			var val = parent.read(_);
@@ -280,7 +280,7 @@ export class Reader<T> {
 	/// * `result = reader.toArray(_)`  
 	///   Reads all entries and returns them to an array.
 	///   Note that this call is an anti-pattern for streaming but it may be useful when working with small streams.
-	toArray(_: _) : T[] {
+	toArray(_: _): T[] {
 		return this.reduce(_, (_, arr, elt) => {
 			arr.push(elt);
 			return arr;
@@ -290,7 +290,7 @@ export class Reader<T> {
 	/// * `result = reader.readAll(_)`  
 	///   Reads all entries and returns them as a single string or buffer. Returns undefined if nothing has been read.
 	///   Note that this call is an anti-pattern for streaming but it may be useful when working with small streams.
-	readAll(_: _) : string | Buffer | T[] | undefined {
+	readAll(_: _): string | Buffer | T[] | undefined {
 		const arr = this.toArray(_);
 		if (typeof arr[0] === 'string') return arr.join('');
 		if (Buffer.isBuffer(arr[0])) {
@@ -329,7 +329,7 @@ export class Reader<T> {
 		const f = resolvePredicate(fn);
 		const parent = this;
 		var i = 0, done = false;
-		return new Reader(function(_) {
+		return new Reader(function (_) {
 			while (!done) {
 				var val = parent.read(_);
 				done = val === undefined;
@@ -349,7 +349,7 @@ export class Reader<T> {
 		const f = resolvePredicate(fn);
 		const parent = this;
 		var i = 0;
-		return new Reader(function(_) {
+		return new Reader(function (_) {
 			var val = parent.read(_);
 			if (val === undefined) return undefined;
 			if (!f.call(thisObj, _, val, i++)) return val;
@@ -398,7 +398,7 @@ export class Reader<T> {
 			readers.push(consumers[0](parent));
 		} else {
 			var source = parent;
-			for (var i = 0; i < consumers.length - 1; i ++) {
+			for (var i = 0; i < consumers.length - 1; i++) {
 				var dup = source.dup()
 				readers.push(consumers[i](dup[0]));
 				source = dup[1];
@@ -415,7 +415,7 @@ export class Reader<T> {
 	///   Returns a `StreamGroup` on which other operations can be chained.  
 	///   Note: transformed entries may be delivered out of order.
 	parallel(options: ParallelOptions | number, consumer: (source: any) => Reader<T>) {
-		var opts : ParallelOptions;
+		var opts: ParallelOptions;
 		if (typeof options === "number") opts = {
 			count: options,
 		};
@@ -455,7 +455,7 @@ export class Reader<T> {
 	///   The lookahead methods are:
 	///   - `reader.peek(_)`: same as `read(_)` but does not consume the item. 
 	///   - `reader.unread(val)`: pushes `val` back so that it will be returned by the next `read(_)`
-	peekable() : PeekableReader<T> {
+	peekable(): PeekableReader<T> {
 		const that: Reader<T> = this;
 		return new PeekableReader(that);
 	}
@@ -588,7 +588,7 @@ export class Reader<T> {
 
 
 export class PeekableReader<T> extends Reader<T> {
-	buffered: (T|undefined)[];
+	buffered: (T | undefined)[];
 	constructor(parent: Reader<T>) {
 		super((_: _) => {
 			return this.buffered.length > 0 ? this.buffered.pop() : parent.read(_);
@@ -613,7 +613,7 @@ export class PeekableReader<T> extends Reader<T> {
 ///   You do not need to call this function if you create your readers with
 ///   the `ez.devices` modules.   
 ///   Returns `proto` for convenience.
-exports.decorate = function(proto: any) {
+exports.decorate = function (proto: any) {
 	const readerProto: any = Reader.prototype;
 	Object.getOwnPropertyNames(Reader.prototype).forEach(k => {
 		if (k !== 'constructor' && !proto[k]) proto[k] = readerProto[k];
@@ -655,25 +655,25 @@ export class StreamGroup<T> implements Stoppable {
 			if (!stream) return;
 			const next = () => {
 				if (alive === 0) return;
-					_.run(_ => stream.read(_), (e, v) => {
-						if (!e && v === undefined) alive--;
-						if (e || v !== undefined || alive === 0) {
-							if (resume) {
-								var cb = resume;
-								resume = undefined;
-								cb(e, v);
-								next();
-							} else {
-								results.push({
-									i: i,
-									e: e,
-									v: v,
-									next: next,
-								});
-							}
+				_.run(_ => stream.read(_), (e, v) => {
+					if (!e && v === undefined) alive--;
+					if (e || v !== undefined || alive === 0) {
+						if (resume) {
+							var cb = resume;
+							resume = undefined;
+							cb(e, v);
+							next();
+						} else {
+							results.push({
+								i: i,
+								e: e,
+								v: v,
+								next: next,
+							});
 						}
-					});
-				};
+					}
+				});
+			};
 			next();
 		});
 		return new Reader(_.cast(function read(cb) {
@@ -694,7 +694,7 @@ export class StreamGroup<T> implements Stoppable {
 		interface Entry {
 			i: number;
 			stream: Reader<T>;
-			read: (_: _) => T | undefined; 
+			read: (_: _) => T | undefined;
 		}
 		const entry = (stream: Reader<T>, i: number) => ({
 			i: i,
@@ -702,7 +702,7 @@ export class StreamGroup<T> implements Stoppable {
 			read: _.future(_ => stream.read(_)),
 		});
 		const q = this.readers.map(entry);
-		return new Reader(function(_) {
+		return new Reader(function (_) {
 			var elt: Entry | undefined;
 			while (elt = q.shift()) {
 				var val = elt.read(_);
@@ -728,7 +728,7 @@ export class StreamGroup<T> implements Stoppable {
 
 		var last = 0; // index of last value read by default fn 
 		if (!fn) fn = ((_, values) => {
-			var i = last; 
+			var i = last;
 			do {
 				i = (i + 1) % values.length;
 				var v = values[i];

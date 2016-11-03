@@ -30,9 +30,9 @@ function scanDirs(dir: string) {
                     if (crt.protocol && crt.module) {
                         factories[crt.protocol] = fromDir ? crt.module.replace(/^.*([\\\/])/, fromDir + '$1') : crt.module;
                     }
-                });    
+                });
             }
-        } catch(e) {
+        } catch (e) {
             console.error(e.message);
         }
     };
@@ -50,7 +50,7 @@ function scanDirs(dir: string) {
 
 scanDirs(__dirname);
 
-export default function(url: string) {
+export default function (url: string) {
     const parts = (url || "").split(":");
     if (parts.length < 2) throw new Error("invalid URL: " + url);
     const pp = parts[0];

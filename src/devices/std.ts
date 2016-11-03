@@ -10,20 +10,20 @@ import * as streams from '../node-wrappers';
 /// * `reader = ez.devices.std.in(encoding)`  
 /// * `writer = ez.devices.std.out(encoding)`  
 /// * `writer = ez.devices.std.err(encoding)`  
-export const input: Input = function(encoding?: string) {
+export const input: Input = function (encoding?: string) {
 	const st = new streams.ReadableStream(process.stdin, {});
 	st.setEncoding(encoding || null);
 	process.stdin.resume();
 	return st.reader;
 }
 
-export const output: Output = function(encoding?: string) {
+export const output: Output = function (encoding?: string) {
 	return new streams.WritableStream(process.stdout, {
 		encoding: encoding,
 	}).writer;
 }
 
-export const error: Output = function(encoding?: string) {
+export const error: Output = function (encoding?: string) {
 	return new streams.WritableStream(process.stderr, {
 		encoding: encoding,
 	}).writer;

@@ -53,8 +53,8 @@ export function reader(proc: ChildProcess, options?: ReaderOptions) {
 	// node does not send close event if we remove all listeners on stdin and stdout
 	// so we disable the stop methods and we call stop explicitly after the close.
 	const stops = [stdout.stop.bind(stdout), stderr.stop.bind(stderr)];
-	stdout.stop = stderr.stop = (_: _) => {};
-	function stopStreams(_:_, arg?: any) {
+	stdout.stop = stderr.stop = (_: _) => { };
+	function stopStreams(_: _, arg?: any) {
 		stops.forEach_(_, (_, stop) => {
 			stop(_, arg);
 		});
@@ -65,7 +65,7 @@ export function reader(proc: ChildProcess, options?: ReaderOptions) {
 	}
 	if (opts.dataHandler) stdout = opts.dataHandler(stdout);
 	if (opts.errorHandler) stderr = opts.errorHandler(stderr);
-	if (opts.errorPrefix || opts.errorThrow) stderr = stderr.map(function(_, data) {
+	if (opts.errorPrefix || opts.errorThrow) stderr = stderr.map(function (_, data) {
 		if (opts.errorThrow) throw new Error((opts.errorPrefix || "") + data);
 		return opts.errorPrefix + data;
 	});
@@ -80,7 +80,7 @@ export function reader(proc: ChildProcess, options?: ReaderOptions) {
 			if (err) throw err;
 		} else {
 			// wait for the close event
-			_.cast(function(cb) {
+			_.cast(function (cb) {
 				closeCb = cb;
 			})(_);
 			stopStreams(_);

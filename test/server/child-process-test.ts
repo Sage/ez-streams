@@ -11,13 +11,13 @@ import * as os from "os";
 QUnit.module(module.id);
 
 asyncTest("echo ok", 1, (_) => {
-    if (os.type() === 'Windows_NT') {
-        ok("Ignore on Windows");
-    } else {
-        const proc = cp.spawn('echo', ['hello\nworld']);
-        const got = ez.devices.child_process.reader(proc).toArray(_);
-        deepEqual(got, ['hello', 'world']);
-    }
+	if (os.type() === 'Windows_NT') {
+		ok("Ignore on Windows");
+	} else {
+		const proc = cp.spawn('echo', ['hello\nworld']);
+		const got = ez.devices.child_process.reader(proc).toArray(_);
+		deepEqual(got, ['hello', 'world']);
+	}
 	start();
 });
 

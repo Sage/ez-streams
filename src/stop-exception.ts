@@ -11,7 +11,7 @@ class StopException {
 	}
 	get stack() {
 		return "stream stopped\n\t<no stack trace>";
-	} 
+	}
 }
 
 

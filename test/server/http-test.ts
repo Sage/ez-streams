@@ -14,7 +14,7 @@ asyncTest("Echo service test", 6, (_) => {
         writer.write(_, message);
         strictEqual(writer.write(_, undefined), type + ((type === "application/json") ? JSON.stringify(message) : message), "POST result ok for " + type);
     }
-    server = ez.devices.http.server(function(req, res, _) {
+    server = ez.devices.http.server(function (req, res, _) {
         if (req.method === "POST") {
             const text = req.readAll(_);
             res.statusCode = 201;
@@ -22,7 +22,7 @@ asyncTest("Echo service test", 6, (_) => {
         }
         if (req.method === "GET") {
             // query parameters
-            var query = (req.url.split("?")[1] || "").split("&").reduce(function(prev, crt) {
+            var query = (req.url.split("?")[1] || "").split("&").reduce(function (prev, crt) {
                 var parts = crt.split("=");
                 if (parts[0]) prev[parts[0]] = parts[1];
                 return prev;
@@ -43,10 +43,10 @@ asyncTest("Echo service test", 6, (_) => {
     try {
         const nf_reader = ez.factory("http://localhost:3004?status=404").reader(_);
         ok(false, "Reader supposed to throw");
-    } catch(ex) {
+    } catch (ex) {
         ok(/Status 404/.test(ex.message), "Reader throws ok");
     }
- 
+
     start();
 });
 

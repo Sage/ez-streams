@@ -10,7 +10,7 @@ import { _ } from 'streamline-runtime';
 ///   returns a mapper that converts to string
 export function stringify(encoding?: string) {
 	encoding = encoding || 'utf8';
-	return (_:_, data: Buffer) => {
+	return (_: _, data: Buffer) => {
 		return data.toString(encoding);
 	}
 }

@@ -5,12 +5,12 @@ import { Writer } from '../writer';
 import * as http from 'http';
 
 import {
-    HttpProxyClientRequest, 
-    HttpClientRequest, 
+    HttpProxyClientRequest,
+    HttpClientRequest,
     HttpClientResponse,
     HttpClientOptions,
     HttpServer,
-    HttpServerRequest, 
+    HttpServerRequest,
     HttpServerResponse,
     HttpServerOptions,
     createHttpServer,
@@ -19,12 +19,12 @@ import {
 } from '../node-wrappers';
 
 export {
-    HttpProxyClientRequest, 
-    HttpClientRequest, 
+    HttpProxyClientRequest,
+    HttpClientRequest,
     HttpClientResponse,
     HttpClientOptions,
     HttpServer,
-    HttpServerRequest, 
+    HttpServerRequest,
     HttpServerResponse,
     HttpServerOptions,
 }
@@ -79,7 +79,7 @@ export function client(options?: HttpClientOptions) {
 export interface HttpListenerOption {
 
 }
-export function listener(listener: (request: HttpServerRequest, response: HttpServerResponse) => void, options? : HttpListenerOption) {
+export function listener(listener: (request: HttpServerRequest, response: HttpServerResponse) => void, options?: HttpListenerOption) {
     return httpListener(listener, fixOptions(options));
 }
 /// * `factory = ez.factory("http://user:pass@host:port/...")` 

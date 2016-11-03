@@ -14,7 +14,7 @@ function eqbuf(b1: Buffer | undefined, b2: Buffer, msg: string) {
 }
 
 asyncTest("roundtrip", 52, (_) => {
-	[1, 4, 11, 1000].forEach_(_, function(_, size) {
+	[1, 4, 11, 1000].forEach_(_, function (_, size) {
 		const dst = ez.devices.buffer.writer();
 		const writer = ez.helpers.binary.writer(dst, {
 			bufSize: size

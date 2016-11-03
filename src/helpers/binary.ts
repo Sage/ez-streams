@@ -7,10 +7,10 @@ import { Reader as BaseReader } from "../reader";
 import { Writer as BaseWriter } from "../writer";
 
 const NUMBERS: [string, number][] = [//
-['Int8', 1], ['UInt8', 1], //
-['Int16', 2], ['UInt16', 2], //
-['Int32', 4], ['UInt32', 4], //
-['Float', 4], ['Double', 8]];
+	['Int8', 1], ['UInt8', 1], //
+	['Int16', 2], ['UInt16', 2], //
+	['Int32', 4], ['UInt32', 4], //
+	['Float', 4], ['Double', 8]];
 
 /// 
 /// ----
@@ -119,7 +119,7 @@ export class Reader extends BaseReader<Buffer> {
 /// * `val = reader.peekDouble(_)`  
 ///   Specialized peekers for numbers.
 function numberReader(name: string, len: number, peekOnly?: boolean) {
-	return function(this: Reader, _: _) {
+	return function (this: Reader, _: _) {
 		const got = this.ensure(_, len);
 		if (got === 0) return undefined;
 		if (got < len) throw new Error("unexpected EOF: expected " + len + ", got " + got);
@@ -139,7 +139,7 @@ function numberReader(name: string, len: number, peekOnly?: boolean) {
 /// * `val = reader.unreadDouble()`  
 ///   Specialized unreaders for numbers.
 function numberUnreader(len: number) {
-	return function(this: Reader) {
+	return function (this: Reader) {
 		return this.unread(len);
 	};
 }
@@ -173,7 +173,7 @@ export class Writer extends BaseWriter<Buffer> {
 		this.pos = 0;
 		this.buf = new Buffer(options.bufSize && options.bufSize > 0 ? options.bufSize : 16384);
 	}
-		
+
 
 	/// 
 	/// * `writer.flush(_)`  
@@ -181,7 +181,7 @@ export class Writer extends BaseWriter<Buffer> {
 	flush(_: _) {
 		if (this.pos > 0) this.writer.write(_, this.buf.slice(0, this.pos));
 		// reallocate the buffer because existing buffer belongs to this.writer now.
-		this.buf = new Buffer(this.buf.length);	
+		this.buf = new Buffer(this.buf.length);
 		this.pos = 0;
 	}
 
@@ -221,19 +221,19 @@ export class Writer extends BaseWriter<Buffer> {
 /// * `writer.writeDouble(_, val)`  
 ///   Specialized writers for numbers.
 function numberWriter(name: string, len: number) {
-	return function(this: Writer, _: _, val: number) {
+	return function (this: Writer, _: _, val: number) {
 		this.ensure(_, len);
 		(this.buf as any)[name](val, this.pos);
 		this.pos += len;
 	};
 }
 
-NUMBERS.forEach(function(pair) {
+NUMBERS.forEach(function (pair) {
 	const len = pair[1];
 	const names = len > 1 ? [pair[0] + 'BE', pair[0] + 'LE'] : [pair[0]];
 	const readerProto: any = Reader.prototype;
 	const writerProto: any = Writer.prototype;
-	names.forEach(function(name) {
+	names.forEach(function (name) {
 		readerProto['read' + name] = numberReader('read' + name, len, false);
 		readerProto['peek' + name] = numberReader('read' + name, len, true);
 		readerProto['unread' + name] = numberUnreader(len);
@@ -242,12 +242,12 @@ NUMBERS.forEach(function(pair) {
 });
 
 function makeEndian(base: Function, verbs: string[], suffix: string) {
-	const construct = function(this: Reader | Writer) {
+	const construct = function (this: Reader | Writer) {
 		base.apply(this, arguments);
 	}
 	construct.prototype = Object.create(base.prototype);
-	NUMBERS.slice(1).forEach(function(pair) {
-		verbs.forEach(function(verb) {
+	NUMBERS.slice(1).forEach(function (pair) {
+		verbs.forEach(function (verb) {
 			construct.prototype[verb + pair[0]] = base.prototype[verb + pair[0] + suffix];
 		});
 	});
@@ -299,13 +299,13 @@ export interface BinaryWriter extends Writer {
 }
 
 // Documentation above, next to the constructor
-export function reader(reader: BaseReader<Buffer>, options?: ReaderOptions) : BinaryReader {
+export function reader(reader: BaseReader<Buffer>, options?: ReaderOptions): BinaryReader {
 	options = options || {};
 	const constr: any = options.endian === 'little' ? ReaderLE : ReaderBE;
 	return new constr(reader, options);
 }
 
-export function	writer(writer: BaseWriter<Buffer>, options?: WriterOptions) : BinaryWriter {
+export function writer(writer: BaseWriter<Buffer>, options?: WriterOptions): BinaryWriter {
 	options = options || {};
 	const constr: any = options.endian === 'little' ? WriterLE : WriterBE;
 	return new constr(writer, options);

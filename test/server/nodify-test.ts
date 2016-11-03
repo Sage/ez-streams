@@ -26,7 +26,7 @@ asyncTest("writer nodify", 1, (_) => {
 	const dest = ez.devices.string.writer();
 	const expected = sampleReader2.toArray(_).join('');
 	const piped = sampleReader1.nodify().pipe(dest.nodify());
-	piped.on('finish', function() {
+	piped.on('finish', function () {
 		equal(dest.toString(), expected);
 		start();
 	});

@@ -13,7 +13,7 @@ const outputFile = require('os').tmpdir() + '/jsonOutput.json';
 const fs = require('fs');
 const string = ez.devices.string;
 
-function nodeStream(_: _, text : string) {
+function nodeStream(_: _, text: string) {
 	fs.writeFile(inputFile, text, "utf8", _);
 	return file.text.reader(inputFile);
 }

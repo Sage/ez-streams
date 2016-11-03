@@ -72,7 +72,7 @@ export class Writer<T> {
 	/// * `writer = writer.stop(_, err)`  
 	///   stops the writer.  
 	///   by default arg is silently ignored
-	stop(_: _, arg?: any) : Writer<T> {
+	stop(_: _, arg?: any): Writer<T> {
 		this.write(_, undefined);
 		return this;
 	};
@@ -89,7 +89,7 @@ export class Writer<T> {
 	/// * `writer = writer.pre.action(fn)`  
 	///   returns another writer which applies `action(fn)` before writing to the original writer.  
 	///   `action` may be any chainable action from the reader API: `map`, `filter`, `transform`, ...  
-	get pre() : Pre<T> {
+	get pre(): Pre<T> {
 		return new PreImpl(this) as Pre<T>;
 	}
 
@@ -102,7 +102,7 @@ export class Writer<T> {
 		// This is fishy. Clean up later (should do it from end event).
 		// also very fragile because of optional args.
 		const anyStream: any = stream;
-		anyStream._write = function(chunk: any, encoding?: string, done?: Function) {
+		anyStream._write = function (chunk: any, encoding?: string, done?: Function) {
 			if (chunk && encoding && encoding !== 'buffer') chunk = chunk.toString(encoding);
 			_.run(_ => self.write(_, chunk), err => {
 				if (err) return stream.emit('error', err) as never;
@@ -111,10 +111,10 @@ export class Writer<T> {
 		}
 		// override end to emit undefined marker
 		const end = stream.end;
-		anyStream.end = function(chunk: any, encoding?: string, cb?: (err: any, val?: any) => any) {
+		anyStream.end = function (chunk: any, encoding?: string, cb?: (err: any, val?: any) => any) {
 			end.call(stream, chunk, encoding, (err: any) => {
 				if (err) return stream.emit('error', err) as never;
-				cb = cb || ((err) => {});
+				cb = cb || ((err) => { });
 				_.run(_ => self.write(_, undefined), cb);
 			});
 		};
@@ -137,7 +137,7 @@ export function create<T>(write: (_: _, value: T) => Writer<T>, stop?: (_: _, ar
 ///   the `ez.devices` modules.   
 ///   Returns `proto` for convenience.
 // compat API - don't export in TS
-exports.decorate = function(proto: any) {
+exports.decorate = function (proto: any) {
 	const writerProto: any = Writer.prototype;
 	Object.getOwnPropertyNames(Writer.prototype).forEach(k => {
 		// compare with == is important here!
@@ -163,7 +163,7 @@ export class PreImpl<T> {
 }
 
 export interface Pre<T> extends PreImpl<T> {
-	map<U>(fn: (_:_, elt: U, index?: number) => T, thisObj?: any): Writer<U>;
+	map<U>(fn: (_: _, elt: U, index?: number) => T, thisObj?: any): Writer<U>;
 	tee(writer: Writer<T>): Writer<T>;
 	concat(readers: Reader<T>[]): Writer<T>;
 	transform<U>(fn: (_: _, reader: Reader<U>, writer: Writer<T>) => void, thisObj?: any): Writer<U>;
@@ -187,7 +187,7 @@ process.nextTick(() => {
 		'tee',
 		'concat',
 		'transform',
-		'filter', 
+		'filter',
 		'until',
 		'while',
 		'limit',
@@ -196,7 +196,7 @@ process.nextTick(() => {
 		'buffer',
 		'nodeTransform'
 	].forEach((name) => {
-		preProto[name] = function(this: Pre<any>, arg: any) {
+		preProto[name] = function (this: Pre<any>, arg: any) {
 			const uturn = require('./devices/uturn').create();
 			uturn.reader[name](arg).pipe(uturn.end, this.writer);
 			return uturn.writer;

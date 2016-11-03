@@ -13,7 +13,7 @@ export function converter(options?: Options) {
 	const pfalse: Predicate = (_, obj) => false;
 	const ptrue: Predicate = (_, obj) => true;
 
-	const ops: { [name: string]: Op} = {
+	const ops: { [name: string]: Op } = {
 		$eq: (val) => ((_, v) => v == val),
 		$ne: (val) => ((_, v) => v != val),
 		$gt: (val) => ((_, v) => v > val),
@@ -70,7 +70,7 @@ export function converter(options?: Options) {
 	const or = (predicates: Predicate[]) => {
 		if (predicates.length === 0) return pfalse;
 		if (predicates.length === 1) return predicates[0];
-		return (_:_, obj: any) => predicates.some_(_, (_, predicate) => predicate(_, obj));
+		return (_: _, obj: any) => predicates.some_(_, (_, predicate) => predicate(_, obj));
 	}
 
 	const and = (predicates: Predicate[]) => {
@@ -82,9 +82,9 @@ export function converter(options?: Options) {
 	const compose = (f: Predicate, g: Predicate) => ((_: _, obj: any) => f(_, g(_, obj)));
 
 	const deref = (key: string) => ((_: _, obj: any) => {
-			if (obj == null) return undefined;
-			const v = obj[key];
-			return typeof v === "function" ? v(_) : v;
+		if (obj == null) return undefined;
+		const v = obj[key];
+		return typeof v === "function" ? v(_) : v;
 	});
 
 	const walk: (p: string) => Predicate = (p) => {

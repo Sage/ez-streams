@@ -45,7 +45,7 @@ export interface Emitter extends NodeJS.EventEmitter {
 	destroySoon?: () => void;
 }
 
-function nop() {}
+function nop() { }
 
 export class Wrapper<EmitterT extends Emitter> {
 	/// * `emitter = wrapper.emitter`  
@@ -66,7 +66,7 @@ export class Wrapper<EmitterT extends Emitter> {
 		this._autoClosed = [];
 		this._onClose = this._trackClose;
 	}
-	
+
 	_trackClose() {
 		this._closed = true;
 		this._autoClosed.forEach(fn => {
@@ -180,7 +180,7 @@ export class ReadableStream<EmitterT extends NodeJS.ReadableStream> extends Wrap
 			}
 		} else this._done = true;
 	}
-	
+
 	_readChunk(callback: (err?: Error, data?: Data) => void) {
 		if (this._chunks.length > 0) {
 			const chunk = this._chunks.splice(0, 1)[0];
@@ -430,11 +430,11 @@ function _getEncodingStrict(headers: Headers) {
 			// Node Buffer supported encodings: http://nodejs.org/api/buffer.html#buffer_buffer
 			switch (pair[1].trim().toLowerCase()) {
 				case 'utf8':
-					// Fallthrough
+				// Fallthrough
 				case 'utf-8':
 					return 'utf8';
 				case 'utf16le':
-					// Fallthrough
+				// Fallthrough
 				case 'utf-16le':
 					return 'utf16le';
 				case 'us-ascii':
@@ -566,7 +566,7 @@ export class HttpServerResponse extends WritableStream<http.ServerResponse> {
 
 function _fixHttpServerOptions(options?: HttpServerOptions) {
 	var opts = options || {};
-	opts.createServer = function(listener) : http.Server | https.Server {
+	opts.createServer = function (listener): http.Server | https.Server {
 		if (typeof listener !== 'function') throw new TypeError("bad listener parameter: " + typeof listener);
 		return opts.secure ? https.createServer(opts, listener) : http.createServer(listener);
 	};
@@ -661,7 +661,7 @@ export class HttpServer extends Server<http.Server | https.Server> {
 /// * `response = request.response(_)`  
 ///    returns the response stream.
 
-export interface HttpClientResponseOptions extends ReadableOptions {}
+export interface HttpClientResponseOptions extends ReadableOptions { }
 
 export class HttpClientResponse extends ReadableStream<http.ClientResponse> {
 	constructor(resp: http.ClientResponse, options?: HttpClientResponseOptions) {
@@ -843,7 +843,7 @@ export class HttpClientRequest extends WritableStream<http.ClientRequest> {
 	_responseCb(callback: (err?: Error, resp?: http.ClientResponse) => void) {
 		var replied = false;
 		if (typeof callback !== 'function') throw new TypeError("bad callback parameter: " + typeof callback);
-			if (this._done) return callback(this._error, this._response);
+		if (this._done) return callback(this._error, this._response);
 		else this._onResponse = (err, resp) => {
 			this._done = true;
 			if (!replied) callback(err, resp);
@@ -912,7 +912,7 @@ export class HttpProxyClientRequest {
 	}
 }
 
-export function httpRequest(options: HttpClientOptions) : HttpProxyClientRequest | HttpClientRequest {
+export function httpRequest(options: HttpClientOptions): HttpProxyClientRequest | HttpClientRequest {
 	options = _fixHttpClientOptions(options);
 	if (options.isHttps || options.proxyAuthenticate) return new HttpProxyClientRequest(options);
 	else return new HttpClientRequest(options);
@@ -1060,7 +1060,7 @@ export class SocketClient {
 /// * `server.listen(_, path)`  
 ///   (same as `net.Server`)
 
-export interface SocketServerOptions {}
+export interface SocketServerOptions { }
 export type SocketServerListener = (stream: SocketStream, _: _) => void;
 
 export function createNetServer(serverOptions: SocketServerOptions, connectionListener: SocketServerListener, streamOptions: SocketOptions) {
@@ -1069,7 +1069,7 @@ export function createNetServer(serverOptions: SocketServerOptions, connectionLi
 
 export class SocketServer extends Server<net.Server> {
 	constructor(serverOptions: SocketServerOptions, connectionListener: SocketServerListener, streamOptions: SocketOptions) {
-		if (typeof(serverOptions) === 'function') {
+		if (typeof (serverOptions) === 'function') {
 			streamOptions = connectionListener;
 			connectionListener = serverOptions;
 			serverOptions = {};
@@ -1095,7 +1095,7 @@ export class SocketServer extends Server<net.Server> {
 ///    passes the wrapper to `fn(_, wrapper)` and closes the stream after `fn` returns.  
 ///    `fn` is called inside a `try/finally` block to guarantee that the stream is closed in all cases.  
 ///    Returns the value returned by `fn`.
-exports.using = function(this: any, _: _, constructor: any, emitter: NodeJS.EventEmitter, options?: any, fn?: (_: _, stream: any) => any) {
+exports.using = function (this: any, _: _, constructor: any, emitter: NodeJS.EventEmitter, options?: any, fn?: (_: _, stream: any) => any) {
 	if (!fn && typeof options === 'function') fn = options, options = null;
 	if (!fn) throw new Error("using body missing");
 	const stream = new constructor(emitter, options);
@@ -1108,20 +1108,20 @@ exports.using = function(this: any, _: _, constructor: any, emitter: NodeJS.Even
 
 /// * `result = streams.usingReadable(_, stream[, options], fn)`  
 ///    shortcut for `streams.using(_, streams.ReadableStream, stream, options, fn)` 
-exports.usingReadable = function(this: any, _: _, emitter: NodeJS.ReadableStream, options?: ReadableOptions, fn?: (_: _, stream: any) => any) {
+exports.usingReadable = function (this: any, _: _, emitter: NodeJS.ReadableStream, options?: ReadableOptions, fn?: (_: _, stream: any) => any) {
 	return exports.using.call(this, _, ReadableStream, emitter, options, fn);
 };
 
 /// * `result = streams.usingWritable(_, stream[, options], fn)`  
 ///    shortcut for `streams.using(_, streams.WritableStream, stream, options, fn)` 
-exports.usingWritable = function(this: any, _: _, emitter: NodeJS.WritableStream, options?: WritableOptions, fn?: (_: _, stream: any) => any) {
+exports.usingWritable = function (this: any, _: _, emitter: NodeJS.WritableStream, options?: WritableOptions, fn?: (_: _, stream: any) => any) {
 	return exports.using.call(this, _, WritableStream, emitter, options, fn);
 };
 
 /// * `streams.pump(_, inStream, outStream)`  
 ///    Pumps from `inStream` to `outStream`.  
 ///    Does not close the streams at the end.
-exports.pump = function(_: _, inStream: ReadableStream<any>, outStream: WritableStream<any>) {
+exports.pump = function (_: _, inStream: ReadableStream<any>, outStream: WritableStream<any>) {
 	var data: any;
 	while (data = inStream.read(_)) outStream.write(_, data);
 };

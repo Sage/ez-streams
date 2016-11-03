@@ -43,6 +43,7 @@ export interface FormatterOptions {
 	sep?: string;
 	eol?: string;
 }
+
 export function formatter(options?: FormatterOptions) {
 	const opts = options || {};
 	const sep = opts.sep || ',';

@@ -175,8 +175,8 @@ asyncTest("empty or", 2, (_) => {
 	t(_, {
 		$or: []
 	}, {
-		a: 5,
-	}, false);
+			a: 5,
+		}, false);
 
 	start();
 });
@@ -245,20 +245,20 @@ asyncTest("exists", 3, (_) => {
 	t(_, {
 		$exists: "a"
 	}, {
-		a: 5,
-	}, true);
+			a: 5,
+		}, true);
 
 	t(_, {
 		$exists: "a"
 	}, {
-		a: undefined,
-	}, true);
+			a: undefined,
+		}, true);
 
 	t(_, {
 		$exists: "a"
 	}, {
-		b: 5,
-	}, false);
+			b: 5,
+		}, false);
 
 	start();
 });
@@ -316,34 +316,34 @@ asyncTest("where", 4, (_) => {
 	t(_, {
 		$where: "this.a === this.b",
 	}, {
-		a: 5,
-		b: 5,
-	}, true, true);
+			a: 5,
+			b: 5,
+		}, true, true);
 
 	t(_, {
 		$where: "this.a === this.b",
 	}, {
-		a: 5,
-		b: 6,
-	}, false, true);
+			a: 5,
+			b: 6,
+		}, false, true);
 
 	t(_, {
-		$where: function(this: any) {
+		$where: function (this: any) {
 			return this.a === this.b;
 		},
 	}, {
-		a: 5,
-		b: 5,
-	}, true);
+			a: 5,
+			b: 5,
+		}, true);
 
 	t(_, {
-		$where: function(this: any) {
+		$where: function (this: any) {
 			return this.a === this.b;
 		},
 	}, {
-		a: 5,
-		b: 6,
-	}, false);
+			a: 5,
+			b: 6,
+		}, false);
 
 	start();
 });
@@ -380,16 +380,16 @@ asyncTest("all", 6, (_) => {
 			$all: ["appliance", "school", "book"]
 		}
 	}, {
-		tags: ["school", "book", "bag", "headphone", "appliance"],
-	}, true);
+			tags: ["school", "book", "bag", "headphone", "appliance"],
+		}, true);
 
 	t(_, {
 		tags: {
 			$all: ["appliance", "school", "book"]
 		}
 	}, {
-		tags: ["school", "bag", "headphone", "appliance"],
-	}, false);
+			tags: ["school", "bag", "headphone", "appliance"],
+		}, false);
 
 	const cond = {
 		items: {
@@ -458,16 +458,16 @@ asyncTest("single property", 2, (_) => {
 	t(_, {
 		a: 5,
 	}, {
-		a: 5,
-		b: 3,
-	}, true);
+			a: 5,
+			b: 3,
+		}, true);
 
 	t(_, {
 		a: 6,
 	}, {
-		a: 5,
-		b: 3,
-	}, false);
+			a: 5,
+			b: 3,
+		}, false);
 	start();
 });
 
@@ -476,16 +476,16 @@ asyncTest("implicit and (multiple properties)", 2, (_) => {
 		a: 5,
 		b: 3,
 	}, {
-		a: 5,
-		b: 3,
-	}, true);
+			a: 5,
+			b: 3,
+		}, true);
 
 	t(_, {
 		a: 5,
 		b: 3,
 	}, {
-		a: 5,
-	}, false);
+			a: 5,
+		}, false);
 
 	start();
 });
@@ -494,46 +494,46 @@ asyncTest("walk", 5, (_) => {
 	t(_, {
 		'a.b': /^hel/,
 	}, {
-		a: {
-			b: 'hello',
-		}
-	}, true);
+			a: {
+				b: 'hello',
+			}
+		}, true);
 
 	t(_, {
 		'a.b': /^hel/,
 	}, {
-		a: {
-			c: 'hello',
-		}
-	}, false);
+			a: {
+				c: 'hello',
+			}
+		}, false);
 
 	t(_, {
 		'a.c': /^hel/,
 	}, {
-		b: {
-			c: 'hello',
-		}
-	}, false);
-
-	t(_, {
-		'a.b.c': /^hel/,
-	}, {
-		a: {
 			b: {
 				c: 'hello',
 			}
-		}
-	}, true);
+		}, false);
 
 	t(_, {
 		'a.b.c': /^hel/,
 	}, {
-		a: {
-			b: {
-				c: 'world',
+			a: {
+				b: {
+					c: 'hello',
+				}
 			}
-		}
-	}, false);
+		}, true);
+
+	t(_, {
+		'a.b.c': /^hel/,
+	}, {
+			a: {
+				b: {
+					c: 'world',
+				}
+			}
+		}, false);
 
 	start();
 });

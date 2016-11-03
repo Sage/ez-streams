@@ -50,7 +50,7 @@ const begWord: any = {},
 	EQ = '='.charCodeAt(0),
 	DQUOTE = '"'.charCodeAt(0),
 	DASH = '-'.charCodeAt(0),
-	entitiesByChar: { [name: string]: string }  = {
+	entitiesByChar: { [name: string]: string } = {
 		'&': 'amp',
 		'<': 'lt',
 		'>': 'gt',
@@ -123,7 +123,7 @@ export function parser(options?: ParserOptions) {
 			return true;
 		}
 
-		function clone(parent: Element, tag: string | undefined, child: Element) : Element {
+		function clone(parent: Element, tag: string | undefined, child: Element): Element {
 			const pp = Object.keys(parent).reduce((r: Element, k: string) => {
 				if (k[0] !== '$' || k.length === 1) r[k] = tag === k ? child : parent[k];
 				return r;
@@ -389,7 +389,7 @@ export function formatter(options?: FormatterOptions) {
 		}
 
 		function escape(val: any) {
-			return typeof(val) !== "string" ? "" + val : val.replace(/([&<>"']|[^ -~\u00a1-\ud7ff\ue000-\ufffd])/g, (ch: string) => {
+			return typeof (val) !== "string" ? "" + val : val.replace(/([&<>"']|[^ -~\u00a1-\ud7ff\ue000-\ufffd])/g, (ch: string) => {
 				const ent = entitiesByChar[ch];
 				if (ent) return '&' + ent + ';';
 				var hex = ch.charCodeAt(0).toString(16);
@@ -448,7 +448,7 @@ export function formatter(options?: FormatterOptions) {
 			if (elt === null) {
 				bld.addAttribute('xsi:nil', 'true');
 				bld.endTag(true);
-			} else if (typeof elt !== "object" ) {
+			} else if (typeof elt !== "object") {
 				bld.endTag();
 				bld.closeTag(tag, elt);
 			} else {
@@ -505,7 +505,7 @@ export function formatter(options?: FormatterOptions) {
 		const envelope = strfy(builder(0), elt[rootTag], rootTag).getResult();
 		parent[parentTag] = saved;
 
-		const marker = '<' + parentTag + '>' + MARKER + '</' + parentTag + '>'; 
+		const marker = '<' + parentTag + '>' + MARKER + '</' + parentTag + '>';
 		const markerPos = envelope.indexOf(marker);
 		if (markerPos < 0) throw new Error("internal error: marker not found");
 
@@ -513,7 +513,7 @@ export function formatter(options?: FormatterOptions) {
 		writer.write(_, prologue + envelope.substring(0, markerPos));
 		while (true) {
 			var xml = strfy(builder(tags.length - 1), parent[parentTag], parentTag).getResult(true);
-			writer.write(_, xml );
+			writer.write(_, xml);
 			var parent = reader.read(_);
 			if (parent === undefined) break;
 			parent = getParent(parent);

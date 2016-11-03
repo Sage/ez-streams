@@ -9,8 +9,10 @@ import * as EzReader from './reader';
 import * as EzWriter from './writer';
 import EzFactory from './factory';
 
-export { devices, helpers, mappers, transforms,
-	predicate, stopException  };
+export {
+	devices, helpers, mappers, transforms,
+	predicate, stopException
+};
 
 export const factory = EzFactory;
 
@@ -20,7 +22,7 @@ export type ParallelOptions = EzReader.ParallelOptions;
 
 export type Writer<T> = EzWriter.Writer<T>;
 
-export function reader(arg: string | any[] | Buffer) : Reader<any> {
+export function reader(arg: string | any[] | Buffer): Reader<any> {
 	if (typeof arg === 'string') {
 		const f = factory(arg);
 		let reader: Reader<any>;
@@ -36,11 +38,11 @@ export function reader(arg: string | any[] | Buffer) : Reader<any> {
 	} else if (Buffer.isBuffer(arg)) {
 		return devices.buffer.reader(arg);
 	} else {
-		throw new Error(`invalid argument ${ arg && typeof arg }`);
+		throw new Error(`invalid argument ${arg && typeof arg}`);
 	}
 }
 
-export function writer(arg: string | any[] | Buffer) : Writer<any> {
+export function writer(arg: string | any[] | Buffer): Writer<any> {
 	if (typeof arg === 'string') {
 		const f = factory(arg);
 		let writer: Writer<any>;
@@ -63,8 +65,8 @@ export function writer(arg: string | any[] | Buffer) : Writer<any> {
 	} else if (Buffer.isBuffer(arg)) {
 		return devices.buffer.writer(arg);
 	} else {
-		throw new Error(`invalid argument ${ arg && typeof arg }`);
-	}	
+		throw new Error(`invalid argument ${arg && typeof arg}`);
+	}
 }
 
 // compatibility hacks
