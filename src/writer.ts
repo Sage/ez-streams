@@ -98,19 +98,19 @@ export class Writer<T> {
 	nodify() {
 		const self = this;
 		const stream = new nodeStream.Writable();
-		stream._write = function(chunk, encoding, done) {
-			if (chunk && encoding && encoding !== 'buffer') chunk = chunk.toString(encoding);
-			_.run(_ => self.write(_, chunk), err => {
-				if (err) return stream.emit('error', err) as never;
-				done();
-			});
-		}
-		// override end to emit undefined marker
-		const end = stream.end;
 		// ES2015 does not let us override method directly but we do it!
 		// This is fishy. Clean up later (should do it from end event).
 		// also very fragile because of optional args.
 		const anyStream: any = stream;
+		anyStream._write = function(chunk: any, encoding?: string, done?: Function) {
+			if (chunk && encoding && encoding !== 'buffer') chunk = chunk.toString(encoding);
+			_.run(_ => self.write(_, chunk), err => {
+				if (err) return stream.emit('error', err) as never;
+				if (done) done();
+			});
+		}
+		// override end to emit undefined marker
+		const end = stream.end;
 		anyStream.end = function(chunk: any, encoding?: string, cb?: (err: any, val?: any) => any) {
 			end.call(stream, chunk, encoding, (err: any) => {
 				if (err) return stream.emit('error', err) as never;

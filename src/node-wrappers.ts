@@ -643,7 +643,7 @@ export class HttpServer extends Server<http.Server | https.Server> {
 	}
 	setTimeout(msecs: number, callback: Function) {
 		// node.js version lower than 0.11.2 do not inmplement a https.Server.setTimeout method.
-		if (this._emitter.setTimeout) (this._emitter as http.Server).setTimeout(msecs, callback);
+		if ((this._emitter as any).setTimeout) (this._emitter as http.Server).setTimeout(msecs, callback);
 		return this;
 	}
 }
