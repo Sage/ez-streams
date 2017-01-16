@@ -218,7 +218,7 @@ export class ReadableStream<EmitterT extends NodeJS.ReadableStream> extends Wrap
 		if (chunks.length == 1) return chunks[0];
 		const result = new Buffer(total);
 		chunks.reduce((val, chunk) => {
-			if (typeof chunk === 'string') throw new Error('expected Buffer, not string');
+			if (!Buffer.isBuffer(chunk)) throw new Error('chunk is not a buffer: ' + typeof chunk);
 			chunk.copy(result, val);
 			return val + chunk.length;
 		}, 0);
