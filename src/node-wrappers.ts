@@ -407,12 +407,30 @@ function _getEncodingDefault(headers: Headers) {
 	for (var i = 1; i < comps.length; i++) {
 		const pair = comps[i].split('=');
 		if (pair.length == 2 && pair[0].trim() == 'charset') {
-			const enc = pair[1].trim();
-			return (enc.toLowerCase() === "iso-8859-1") ? "binary" : enc;
+			const enc = pair[1].trim().toLowerCase();
+			return enc === "iso-8859-1" ? "binary" : _getSupportedEnconding(enc);
 		}
 	}
 	if (ctype.indexOf('text') >= 0 || ctype.indexOf('json') >= 0) return "utf8";
 	return null;
+}
+
+function _getSupportedEnconding(enc: string) {
+	// List of charsets: http://www.iana.org/assignments/character-sets/character-sets.xml
+	// Node Buffer supported encodings: http://nodejs.org/api/buffer.html#buffer_buffer
+	switch (enc.trim().toLowerCase()) {
+		case 'utf8':
+		// Fallthrough
+		case 'utf-8':
+			return 'utf8';
+		case 'utf16le':
+		// Fallthrough
+		case 'utf-16le':
+			return 'utf16le';
+		case 'us-ascii':
+			return 'ascii';
+	}
+	return null; // we do not understand this charset - do *not* encode
 }
 
 function _getEncodingStrict(headers: Headers) {
@@ -420,27 +438,12 @@ function _getEncodingStrict(headers: Headers) {
 	// as "application/octet-stream" (may optionally try to determine it by
 	// looking into content body - we don't)
 	if (!headers['content-type'] || headers['content-encoding']) return null;
-
 	const comps = headers['content-type'].split(';');
 	const ctype = comps[0];
 	for (var i = 1; i < comps.length; i++) {
 		const pair = comps[i].split('=');
 		if (pair.length === 2 && pair[0].trim() === 'charset') {
-			// List of charsets: http://www.iana.org/assignments/character-sets/character-sets.xml
-			// Node Buffer supported encodings: http://nodejs.org/api/buffer.html#buffer_buffer
-			switch (pair[1].trim().toLowerCase()) {
-				case 'utf8':
-				// Fallthrough
-				case 'utf-8':
-					return 'utf8';
-				case 'utf16le':
-				// Fallthrough
-				case 'utf-16le':
-					return 'utf16le';
-				case 'us-ascii':
-					return 'ascii';
-			}
-			return null; // we do not understand this charset - do *not* encode
+			return _getSupportedEnconding(pair[1]);
 		}
 	}
 	return null;
