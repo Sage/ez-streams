@@ -401,19 +401,6 @@ export class WritableStream<EmitterT extends NodeJS.WritableStream> extends Wrap
 
 export type Headers = { [key: string]: string };
 
-function _getEncodingDefault(headers: Headers) {
-	const comps = (headers['content-type'] || 'text/plain').split(';');
-	const ctype = comps[0];
-	for (var i = 1; i < comps.length; i++) {
-		const pair = comps[i].split('=');
-		if (pair.length == 2 && pair[0].trim() == 'charset') {
-			return _getSupportedEncoding(pair[1]);
-		}
-	}
-	if (ctype.indexOf('text') >= 0 || ctype.indexOf('json') >= 0) return "utf8";
-	return null;
-}
-
 function _getSupportedEncoding(enc: string) {
 	// List of charsets: http://www.iana.org/assignments/character-sets/character-sets.xml
 	// Node Buffer supported encodings: http://nodejs.org/api/buffer.html#buffer_buffer
@@ -431,6 +418,19 @@ function _getSupportedEncoding(enc: string) {
 			return 'binary';
 	}
 	return null; // we do not understand this charset - do *not* encode
+}
+
+function _getEncodingDefault(headers: Headers) {
+	const comps = (headers['content-type'] || 'text/plain').split(';');
+	const ctype = comps[0];
+	for (var i = 1; i < comps.length; i++) {
+		const pair = comps[i].split('=');
+		if (pair.length == 2 && pair[0].trim() == 'charset') {
+			return _getSupportedEncoding(pair[1]);
+		}
+	}
+	if (ctype.indexOf('text') >= 0 || ctype.indexOf('json') >= 0) return "utf8";
+	return null;
 }
 
 function _getEncodingStrict(headers: Headers) {
