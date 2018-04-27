@@ -216,7 +216,7 @@ export class ReadableStream<EmitterT extends NodeJS.ReadableStream> extends Wrap
 	_concat(chunks: Data[], total: number) {
 		if (this._encoding) return chunks.join('');
 		if (chunks.length == 1) return chunks[0];
-		const result = new Buffer(total);
+		const result = Buffer.alloc(total);
 		chunks.reduce((val, chunk) => {
 			if (!Buffer.isBuffer(chunk)) throw new Error('chunk is not a buffer: ' + typeof chunk);
 			chunk.copy(result, val);
@@ -244,7 +244,7 @@ export class ReadableStream<EmitterT extends NodeJS.ReadableStream> extends Wrap
 		if (this._closed && !this._chunks.length) return undefined;
 		if (len == null) return this.reader.read(_);
 		if (len < 0) len = Infinity;
-		if (len == 0) return this._encoding ? "" : new Buffer(0);
+		if (len == 0) return this._encoding ? "" : Buffer.alloc(0);
 		const chunks: Data[] = [];
 		var total = 0;
 		while (total < len) {
@@ -340,7 +340,7 @@ export class WritableStream<EmitterT extends NodeJS.WritableStream> extends Wrap
 			if (data != null) {
 				// if data is empty do nothing but it's not to be interpreted as end
 				if (!data.length) return this.writer;
-				if (typeof data === "string") data = new Buffer(data, this._encoding || "utf8");
+				if (typeof data === "string") data = Buffer.from(data, this._encoding || "utf8");
 				//
 				if (!this._emitter.write(data)) this._drain(_);
 			} else {
@@ -365,7 +365,7 @@ export class WritableStream<EmitterT extends NodeJS.WritableStream> extends Wrap
 	///   This operation is asynchronous because it _drains_ the stream if necessary.  
 	///   Returns `this` for chaining.
 	write(_: _, data?: Data, enc?: string) {
-		if (typeof data === "string") data = new Buffer(data, enc || this._encoding || "utf8");
+		if (typeof data === "string") data = Buffer.from(data, enc || this._encoding || "utf8");
 		else if (data === null) data = undefined;
 		this.writer.write(_, data);
 		return this;
@@ -379,7 +379,7 @@ export class WritableStream<EmitterT extends NodeJS.WritableStream> extends Wrap
 			if (data != null) throw new Error("invalid attempt to write after end");
 			return this;
 		}
-		if (typeof data === "string") data = new Buffer(data, enc || this._encoding || "utf8");
+		if (typeof data === "string") data = Buffer.from(data, enc || this._encoding || "utf8");
 		else if (data === null) data = undefined;
 		if (data !== undefined) {
 			_.run(_ => this.writer.write(_, data), err => {
@@ -742,7 +742,7 @@ function _fixHttpClientOptions(options: HttpClientOptions) {
 	if (opts.user != null) {
 		// assumes basic auth for now
 		var token = opts.user + ":" + (opts.password || "");
-		token = new Buffer(token, "utf8").toString("base64");
+		token = Buffer.from(token, "utf8").toString("base64");
 		opts.headers['Authorization'] = "Basic " + token;
 	}
 
@@ -778,7 +778,7 @@ function _fixHttpClientOptions(options: HttpClientOptions) {
 					if (opts.proxy.auth.toLowerCase() === "basic") {
 						if (!opts.proxy.user) throw new Error("request error: no proxy user");
 						var proxyToken = opts.proxy.user + ":" + (opts.proxy.password || "");
-						proxyToken = new Buffer(proxyToken, "utf8").toString("base64");
+						proxyToken = Buffer.from(proxyToken, "utf8").toString("base64");
 						opts.headers["Proxy-Authorization"] = "Basic " + proxyToken;
 					} else if (opts.proxy.auth.toLowerCase() === "ntlm") {
 

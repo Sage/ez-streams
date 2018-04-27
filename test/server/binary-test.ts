@@ -6,7 +6,7 @@ import * as ez from "../..";
 
 QUnit.module(module.id);
 
-const TESTBUF = new Buffer([1, 4, 9, 16, 25, 36, 49, 64, 81, 100]);
+const TESTBUF = Buffer.from([1, 4, 9, 16, 25, 36, 49, 64, 81, 100]);
 
 function eqbuf(b1: Buffer | undefined, b2: Buffer, msg: string) {
 	if (!b1) throw new Error('unexpected EOF');

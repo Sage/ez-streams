@@ -44,7 +44,7 @@ function testStream() {
 			return name + ': ' + part.headers[name]
 		}).join('\n') + '\n\n' + boundary + '\n' + part.body + '\n' + boundary + '\n';
 	}
-	return buffer.reader(new Buffer(parts.map(formatPart).join(''), "binary"));
+	return buffer.reader(Buffer.from(parts.map(formatPart).join(''), "binary"));
 }
 
 asyncTest('basic multipart/mixed', 13, (_) => {

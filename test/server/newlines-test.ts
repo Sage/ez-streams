@@ -59,7 +59,7 @@ asyncTest("roundtrip", 1, (_) => {
 asyncTest("binary input", 1, (_) => {
 	const writer = string.writer();
 	const text = 'abc\n\ndef\nghi';
-	ez.devices.buffer.reader(new Buffer(text, 'utf8')).transform(lines.parser()).transform(lines.formatter()).pipe(_, writer);
+	ez.devices.buffer.reader(Buffer.from(text, 'utf8')).transform(lines.parser()).transform(lines.formatter()).pipe(_, writer);
 	strictEqual(writer.toString(), text, text);
 	start();
 });

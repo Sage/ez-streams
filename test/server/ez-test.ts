@@ -93,15 +93,15 @@ asyncTest("string readers and writers", 1, (_) => {
 });
 
 asyncTest("buffer test", 1, (_) => {
-    const buf = new Buffer('hello world', 'utf8');
+    const buf = Buffer.from('hello world', 'utf8');
     const reply = ez.reader(buf).transform(ez.transforms.cut.transform(2)).readAll(_) as Buffer;
     deepEqual(reply.toString('utf8'), buf.toString('utf8'));
     start();
 });
 
 asyncTest("buffer reader and writer", 1, (_) => {
-    const buf = new Buffer('hello world', 'utf8');
-    const writer = ez.writer(new Buffer(0));
+    const buf = Buffer.from('hello world', 'utf8');
+    const writer = ez.writer(Buffer.alloc(0));
     const reply = ez.reader(buf).pipe(_, writer);
     deepEqual(writer.result.toString('utf8'), buf.toString('utf8'));
     start();

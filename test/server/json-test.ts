@@ -55,7 +55,7 @@ asyncTest("fragmented read", 9, (_) => {
 });
 
 asyncTest("binary input", 9, (_) => {
-	const stream = ez.devices.buffer.reader(new Buffer(mixedData, 'utf8')).transform(jsonTrans.parser());
+	const stream = ez.devices.buffer.reader(Buffer.from(mixedData, 'utf8')).transform(jsonTrans.parser());
 	const expected = JSON.parse(mixedData);
 	stream.forEach(_, function (_, elt, i) {
 		deepEqual(elt, expected[i], expected[i]);

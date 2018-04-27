@@ -40,7 +40,7 @@ export class Reader extends BaseReader<Buffer> {
 		this.reader = reader;
 		this.options = options;
 		this.pos = 0;
-		this.buf = new Buffer(0);
+		this.buf = Buffer.alloc(0);
 		// override read for compat
 		this.read = this.readData;
 	}
@@ -171,7 +171,7 @@ export class Writer extends BaseWriter<Buffer> {
 		this.writer = writer;
 		this.options = options;
 		this.pos = 0;
-		this.buf = new Buffer(options.bufSize && options.bufSize > 0 ? options.bufSize : 16384);
+		this.buf = Buffer.alloc(options.bufSize && options.bufSize > 0 ? options.bufSize : 16384);
 	}
 
 
@@ -181,7 +181,7 @@ export class Writer extends BaseWriter<Buffer> {
 	flush(_: _) {
 		if (this.pos > 0) this.writer.write(_, this.buf.slice(0, this.pos));
 		// reallocate the buffer because existing buffer belongs to this.writer now.
-		this.buf = new Buffer(this.buf.length);
+		this.buf = Buffer.alloc(this.buf.length);
 		this.pos = 0;
 	}
 
@@ -189,7 +189,7 @@ export class Writer extends BaseWriter<Buffer> {
 	ensure(_: _, len: number) {
 		if (this.pos + len > this.buf.length) {
 			this.flush(_);
-			if (len > this.buf.length) this.buf = new Buffer(len);
+			if (len > this.buf.length) this.buf = Buffer.alloc(len);
 		}
 	}
 

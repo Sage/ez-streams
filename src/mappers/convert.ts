@@ -19,6 +19,6 @@ export function stringify(encoding?: string) {
 export function bufferify(encoding?: string) {
 	encoding = encoding || 'utf8';
 	return (_: _, data: string) => {
-		return new Buffer(data, encoding);
+		return Buffer.from(data, encoding);
 	}
 }

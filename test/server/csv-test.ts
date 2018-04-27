@@ -23,7 +23,7 @@ asyncTest("roundtrip", 1, (_) => {
 
 asyncTest("binary input", 1, (_) => {
 	const sink = string.writer();
-	ez.devices.buffer.reader(new Buffer(legends, 'utf8')).transform(csv.parser()).transform(csv.formatter()).pipe(_, sink);
+	ez.devices.buffer.reader(Buffer.from(legends, 'utf8')).transform(csv.parser()).transform(csv.formatter()).pipe(_, sink);
 	equal(sink.toString(), legends);
 	start();
 });
