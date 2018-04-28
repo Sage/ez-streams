@@ -31,7 +31,7 @@
     "typescript": "^2.0.3"
   },
   "scripts": {
-    "prepublish": "node build.js || nodejs build.js",
+    "prepare": "node build.js || nodejs build.js",
     "test": "node test-callbacks && node test-fibers"
   },
   "main": "index.js",
