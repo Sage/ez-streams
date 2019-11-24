@@ -11,24 +11,24 @@
     "url": "git://github.com/Sage/ez-streams.git"
   },
   "engines": {
-    "node": ">=6.0.0"
+    "node": ">=10.0.0"
   },
   "dependencies": {
-    "@types/node": "^6.0.114",
-    "streamline-node": "^2.0.0",
-    "streamline-runtime": "^1.0.17"
+    "@types/node": "^12.12.12",
+    "streamline-node": "^3.1.2",
+    "streamline-runtime": "^2.0.0"
   },
   "devDependencies": {
-    "babel-core": "^6.3.17",
-    "babel-plugin-streamline": "^2.0.6",
-    "babel-plugin-transform-class-properties": "^6.9.1",
-    "babel-plugin-transform-flow-comments": "^6.8.0",
-    "babel-preset-es2015": "^6.3.13",
-    "dts-bundle": "^0.4.3",
+    "babel-core": "^6.26.3",
+    "babel-plugin-streamline": "^2.0.26",
+    "babel-plugin-transform-class-properties": "^6.24.1",
+    "babel-plugin-transform-flow-comments": "^6.22.0",
+    "babel-preset-es2015": "^6.24.1",
+    "dts-bundle": "^0.7.3",
     "retyped-qunit-tsd-ambient": "^1.16.0-0",
-    "streamline": "^2.0.8",
+    "streamline": "^3.0.0",
     "streamline-helpers": "^3.0.0",
-    "typescript": "^2.9.2"
+    "typescript": "^3.7.2"
   },
   "scripts": {
     "prepare": "node build.js || nodejs build.js",
